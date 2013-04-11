@@ -1,4 +1,8 @@
 
+/**
+ * A single Nucleotide.
+ * @author Mitchell Rosen
+ */
 public class Nucleotide {
    enum Type { ADENINE, CYTOSINE, GUANINE, THYMINE }
    

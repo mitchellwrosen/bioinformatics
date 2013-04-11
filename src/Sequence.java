@@ -1,12 +1,35 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A Sequence of nucleotides.
+ * A Sequence of Nucleotides.
+ * @author Mitchell Rosen
  */
 public class Sequence {
    protected List<Nucleotide> nucleotides;
    
    public Sequence(List<Nucleotide> nucleotides) { this.nucleotides = nucleotides; }
+   
+   public Sequence(String filename) throws IOException {
+      BufferedReader r = new BufferedReader(new FileReader(filename));
+      
+      nucleotides = new ArrayList<Nucleotide>();
+      
+      // First line possibly begins with '>'
+      String line = r.readLine();
+      if (line.startsWith(">"))
+         line = r.readLine();
+      
+      do {
+         for (int i = 0; i < line.length(); ++i) 
+            nucleotides.add(new Nucleotide(line.charAt(i)));
+      } while ((line = r.readLine()) != null);
+      
+      r.close();
+   }
   
    // Slices this sequence and returns a new sequence of range [from, to)
    public Sequence slice(int from, int to) {
