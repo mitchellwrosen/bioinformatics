@@ -1,3 +1,4 @@
+package model;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -25,7 +26,7 @@ public class Sequence {
       
       do {
          for (int i = 0; i < line.length(); ++i) 
-            nucleotides.add(new Nucleotide(line.charAt(i)));
+            nucleotides.add(Nucleotide.fromChar(line.charAt(i)));
       } while ((line = r.readLine()) != null);
       
       r.close();
@@ -46,31 +47,48 @@ public class Sequence {
     *  
     *  @return    the GC-content histogram
     */
-   public double[] gcContentHistogram(int windowSize, int shiftLen) {
-      if ((nucleotides.size() - windowSize) % shiftLen != 0) {
-         throw new IllegalArgumentException(String.format(
-               "Window size + n * shift length must equal %d for some n", 
-               nucleotides.size()));
+   public GCContentInfo[] gcContentHistogram(int windowSize, int shiftLen) {
+      int histogramLen = (int)Math.ceil((double)nucleotides.size() / shiftLen);
+      GCContentInfo[] gc = new GCContentInfo[histogramLen];
+      for (int i = 0; i < histogramLen; ++i) {
+    	  gc[i].from = i*shiftLen;
+    	  gc[i].to = Math.min(nucleotides.size(), i*shiftLen + windowSize);
+    	  Sequence slice = slice(gc[i].from, gc[i].to);
+          gc[i].min = slice.gcContentMin();
+          gc[i].max = slice.gcContentMax();
       }
-      
-      int histogramLen = (nucleotides.size() - windowSize) / shiftLen;
-      double[] gc = new double[histogramLen];
-      for (int i = 0; i < histogramLen; ++i)
-         gc[i] = slice(i*shiftLen, i*shiftLen + windowSize).gcContent();
       
       return gc;
    }
    
    /**
-    * Gets the GC-content of this Sequence.
+    * Gets the GC-content Min of this Sequence.
     * 
-    * @return  the GC-content
+    * @return  the GC-content Min
     */
-   public double gcContent() {
+   public double gcContentMin() {
       double numGC = 0;
       for (Nucleotide n : nucleotides) {
-         if (n.getType() == Nucleotide.Type.CYTOSINE || 
-               n.getType() == Nucleotide.Type.GUANINE) {
+         if (n == Nucleotide.CYTOSINE || 
+               n == Nucleotide.GUANINE) {
+            numGC++;
+         }
+      }
+      
+      return numGC / nucleotides.size();
+   }
+   
+   /**
+    * Gets the GC-content Max of this Sequence.
+    * 
+    * @return  the GC-content Max
+    */
+   public double gcContentMax() {
+      double numGC = 0;
+      for (Nucleotide n : nucleotides) {
+         if (n == Nucleotide.CYTOSINE || 
+               n == Nucleotide.GUANINE ||
+               n == Nucleotide.UNKNOWN) {
             numGC++;
          }
       }
