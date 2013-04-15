@@ -48,19 +48,21 @@ public class Sequence {
     *  @return    the GC-content histogram
     */
    public GCContentInfo[] gcContentHistogram(int windowSize, int shiftLen) {
-      int histogramLen = (int)Math.ceil((double)nucleotides.size() / shiftLen);
+      int histogramLen = (int) Math
+            .ceil((double) nucleotides.size() / shiftLen);
       GCContentInfo[] gc = new GCContentInfo[histogramLen];
       for (int i = 0; i < histogramLen; ++i) {
-    	  gc[i].from = i*shiftLen;
-    	  gc[i].to = Math.min(nucleotides.size(), i*shiftLen + windowSize);
-    	  Sequence slice = slice(gc[i].from, gc[i].to);
-          gc[i].min = slice.gcContentMin();
-          gc[i].max = slice.gcContentMax();
+         gc[i] = new GCContentInfo();
+         gc[i].from = i * shiftLen;
+         gc[i].to = Math.min(nucleotides.size(), i * shiftLen + windowSize);
+         Sequence slice = slice(gc[i].from, gc[i].to);
+         gc[i].min = slice.gcContentMin();
+         gc[i].max = slice.gcContentMax();
       }
-      
+
       return gc;
    }
-   
+
    /**
     * Gets the GC-content Min of this Sequence.
     * 

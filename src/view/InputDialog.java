@@ -24,6 +24,9 @@ import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
 
+import controller.Main;
+
+
 import java.io.File;
 import java.io.FileWriter;
 
@@ -242,10 +245,10 @@ public class InputDialog extends JDialog {
                JOptionPane.showMessageDialog(null,
                 "No FASTA file was selected",
                 "Invalid File", JOptionPane.ERROR_MESSAGE);
-            }
-
-            else {
-               mDisplayArea.setText("Code output goes here!\n");
+            } else {
+               mDisplayArea.setText(Main.handleRun(mFile.getText(), mStartPos
+                     .getText(), mEndPos.getText(), mUseSlidingWindow
+                     .isSelected(), mWinSize.getText(), mShiftIncr.getText()));
             }
          }
       });
