@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -11,6 +12,8 @@ import java.util.List;
  */
 public class Sequence {
    protected List<Nucleotide> nucleotides;
+   private boolean valid = true;
+   private List<String> errors = new ArrayList<String>();
 
    public Sequence(List<Nucleotide> nucleotides) { this.nucleotides = nucleotides; }
    
@@ -31,13 +34,34 @@ public class Sequence {
       do {
          // Ignore whitespace on line starts and stops.
          line = line.trim();
-         for (int i = 0; i < line.length(); ++i) 
-            nucleotides.add(Nucleotide.fromChar(line.charAt(i)));
+         for (int i = 0; i < line.length(); ++i) {
+            try {
+               nucleotides.add(Nucleotide.fromChar(line.charAt(i)));
+            } catch (IllegalArgumentException e) {
+               errors.add(e.getMessage());
+               valid = false;
+            }
+         }
       } while ((line = r.readLine()) != null);
       
       r.close();
    }
   
+   /**
+    * @return the valid
+    */
+   public boolean isValid() {
+      return valid;
+   }
+   
+   public Iterator<String> getErrors() {
+      return errors.iterator();
+   }
+   
+   public void clearErrors() {
+      errors.clear();
+   }
+
    // Slices this sequence and returns a new sequence of range [from, to)
    public Sequence slice(int from, int to) {
       return new Sequence(nucleotides.subList(from, to));

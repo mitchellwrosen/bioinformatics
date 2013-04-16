@@ -7,7 +7,7 @@ package model;
 public enum Nucleotide {
    ADENINE, CYTOSINE, GUANINE, THYMINE, UNKNOWN;
    
-   public static Nucleotide fromChar(char c) {
+   public static Nucleotide fromChar(char c) throws IllegalArgumentException {
       switch (c) {
       case 'A':
       case 'a':

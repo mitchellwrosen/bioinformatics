@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import model.GCContentInfo;
 import model.Sequence;
@@ -57,34 +58,44 @@ public class Main {
       String newTextArea = "Start, stop, min %, max %\n";
       try {
          Sequence s = new Sequence(mFile);
-         if(mStartPos.isEmpty()) {
-        	 mStartPos = "1";
-         }
-         if(mEndPos.isEmpty()) {
-        	 mEndPos = Integer.toString(s.size());
-         }
-         s = s.slice(Integer.valueOf(mStartPos) - 1, Integer.valueOf(mEndPos));
-         if (mUseSlidingWindow) {
-            GCContentInfo[] gcs = s.gcContentHistogram(Integer
-                  .valueOf(mWinSize), Integer.valueOf(mShiftIncr));
-            // Potential area for performance improvement, replace string with
-            // stringbuilder.
-            for (GCContentInfo gc : gcs) {
-               newTextArea += gc + "\n";
+         if (s.isValid()) {
+            if(mStartPos.isEmpty()) {
+               mStartPos = "1";
             }
-            return newTextArea;
+            if(mEndPos.isEmpty()) {
+               mEndPos = Integer.toString(s.size());
+            }
+            s = s.slice(Integer.valueOf(mStartPos) - 1, Integer.valueOf(mEndPos));
+            if (mUseSlidingWindow) {
+               GCContentInfo[] gcs = s.gcContentHistogram(Integer
+                     .valueOf(mWinSize), Integer.valueOf(mShiftIncr));
+               // Potential area for performance improvement, replace string with
+               // stringbuilder.
+               for (GCContentInfo gc : gcs) {
+                  newTextArea += gc + "\n";
+               }
+               return newTextArea;
+            } else {
+               newTextArea += String.format("%d, %d, %.2f%%, %.2f%%", Integer
+                     .valueOf(mStartPos), Integer.valueOf(mEndPos), s
+                     .gcContentMin() * 100, s.gcContentMax() * 100);
+               return newTextArea;
+            }
          } else {
-            newTextArea += String.format("%d, %d, %.2f%%, %.2f%%", Integer
-                  .valueOf(mStartPos), Integer.valueOf(mEndPos), s
-                  .gcContentMin() * 100, s.gcContentMax() * 100);
-            return newTextArea;
+            StringBuilder b = new StringBuilder();
+            Iterator<String> errors = s.getErrors();
+            while (errors.hasNext()) {
+               b.append(errors.next() + "\n");
+            }
+            s.clearErrors();
+            newTextArea = b.toString();
          }
       } catch (IOException err) {
          newTextArea = "Error trying to open file: " + err.getMessage();
       } catch (NumberFormatException err) {
          newTextArea = "Please only use numbers for start/end positions, window sizes, and shift increment.";
       } catch (IndexOutOfBoundsException err) {
-    	  newTextArea = "Ensure that start position and end position are within the file size.";
+         newTextArea = "Ensure that start position and end position are within the file size.";
       }
       return newTextArea;
    }
