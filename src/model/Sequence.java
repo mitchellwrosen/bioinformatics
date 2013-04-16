@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class Sequence {
    protected List<Nucleotide> nucleotides;
-   
+
    public Sequence(List<Nucleotide> nucleotides) { this.nucleotides = nucleotides; }
    
    public Sequence(String filename) throws IOException {
@@ -96,5 +96,13 @@ public class Sequence {
       }
       
       return numGC / nucleotides.size();
+   }
+
+   /**
+    * Get the number of nucleotides (including unknowns) in this sequence.
+    * @return the size of this sequence.
+    */
+   public int size() {
+      return nucleotides.size();
    }
 }

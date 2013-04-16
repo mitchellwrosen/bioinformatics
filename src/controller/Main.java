@@ -37,10 +37,10 @@ public class Main {
     *           The name of the file to process
     * @param mStartPos
     *           The start position in the file to process. Indexed inclusively
-    *           from 1.
+    *           from 1. If the string is empty, we index from the start of file.
     * @param mEndPos
     *           The end position in the file to process. Indexed inclusively
-    *           from 1. (Or exclusively from 0).
+    *           from 1. (Or exclusively from 0). If empty, we set to end of file.
     * @param mUseSlidingWindow
     *           True if we are using sliding window logic.
     * @param mWinSize
@@ -57,6 +57,12 @@ public class Main {
       String newTextArea = "Start, stop, min %, max %\n";
       try {
          Sequence s = new Sequence(mFile);
+         if(mStartPos.isEmpty()) {
+        	 mStartPos = "1";
+         }
+         if(mEndPos.isEmpty()) {
+        	 mEndPos = Integer.toString(s.size());
+         }
          s = s.slice(Integer.valueOf(mStartPos) - 1, Integer.valueOf(mEndPos));
          if (mUseSlidingWindow) {
             GCContentInfo[] gcs = s.gcContentHistogram(Integer
@@ -77,6 +83,8 @@ public class Main {
          newTextArea = "Error trying to open file: " + err.getMessage();
       } catch (NumberFormatException err) {
          newTextArea = "Please only use numbers for start/end positions, window sizes, and shift increment.";
+      } catch (IndexOutOfBoundsException err) {
+    	  newTextArea = "Ensure that start position and end position are within the file size.";
       }
       return newTextArea;
    }
