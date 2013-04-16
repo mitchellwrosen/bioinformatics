@@ -21,10 +21,16 @@ public class Sequence {
       
       // First line possibly begins with '>'
       String line = r.readLine();
+
+      // Trim whitespace
+      line = line.trim();
+
       if (line.startsWith(">"))
          line = r.readLine();
       
       do {
+         // Ignore whitespace on line starts and stops.
+         line = line.trim();
          for (int i = 0; i < line.length(); ++i) 
             nucleotides.add(Nucleotide.fromChar(line.charAt(i)));
       } while ((line = r.readLine()) != null);
@@ -69,7 +75,7 @@ public class Sequence {
     * @return  the GC-content Min
     */
    public double gcContentMin() {
-      double numGC = 0;
+      int numGC = 0;
       for (Nucleotide n : nucleotides) {
          if (n == Nucleotide.CYTOSINE || 
                n == Nucleotide.GUANINE) {
@@ -86,7 +92,7 @@ public class Sequence {
     * @return  the GC-content Max
     */
    public double gcContentMax() {
-      double numGC = 0;
+      int numGC = 0;
       for (Nucleotide n : nucleotides) {
          if (n == Nucleotide.CYTOSINE || 
                n == Nucleotide.GUANINE ||
@@ -95,7 +101,7 @@ public class Sequence {
          }
       }
       
-      return numGC / nucleotides.size();
+      return numGC / (double) nucleotides.size();
    }
 
    /**

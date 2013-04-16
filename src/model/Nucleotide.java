@@ -25,7 +25,7 @@ public enum Nucleotide {
       case 'n':
          return UNKNOWN;
       default:
-         throw new IllegalArgumentException("Invalid nucleotide: " + c);
+         throw new IllegalArgumentException("Invalid nucleotide: <" + c + ">");
       }
    }
    
