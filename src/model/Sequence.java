@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * A Sequence of Nucleotides.
- * 
+ *
  * @author Mitchell Rosen
  */
 public class Sequence {
@@ -66,12 +66,12 @@ public class Sequence {
 	 * Gets the GC-content as a histogram, where each entry in the histogram is
 	 * the GC-content of a slice of size |windowSize|, shifted by some multiple
 	 * of |shiftLen|.
-	 * 
+	 *
 	 * @param windowSize
 	 *            the window size
 	 * @param shiftLen
 	 *            the shift length
-	 * 
+	 *
 	 * @return the GC-content histogram
 	 */
 	public GCContentInfo[] gcContentHistogram(int windowSize, int shiftLen) {
@@ -92,7 +92,7 @@ public class Sequence {
 
 	/**
 	 * Gets the GC-content Min of this Sequence.
-	 * 
+	 *
 	 * @return the GC-content Min
 	 */
 	public double gcContentMin() {
@@ -103,12 +103,12 @@ public class Sequence {
 			}
 		}
 
-		return numGC / nucleotides.size();
+		return numGC / (double) nucleotides.size();
 	}
 
 	/**
 	 * Gets the GC-content Max of this Sequence.
-	 * 
+	 *
 	 * @return the GC-content Max
 	 */
 	public double gcContentMax() {
@@ -125,7 +125,7 @@ public class Sequence {
 
 	/**
 	 * Get the number of nucleotides (including unknowns) in this sequence.
-	 * 
+	 *
 	 * @return the size of this sequence.
 	 */
 	public int size() {

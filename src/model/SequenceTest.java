@@ -17,14 +17,17 @@ public class SequenceTest {
    // This was the filename, I have no idea what it actually means.
    private static Sequence dereDotContig2;
 
-   // private static Sequence dereLarge;
+   private static Sequence dereLarge;
    private static Sequence listSequence;
    private static Sequence emptySequence;
+   private static Sequence contig1234;
+   private static Sequence contig7435;
    @BeforeClass
    public static void beforeClass() throws IOException {
       smallSequence = new Sequence("smallfile.txt");
       dereDotContig2 = new Sequence("test_Dere_dot_contig2.txt");
-      
+      contig1234 = new Sequence("contig1_1234_bp.txt");
+      contig7435 = new Sequence("contig1_7435_bp.txt");
       List<Nucleotide> nucleotides = new ArrayList<Nucleotide>();
       nucleotides.add(Nucleotide.ADENINE);
       nucleotides.add(Nucleotide.CYTOSINE);
@@ -37,7 +40,7 @@ public class SequenceTest {
        * This file has some weird stuff we should ask bio students about. As far
        * as I can tell, it is invalid.
        */
-      // dereLarge = new Sequence("test_Dere_large.txt");
+      dereLarge = new Sequence("test_Dere_large.txt");
    }
 
    @Test
@@ -68,14 +71,19 @@ public class SequenceTest {
 
       // TODO: Fix/investigate this test.
       Assert.assertEquals(.174, dereDotContig2.gcContentMin(), .003); // Our tests say this should be .176
-      // Assert.assertEquals(.346, dereLarge.gcContentMin(), .001);
 
+
+      Assert.assertEquals(.31, contig1234.gcContentMin(), .001);
+      
+      // Run to check performance, kind of...
+      dereLarge.gcContentMin();
+      contig7435.gcContentMin();
    }
 
    @Test
    public void testGcContentMax() {
       Assert.assertEquals(.6, smallSequence.gcContentMax(), .001);
-
+      Assert.assertEquals(.31, contig1234.gcContentMax(), .001);
    }
 
 }
