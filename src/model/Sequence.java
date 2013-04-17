@@ -107,7 +107,7 @@ public class Sequence {
          }
       }
       
-      return numGC / nucleotides.size();
+      return numGC / (double) nucleotides.size();
    }
    
    /**
