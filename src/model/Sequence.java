@@ -33,6 +33,7 @@ public class Sequence {
          line = r.readLine().trim();
 
       do {
+         line = line.trim();
          for (int i = 0; i < line.length(); ++i) {
             try {
                nucleotides.add(Nucleotide.fromChar(line.charAt(i)));
@@ -40,13 +41,13 @@ public class Sequence {
                errors.add(e.getMessage());
             }
          }
-      } while ((line = r.readLine().trim()) != null);
+      } while ((line = r.readLine()) != null);
 
       r.close();
    }
 
    public boolean isValid() {
-      return !errors.isEmpty();
+      return errors.isEmpty();
    }
 
    public List<String> getErrors() {
