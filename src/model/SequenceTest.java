@@ -22,12 +22,15 @@ public class SequenceTest {
    private static Sequence emptySequence;
    private static Sequence contig1234;
    private static Sequence contig7435;
+   private static Sequence slide;
+
    @BeforeClass
    public static void beforeClass() throws IOException {
       smallSequence = new Sequence("smallfile.txt");
       dereDotContig2 = new Sequence("test_Dere_dot_contig2.txt");
       contig1234 = new Sequence("contig1_1234_bp.txt");
       contig7435 = new Sequence("contig1_7435_bp.txt");
+      slide = new Sequence("slide1.txt");
       List<Nucleotide> nucleotides = new ArrayList<Nucleotide>();
       nucleotides.add(Nucleotide.ADENINE);
       nucleotides.add(Nucleotide.CYTOSINE);
@@ -52,17 +55,27 @@ public class SequenceTest {
       sliced = dereDotContig2.slice(0, 4);
       Assert.assertEquals(4, sliced.size());
       Assert.assertEquals(.25, sliced.gcContentMax(), .001);
-      
+
    }
 
-   @Test(expected=IndexOutOfBoundsException.class)
+   @Test(expected = IndexOutOfBoundsException.class)
    public void testBadSlice() {
       emptySequence.slice(1, 2);
    }
 
    @Test
    public void testGcContentHistogram() {
-      // TODO: Test histogram and sliding window stuff.
+      GCContentInfo[] info = slide.gcContentHistogram(4, 3);
+
+      Assert.assertEquals("1,4,25.00%,50.00%", info[0].toString());
+      Assert.assertEquals("4,7,50.00%,50.00%", info[1].toString());
+      Assert.assertEquals("7,10,50.00%,100.00%", info[2].toString());
+      Assert.assertEquals("10,13,50.00%,75.00%", info[3].toString());
+      Assert.assertEquals("13,16,25.00%,50.00%", info[4].toString());
+      Assert.assertEquals("16,19,25.00%,50.00%", info[5].toString());
+      Assert.assertEquals("19,20,100.00%,100.00%", info[6].toString());
+
+      
    }
 
    @Test
@@ -70,11 +83,15 @@ public class SequenceTest {
       Assert.assertEquals(.4, smallSequence.gcContentMin(), .001);
 
       // TODO: Fix/investigate this test.
-      Assert.assertEquals(.174, dereDotContig2.gcContentMin(), .003); // Our tests say this should be .176
-
+      Assert.assertEquals(.174, dereDotContig2.gcContentMin(), .003); // Our
+                                                                      // tests
+                                                                      // say
+                                                                      // this
+                                                                      // should
+                                                                      // be .176
 
       Assert.assertEquals(.31, contig1234.gcContentMin(), .001);
-      
+
       // Run to check performance, kind of...
       dereLarge.gcContentMin();
       contig7435.gcContentMin();
