@@ -33,6 +33,7 @@ public class InputDialog extends JDialog {
    protected JTabbedPane mTabbedPane;
    protected GCContentInfoPanel mGCContentInfoPanel;
    protected CalculationsPanel mCalculationsPanel;
+   protected ProteinsPanel mProteinsPanel;
 
    protected JButton mRunButton, mSaveButton, mQuitButton;
 
@@ -48,6 +49,19 @@ public class InputDialog extends JDialog {
       mPane.setLayout(new BoxLayout(mPane, BoxLayout.Y_AXIS));
       mPane.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
 
+      mTabbedPane = new JTabbedPane();
+      mGCContentInfoPanel = new GCContentInfoPanel();
+      mCalculationsPanel = new CalculationsPanel();
+      mProteinsPanel = new ProteinsPanel();
+      
+      mRunButton = new JButton("Run");
+      mSaveButton = new JButton("Save");
+      mQuitButton = new JButton("Quit");
+      mRunButton.addActionListener(runButtonActionListener);
+      mSaveButton.addActionListener(saveButtonActionListener);
+      mQuitButton.addActionListener(quitButtonActionListener);
+
+      
       mPane.add(prepareFileBox());
       mPane.add(prepareTabbedPane());
       mPane.add(prepareControlsBox());
@@ -83,26 +97,14 @@ public class InputDialog extends JDialog {
    }
 
    protected JTabbedPane prepareTabbedPane() {
-      mTabbedPane = new JTabbedPane();
-      mGCContentInfoPanel = new GCContentInfoPanel();
-      mCalculationsPanel = new CalculationsPanel();
-
       mTabbedPane.addTab("GC Content", mGCContentInfoPanel);
       mTabbedPane.addTab("Calculations", mCalculationsPanel);
+      mTabbedPane.addTab("Proteins", mProteinsPanel);
 
       return mTabbedPane;
    }
 
    protected Box prepareControlsBox() {
-      mRunButton = new JButton("Run");
-      mRunButton.addActionListener(runButtonActionListener);
-
-      mSaveButton = new JButton("Save");
-      mSaveButton.addActionListener(saveButtonActionListener);
-
-      mQuitButton = new JButton("Quit");
-      mQuitButton.addActionListener(quitButtonActionListener);
-
       Box dialogControls = Box.createHorizontalBox();
       dialogControls.add(mRunButton);
       dialogControls.add(mSaveButton);
