@@ -1,49 +1,40 @@
 package view;
 
 import java.awt.Component;
-import java.awt.ComponentOrientation;
 import java.awt.Container;
-import java.awt.Frame;
-import java.awt.Dialog;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.FlowLayout;
-
-import javax.swing.JPanel;
-import javax.swing.JOptionPane;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JTextArea;
-import javax.swing.JButton;
-import javax.swing.JScrollPane;
-import javax.swing.BoxLayout;
-
-import controller.Main;
-
-
 import java.io.File;
 import java.io.FileWriter;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+
+import controller.Main;
+
 @SuppressWarnings("serial")
 public class InputDialog extends JDialog {
-   /*
-    * CONSTANTS
-    */
-   private final int DIALOG_HEIGHT = 400, DIALOG_WIDTH = 500;
+   protected final int DIALOG_HEIGHT = 400, DIALOG_WIDTH = 500;
 
-   /*
-    * GUI Components
-    */
-   private Container mPane;
-   private JTextField mFile, mStartPos, mEndPos, mWinSize, mShiftIncr;
-   private JTextArea mDisplayArea;
-   private JCheckBox mUseSlidingWindow;
+   // Selected tab "enum"
+   protected final int GC_CONTENT = 0, CALCULATIONS = 1, PROTEINS = 2;
+
+   protected Container mPane;
+   protected JTextField mFile;
+   protected JButton mBrowseButton;
+
+   protected JTabbedPane mTabbedPane;
+   protected GCContentInfoPanel mGCContentInfoPanel;
+   protected CalculationsPanel mCalculationsPanel;
+
+   protected JButton mRunButton, mSaveButton, mQuitButton;
 
    public InputDialog() {
       super();
@@ -53,266 +44,178 @@ public class InputDialog extends JDialog {
       setResizable(false);
       setLocationRelativeTo(null);
 
-      mPane = this.getContentPane();
+      mPane = getContentPane();
       mPane.setLayout(new BoxLayout(mPane, BoxLayout.Y_AXIS));
       mPane.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
 
-      mFile = new JTextField(20);
-      mStartPos = new JTextField(20);
-      mEndPos = new JTextField(20);
-
-      mUseSlidingWindow = new JCheckBox("Use Sliding Window", false);
-
-      mDisplayArea = new JTextArea();
-      mWinSize = new JTextField(20);
-      mShiftIncr = new JTextField(20);
-   }
-
-   /*
-    * Adds all of the components to this dialog.
-    */
-   public void init() {
-      JPanel fastaFileField = prepareFileField(mFile);
-      JPanel posField = prepareParamControls(mStartPos, mEndPos, mWinSize,
-                                             mShiftIncr, mUseSlidingWindow);
-
-      mPane.add(fastaFileField);
-      mPane.add(posField);
-
-      //mPane.add(mDisplayArea);
-      JScrollPane scrollDisplay = new JScrollPane(mDisplayArea);
-      scrollDisplay.setPreferredSize(new Dimension(200, 300));
-      mPane.add(scrollDisplay);
-
-      mPane.add(initControls());
-
+      mPane.add(prepareFileBox());
+      mPane.add(prepareTabbedPane());
+      mPane.add(prepareControlsBox());
       mPane.validate();
    }
 
-   /*
-    * Creates and returns a JPanel containing sub components that make up the
-    * input file selection section
-    */
-   private JPanel prepareFileField(JTextField fileField) {
-      JPanel fastaFileField = new JPanel();
+   protected Box prepareFileBox() {
+      mFile = new JTextField(20);
 
-      fastaFileField.setLayout(new FlowLayout(FlowLayout.LEADING));
-
-      fastaFileField.add(new JLabel("Select Input File:"));
-      fastaFileField.add(fileField);
-      fastaFileField.add(prepareBrowseButton(fileField));
-
-      return fastaFileField;
-   }
-
-   /*
-    * Creates and returns a JButton that can be used to browse for any given
-    * file. The input JTextField is associated with the returned button such
-    * that when the browse button is used to select a file, the full file name
-    * is written to the input JTextField
-    */
-   private JButton prepareBrowseButton(final JTextField fileField) {
-      JButton fileBrowse = new JButton("Browse");
-
-      fileBrowse.addActionListener(new ActionListener() {
-
+      mBrowseButton = new JButton("Browse");
+      mBrowseButton.addActionListener(new ActionListener() {
          public void actionPerformed(ActionEvent e) {
             JFileChooser chooser = new JFileChooser();
             int returnVal = chooser.showOpenDialog(chooser);
-            
+
             if (returnVal == JFileChooser.CANCEL_OPTION) {
                System.out.println("cancelled");
-            }
-
-            else if (returnVal == JFileChooser.APPROVE_OPTION) {
+            } else if (returnVal == JFileChooser.APPROVE_OPTION) {
                File fastaFile = chooser.getSelectedFile();
-               fileField.setText(fastaFile.getAbsolutePath());
-            }
-
-            else {
+               mFile.setText(fastaFile.getAbsolutePath());
+            } else {
                System.out.println("Encountered Unknown Error");
                System.exit(0);
             }
          }
       });
 
-      return fileBrowse;
+      Box fileBox = Box.createHorizontalBox();
+      fileBox.add(new JLabel("Select Input File:"));
+      fileBox.add(mFile);
+      fileBox.add(mBrowseButton);
+      return fileBox;
    }
 
-   /*
-    * Creates and returns a JPanel containing all of the parameter JTextFields.
-    * Additionally adds an ItemListener to the JCheckBox to hide/show the
-    * JTextFields for the sliding window parameters.
-    */
-   private JPanel prepareParamControls(JTextField posStart, JTextField posEnd,
-                                       final JTextField winSize,
-                                       final JTextField shiftIncr,
-                                       JCheckBox useSlide) {
-      JPanel controlField = new JPanel(), startField = new JPanel(),
-             endField = new JPanel(), checkBoxField = new JPanel(),
-             windowField = new JPanel(), shiftField = new JPanel();
-      final JPanel slideFields = new JPanel();
+   protected JTabbedPane prepareTabbedPane() {
+      mTabbedPane = new JTabbedPane();
+      mGCContentInfoPanel = new GCContentInfoPanel();
+      mCalculationsPanel = new CalculationsPanel();
 
-      /*
-       * Position based parameters
-       */
-      startField.setLayout(new FlowLayout(FlowLayout.LEADING));
-      startField.add(new JLabel("Start Position:"));
-      startField.add(posStart);
+      mTabbedPane.addTab("GC Content", mGCContentInfoPanel);
+      mTabbedPane.addTab("Calculations", mCalculationsPanel);
 
-      endField.setLayout(new FlowLayout(FlowLayout.LEADING));
-      endField.add(new JLabel("End Position:"));
-      endField.add(posEnd);
-
-      /*
-       * Fancy check box for making window parameters visible/invisible
-       */
-      checkBoxField.setLayout(new FlowLayout(FlowLayout.LEADING));
-      checkBoxField.add(useSlide);
-      useSlide.addItemListener(new ItemListener() {
-         public void itemStateChanged(ItemEvent e) {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-               slideFields.setVisible(true);
-            }
-            else if (e.getStateChange() == ItemEvent.DESELECTED) {
-               slideFields.setVisible(false);
-               winSize.setText("");
-               shiftIncr.setText("");
-            }
-
-            mPane.setVisible(true);
-         }
-      });
-
-      /*
-       * Window Parameters
-       */
-      windowField.setLayout(new FlowLayout(FlowLayout.LEADING));
-      windowField.add(new JLabel("Window Size"));
-      windowField.add(winSize);
-
-      shiftField.setLayout(new FlowLayout(FlowLayout.LEADING));
-      shiftField.add(new JLabel("Window Shift"));
-      shiftField.add(shiftIncr);
-
-      slideFields.setLayout(new BoxLayout(slideFields, BoxLayout.Y_AXIS));
-      slideFields.add(windowField);
-      slideFields.add(shiftField);
-      slideFields.setVisible(false);
-
-      /*
-       * Putting all parameter inputs together
-       */
-      controlField.setLayout(new BoxLayout(controlField, BoxLayout.Y_AXIS));
-      controlField.add(startField);
-      controlField.add(endField);
-      controlField.add(checkBoxField);
-      controlField.add(slideFields);
-
-      return controlField;
+      return mTabbedPane;
    }
 
-   /*
-    * Creates and returns a JPanel containing all of the controls available on
-    * this dialog window. This includes the "Run," "Save," and "Quit" buttons.
-    */
-   public JPanel initControls() {
-      JPanel dialogControls = new JPanel();
+   protected Box prepareControlsBox() {
+      mRunButton = new JButton("Run");
+      mRunButton.addActionListener(runButtonActionListener);
 
-      dialogControls.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+      mSaveButton = new JButton("Save");
+      mSaveButton.addActionListener(saveButtonActionListener);
 
-      dialogControls.add(createRunButton());
-      dialogControls.add(createSaveButton());
-      dialogControls.add(createQuitButton());
+      mQuitButton = new JButton("Quit");
+      mQuitButton.addActionListener(quitButtonActionListener);
 
+      Box dialogControls = Box.createHorizontalBox();
+      dialogControls.add(mRunButton);
+      dialogControls.add(mSaveButton);
+      dialogControls.add(mQuitButton);
       dialogControls.setAlignmentX(Component.CENTER_ALIGNMENT);
-
+      
       return dialogControls;
    }
 
-   /*
-    * Creates and returns a JButton that executes the appropriate code. The
-    * code right now is extremely basic (it doesn't run anything) and output is
-    * written to mDisplayArea, a JTextArea in the middle (ish) of this dialog
-    * window
-    */
-   private JButton createRunButton() {
-      JButton runButton = new JButton("Run");
-
-      runButton.addActionListener(new ActionListener(){
-         public void actionPerformed(ActionEvent e) {
-            if (mFile.getText().equals("")) {
-               JOptionPane.showMessageDialog(null,
-                "No FASTA file was selected",
-                "Invalid File", JOptionPane.ERROR_MESSAGE);
-            } else {
-               mDisplayArea.setText(Main.handleRun(mFile.getText(), mStartPos
-                     .getText(), mEndPos.getText(), mUseSlidingWindow
-                     .isSelected(), mWinSize.getText(), mShiftIncr.getText()));
-            }
-         }
-      });
-
-      return runButton;
-   }
-
-   /*
-    * Creates and returns a JButton that allows the user to select a file for
-    * the contents of the JTextArea to be written to.
-    */
-   private JButton createSaveButton() {
-      JButton saveButton = new JButton("Save");
-
-      saveButton.addActionListener(new ActionListener(){
-         public void actionPerformed(ActionEvent e) {
-            if (mDisplayArea.getText().equals("")) {
-               JOptionPane.showMessageDialog(null,
-                "No output to save", "Empty output",
-                JOptionPane.ERROR_MESSAGE);
-            }
-
-            else {
-               JFileChooser chooser = new JFileChooser();
-               int returnVal = chooser.showSaveDialog(mPane);
-               
-               if (returnVal == JFileChooser.APPROVE_OPTION) {
-                  try {
-                     FileWriter writer = new FileWriter(chooser.getSelectedFile());
-                     writer.write(mDisplayArea.getText());
-                     writer.close();
-                  }
-                  catch (java.io.IOException ioErr) {
-                     JOptionPane.showMessageDialog(null,
-                      "Encountered unknown error when saving output",
-                      "Unable to save output", JOptionPane.ERROR_MESSAGE);
-                  }
-               }
-
-               else if (returnVal == JFileChooser.ERROR_OPTION) {
-                  JOptionPane.showMessageDialog(null,
-                   "Encountered unknown error when saving output",
-                   "Unable to save output", JOptionPane.ERROR_MESSAGE);
-               }
-            }
-         }
-      });
-
-      return saveButton;
-   }
-
-   /*
-    * Self explanatory
-    */
-   private JButton createQuitButton() {
-      JButton quitButton = new JButton("Quit");
-
-      quitButton.addActionListener(new ActionListener() {
-         public void actionPerformed(ActionEvent e) {
-            dispose(); //closes the dialog window
+   protected ActionListener runButtonActionListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+         if (mFile.getText().equals("")) {
+            JOptionPane.showMessageDialog(null, "No FASTA file was selected",
+                  "Invalid File", JOptionPane.ERROR_MESSAGE);
             return;
          }
-      });
 
-      return quitButton;
+         switch (mTabbedPane.getSelectedIndex()) {
+         case GC_CONTENT:
+            runGCContent();
+            break;
+         case CALCULATIONS:
+            runCalculations();
+            break;
+         case PROTEINS:
+            runProteins();
+            break;
+         default:
+            assert false;
+         }
+      }
+   };
+
+   protected void runGCContent() {
+      String filename = mFile.getText();
+      String startPos = mGCContentInfoPanel.getStartPos();
+      String endPos = mGCContentInfoPanel.getEndPos();
+      boolean useSlidingWindow = mGCContentInfoPanel.getUseSlidingWindow();
+      String winSize = mGCContentInfoPanel.getWinSize();
+      String shiftIncr = mGCContentInfoPanel.getShiftIncr();
+      
+      String output = Main.handleRun(filename, startPos, endPos, useSlidingWindow, winSize, shiftIncr);
+      mGCContentInfoPanel.setDisplay(output);
    }
+
+   protected void runCalculations() {
+      // TODO
+   }
+
+   protected void runProteins() {
+      // TODO
+   }
+
+   protected ActionListener saveButtonActionListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+         switch (mTabbedPane.getSelectedIndex()) {
+         case GC_CONTENT:
+            saveGCContent();
+            break;
+         case CALCULATIONS:
+            saveCalculations();
+            break;
+         case PROTEINS:
+            saveProteins();
+            break;
+         default:
+            assert false;
+
+         }
+      }
+   };
+
+   protected void saveGCContent() {
+      String display = mGCContentInfoPanel.getDisplay();
+
+      if (display.equals("")) {
+         JOptionPane.showMessageDialog(null, "No output to save",
+               "Empty output", JOptionPane.ERROR_MESSAGE);
+         return;
+      }
+      
+      JFileChooser chooser = new JFileChooser();
+      int ret = chooser.showSaveDialog(mPane);
+
+      if (ret == JFileChooser.APPROVE_OPTION) {
+         try {
+            FileWriter writer = new FileWriter(chooser.getSelectedFile());
+            writer.write(display);
+            writer.close();
+         } catch (java.io.IOException ioErr) {
+            JOptionPane.showMessageDialog(null,
+                  "Encountered unknown error when saving output",
+                  "Unable to save output", JOptionPane.ERROR_MESSAGE);
+         }
+      } else if (ret == JFileChooser.ERROR_OPTION) {
+         JOptionPane.showMessageDialog(null,
+               "Encountered unknown error when saving output",
+               "Unable to save output", JOptionPane.ERROR_MESSAGE);
+      }
+   }
+   
+   protected void saveCalculations() {
+      // TODO
+   }
+   
+   protected void saveProteins() {
+      // TODO
+   }
+
+   protected ActionListener quitButtonActionListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+         dispose(); // closes the dialog window
+         return;
+      }
+   };
 }
