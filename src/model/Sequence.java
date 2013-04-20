@@ -13,16 +13,13 @@ import java.util.List;
  */
 public class Sequence {
    protected List<Nucleotide> nucleotides;
-   protected List<String> errors;
 
    public Sequence(List<Nucleotide> nucleotides) {
       this.nucleotides = nucleotides;
-      this.errors = new ArrayList<String>();
    }
 
-   public Sequence(String filename) throws IOException {
+   public Sequence(String filename) throws IOException, IllegalArgumentException {
       this.nucleotides = new ArrayList<Nucleotide>();
-      this.errors = new ArrayList<String>();
 
       BufferedReader r = new BufferedReader(new FileReader(filename));
 
@@ -33,30 +30,13 @@ public class Sequence {
 
       do {
          line = line.trim();
-         for (int i = 0; i < line.length(); ++i) {
-            try {
-               nucleotides.add(Nucleotide.fromChar(line.charAt(i)));
-            } catch (IllegalArgumentException e) {
-               errors.add(e.getMessage());
-            }
-         }
+         for (int i = 0; i < line.length(); ++i)
+            nucleotides.add(Nucleotide.fromChar(line.charAt(i)));
       } while ((line = r.readLine()) != null);
 
       r.close();
    }
    
-   public boolean isValid() {
-      return errors.isEmpty();
-   }
-
-   public List<String> getErrors() {
-      return errors;
-   }
-
-   public void clearErrors() {
-      errors.clear();
-   }
-
    // Slices this sequence and returns a new sequence of range [from, to)
    public Sequence slice(int from, int to) {
       return new Sequence(nucleotides.subList(from, to));

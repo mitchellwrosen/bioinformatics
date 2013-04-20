@@ -1,0 +1,332 @@
+package view;
+
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import controller.Controller;
+
+@SuppressWarnings("serial")
+public class View extends JDialog {
+   protected final int DIALOG_HEIGHT = 400, DIALOG_WIDTH = 500;
+
+   // Selected tab "enum"
+   protected final int GC_CONTENT_TAB = 0, CALCULATIONS_TAB = 1, PROTEINS_TAB = 2;
+
+   protected Controller controller;
+
+   protected Container mPane;
+
+   protected JTextField mSequenceFile;
+   protected boolean mValidSequenceFile;
+   protected JButton mBrowseSequenceButton;
+
+   protected Box mGffFileBox;
+   protected JTextField mGffFile;
+   protected boolean mValidGffFile;
+   protected JButton mBrowseGffButton;
+
+   protected JTabbedPane mTabbedPane;
+   protected GCContentInfoPanel mGcContentInfoPanel;
+   protected CalculationsPanel mCalculationsPanel;
+   protected ProteinsPanel mProteinsPanel;
+
+   protected JButton mRunButton, mSaveButton, mQuitButton;
+
+   public View(final Controller controller) {
+      this.controller = controller;
+
+      setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+      setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+      setResizable(false);
+      setLocationRelativeTo(null);
+
+      mPane = getContentPane();
+      mPane.setLayout(new BoxLayout(mPane, BoxLayout.Y_AXIS));
+      mPane.setSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+
+      // Took this out of initializeControlsBox() for now, since the tabbed pane
+      // change listener needs to update it. Will refactor later.
+      mRunButton = new JButton("Run");
+      
+      Box sequenceBox = initializeSequenceBox();
+      initializeGffBox(); // Box is member variable (for hiding)
+      initializeTabbedPane(); // Tabbed pane is member variable
+      Box controlsBox = initializeControlsBox();
+
+      mPane.add(sequenceBox);
+      mPane.add(mGffFileBox);
+      mPane.add(mTabbedPane);
+      mPane.add(controlsBox);
+      mPane.validate();
+   }
+
+   protected Box initializeSequenceBox() {
+      mSequenceFile = new JTextField(20);
+      mSequenceFile.setEditable(false);
+      mValidSequenceFile = false;
+
+      mBrowseSequenceButton = new JButton("Browse");
+      mBrowseSequenceButton
+            .addActionListener(browseSequenceButtonActionListener);
+
+      Box fileBox = Box.createHorizontalBox();
+      fileBox.add(new JLabel("Sequence File:"));
+      fileBox.add(mSequenceFile);
+      fileBox.add(mBrowseSequenceButton);
+      return fileBox;
+   }
+
+   protected void initializeGffBox() {
+      mGffFile = new JTextField(20);
+      mGffFile.setEditable(false);
+      mValidGffFile = false;
+      
+      mBrowseGffButton = new JButton("Browse");
+      mBrowseGffButton
+            .addActionListener(browseGffButtonActionListener);
+
+      mGffFileBox = Box.createHorizontalBox();
+      mGffFileBox.add(new JLabel("GFF File:"));
+      mGffFileBox.add(mGffFile);
+      mGffFileBox.add(mBrowseGffButton);
+      mGffFileBox.setVisible(false);
+   }
+   
+   protected void initializeTabbedPane() {
+      mGcContentInfoPanel = new GCContentInfoPanel();
+      mCalculationsPanel = new CalculationsPanel();
+      mProteinsPanel = new ProteinsPanel();
+      
+      mTabbedPane = new JTabbedPane();
+      mTabbedPane.addChangeListener(new ChangeListener() {
+         public void stateChanged(ChangeEvent e) {
+            updateRunButton();
+            
+            switch (mTabbedPane.getSelectedIndex()) {
+            case GC_CONTENT_TAB:
+               mGffFileBox.setVisible(false);
+               break;
+            case CALCULATIONS_TAB:
+            case PROTEINS_TAB:
+               mGffFileBox.setVisible(true);
+               break;
+            default:
+               assert false;
+            }
+         }
+      });
+      
+      mTabbedPane.addTab("GC Content", mGcContentInfoPanel);
+      mTabbedPane.addTab("Calculations", mCalculationsPanel);
+      mTabbedPane.addTab("Proteins", mProteinsPanel);
+   }
+
+   protected Box initializeControlsBox() {
+      mRunButton.setEnabled(false);
+      mRunButton.addActionListener(runButtonActionListener);
+
+      mSaveButton = new JButton("Save");
+      mSaveButton.addActionListener(saveButtonActionListener);
+
+      mQuitButton = new JButton("Quit");
+      mQuitButton.addActionListener(quitButtonActionListener);
+      
+      Box box = Box.createHorizontalBox();
+      box.add(mRunButton);
+      box.add(mSaveButton);
+      box.add(mQuitButton);
+      box.setAlignmentX(Component.CENTER_ALIGNMENT);
+      
+      return box;
+   }
+
+   /**
+    * The Run button is enabled conditionally on valid Sequence/GFF files. Only
+    * a valid Sequence file is required for the GC content tab.
+    */
+   protected void updateRunButton() {
+      switch (mTabbedPane.getSelectedIndex()) {
+      case GC_CONTENT_TAB:
+         mRunButton.setEnabled(mValidSequenceFile);
+         break;
+      case CALCULATIONS_TAB:
+      case PROTEINS_TAB:
+         mRunButton.setEnabled(mValidSequenceFile && mValidGffFile);
+         break;
+      default:
+         assert false;
+      }
+   }
+
+   // Action listeners ////////////////////////////////////////////////////////
+   
+   protected ActionListener browseSequenceButtonActionListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+         JFileChooser chooser = new JFileChooser();
+         int returnVal = chooser.showOpenDialog(chooser);
+         if (returnVal == JFileChooser.APPROVE_OPTION) {
+            String filename = chooser.getSelectedFile().getAbsolutePath();
+            mSequenceFile.setText(filename);
+
+            try {
+               controller.useSequenceFile(mSequenceFile.getText());
+               mValidSequenceFile = true;
+               updateRunButton();
+            } catch (Exception ex) {
+               ex.printStackTrace();
+               JOptionPane.showMessageDialog(null, ex.toString(), "Error",
+                     JOptionPane.ERROR_MESSAGE);
+               mValidSequenceFile = false;
+               updateRunButton();
+               return;
+            }
+         }
+      }
+   };
+   
+   protected ActionListener browseGffButtonActionListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+         JFileChooser chooser = new JFileChooser();
+         int returnVal = chooser.showOpenDialog(chooser);
+         if (returnVal == JFileChooser.APPROVE_OPTION) {
+            String filename = chooser.getSelectedFile().getAbsolutePath();
+            mGffFile.setText(filename);
+
+            try {
+               controller.useGffFile(mGffFile.getText());
+               mValidGffFile = true;
+               updateRunButton();
+            } catch (Exception ex) {
+               JOptionPane.showMessageDialog(null, ex.toString(), "Error",
+                     JOptionPane.ERROR_MESSAGE);
+               mValidGffFile = false;
+               updateRunButton();
+               return;
+            }
+         }
+      }
+   };
+
+
+   protected ActionListener runButtonActionListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+         if (mSequenceFile.getText().equals("")) {
+            JOptionPane.showMessageDialog(null, "No FASTA file was selected",
+                  "Invalid File", JOptionPane.ERROR_MESSAGE);
+            return;
+         }
+
+         switch (mTabbedPane.getSelectedIndex()) {
+         case GC_CONTENT_TAB:
+            runGCContent();
+            break;
+         case CALCULATIONS_TAB:
+            runCalculations();
+            break;
+         case PROTEINS_TAB:
+            runProteins();
+            break;
+         default:
+            assert false;
+         }
+      }
+   };
+
+   protected void runGCContent() {
+      String output = controller.runGcContent(
+            mGcContentInfoPanel.getStartPos(), mGcContentInfoPanel.getEndPos(),
+            mGcContentInfoPanel.getUseSlidingWindow(),
+            mGcContentInfoPanel.getWinSize(),
+            mGcContentInfoPanel.getShiftIncr());
+
+      mGcContentInfoPanel.setDisplay(output);
+   }
+
+   protected void runCalculations() {
+      // / TODO
+
+   }
+
+   protected void runProteins() {
+      // TODO
+   }
+
+   protected ActionListener saveButtonActionListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+         switch (mTabbedPane.getSelectedIndex()) {
+         case GC_CONTENT_TAB:
+            saveGcContent();
+            break;
+         case CALCULATIONS_TAB:
+            saveCalculations();
+            break;
+         case PROTEINS_TAB:
+            saveProteins();
+            break;
+         default:
+            assert false;
+
+         }
+      }
+   };
+
+   protected void saveGcContent() {
+      String display = mGcContentInfoPanel.getDisplay();
+
+      if (display.equals("")) {
+         JOptionPane.showMessageDialog(null, "No output to save",
+               "Empty output", JOptionPane.ERROR_MESSAGE);
+         return;
+      }
+
+      JFileChooser chooser = new JFileChooser();
+      int ret = chooser.showSaveDialog(mPane);
+
+      if (ret == JFileChooser.APPROVE_OPTION) {
+         try {
+            FileWriter writer = new FileWriter(chooser.getSelectedFile());
+            writer.write(display);
+            writer.close();
+         } catch (java.io.IOException ioErr) {
+            JOptionPane.showMessageDialog(null,
+                  "Encountered unknown error when saving output",
+                  "Unable to save output", JOptionPane.ERROR_MESSAGE);
+         }
+      } else if (ret == JFileChooser.ERROR_OPTION) {
+         JOptionPane.showMessageDialog(null,
+               "Encountered unknown error when saving output",
+               "Unable to save output", JOptionPane.ERROR_MESSAGE);
+      }
+   }
+
+   protected void saveCalculations() {
+      // TODO
+   }
+
+   protected void saveProteins() {
+      // TODO
+   }
+
+   protected ActionListener quitButtonActionListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+         dispose(); // closes the dialog window
+         return;
+      }
+   };
+}
