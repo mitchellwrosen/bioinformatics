@@ -25,7 +25,7 @@ public class CalculationsPanel extends JPanel {
       add(prepareBox("Average CDS size:", mAvgCds));
       add(prepareBox("Average exon size:", mAvgExon));
       add(prepareBox("Average intron size:", mAvgIntron));
-      add(prepareBox("Average intergenic regeion size:", mAvgIntergenic));
+      add(prepareBox("Average intergenic region size:", mAvgIntergenic));
    }
    
    protected JTextField prepareTextField(int size) {
