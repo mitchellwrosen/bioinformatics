@@ -138,7 +138,7 @@ public class Sequence {
    
    public String toProteinString() {
       StringBuilder sb = new StringBuilder();
-      for (int i = 0; i < nucleotides.size()-2; ++i) {
+      for (int i = 0; i < nucleotides.size()-2; i+=3) {
          Sequence codon = slice(i, i+3);
          sb.append(AminoAcid.fromSequence(codon));
       }
