@@ -1,8 +1,13 @@
 package controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import model.GCContentInfo;
+import model.Gene;
+import model.Gene.Isoform;
+import model.GeneUtils;
 import model.Sequence;
 
 /**
@@ -14,7 +19,9 @@ import model.Sequence;
 public class Controller {
    protected String mSequenceFile;
    protected String mGffFile;
+   
    protected Sequence mSequence;
+   protected List<Gene> mGenes;
    
    public Controller() {
       mSequenceFile = new String();
@@ -30,6 +37,7 @@ public class Controller {
    
    public void useGffFile(String filename) throws IOException {
       // TODO
+      mGenes = new ArrayList<Gene>();
    }
 
    /**
@@ -53,7 +61,7 @@ public class Controller {
     *         an appropriate error message detailing why one could not be
     *         provided.
     */
-   public String runGcContent(String startPos, String endPos,
+   public String getGcContent(String startPos, String endPos,
          boolean useSlidingWindow, String winSize, String shiftIncr) {
       StringBuilder sb = new StringBuilder();
       sb.append("Start, stop, min %, max %\n");
@@ -80,5 +88,46 @@ public class Controller {
       }
 
       return sb.toString();
+   }
+   
+   public String avgGeneSize() {
+      return String.format("%.2f", GeneUtils.avgGeneSize(mGenes));
+   }
+   
+   public String avgCdsSize() {
+      return String.format("%.2f", GeneUtils.avgCdsSize(mGenes));
+   }
+   
+   public String avgExonSize() {
+      return String.format("%.2f", GeneUtils.avgExonSize(mGenes));
+   }
+   
+   public String avgIntronSize() {
+      return String.format("%.2f", GeneUtils.avgIntronSize(mGenes));
+   }
+   
+   public String avgIntergenicRegionSize() {
+      return String.format("%.2f", GeneUtils.avgIntergenicRegionSize(mGenes));
+   }
+   
+   public String cdsDensity() {
+      return String.format("%.2f", GeneUtils.cdsDensity(mGenes));
+   }
+   
+   public String genesPerKilobase() {
+      return String.format("%.2f", GeneUtils.genesPerKilobase(mGenes));
+   }
+   
+   public String kilobasesPerGene() {
+      return String.format("%.2f", GeneUtils.kilobasesPerGene(mGenes));
+   }
+   
+   public String getProteins() {
+      StringBuilder sb = new StringBuilder();
+      for (Gene g : mGenes) {
+         for (Isoform i : g.getIsoforms()) {
+            
+         }
+      }
    }
 }

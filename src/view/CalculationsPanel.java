@@ -38,7 +38,7 @@ public class CalculationsPanel extends JPanel {
    public void setAvgIntergenic(String text)    { mAvgIntergenic.setText(text); }
    public void setCdsDensity(String text)       { mCdsDensity.setText(text); }
    public void setGenesPerKilobase(String text) { mGenesPerKilobase.setText(text); }
-   public void mKilobasesPerGene(String text)   { mKilobasesPerGene.setText(text); }
+   public void setKilobasesPerGene(String text) { mKilobasesPerGene.setText(text); }
    
    protected JTextField prepareTextField(int size) {
       JTextField tf = new JTextField(size);

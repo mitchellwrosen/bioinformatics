@@ -32,7 +32,7 @@ public class GeneUtils {
       return (double) size / numExons;
    }
    
-   public static double avgIntron(List<Gene> genes) {
+   public static double avgIntronSize(List<Gene> genes) {
       int size = 0, numIntrons = 0;
       for (Gene gene : genes) {
          size += gene.intronSize();

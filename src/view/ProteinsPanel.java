@@ -22,4 +22,6 @@ public class ProteinsPanel extends JPanel {
       scrollDisplay.setPreferredSize(new Dimension(200, 300));
       return scrollDisplay;
    }
+   
+   public String getDisplay() { return mDisplay.getText(); }
 }

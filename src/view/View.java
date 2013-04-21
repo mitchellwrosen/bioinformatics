@@ -249,21 +249,28 @@ public class View extends JDialog {
    };
 
    protected void runGCContent() {
-      String output = controller.runGcContent(
+      mGcContentInfoPanel.setDisplay(
+         controller.getGcContent(
             mGcContentInfoPanel.getStartPos(), mGcContentInfoPanel.getEndPos(),
             mGcContentInfoPanel.getUseSlidingWindow(),
             mGcContentInfoPanel.getWinSize(),
-            mGcContentInfoPanel.getShiftIncr());
-
-      mGcContentInfoPanel.setDisplay(output);
+            mGcContentInfoPanel.getShiftIncr()));
+            
    }
 
    protected void runCalculations() {
-      // / TODO
-
+      mCalculationsPanel.setAvgGene(controller.avgGeneSize());
+      mCalculationsPanel.setAvgCds(controller.avgCdsSize());
+      mCalculationsPanel.setAvgExon(controller.avgExonSize());
+      mCalculationsPanel.setAvgIntron(controller.avgIntronSize());
+      mCalculationsPanel.setAvgIntergenic(controller.avgIntergenicRegionSize());
+      mCalculationsPanel.setCdsDensity(controller.cdsDensity());
+      mCalculationsPanel.setGenesPerKilobase(controller.genesPerKilobase());
+      mCalculationsPanel.setKilobasesPerGene(controller.kilobasesPerGene());
    }
 
    protected void runProteins() {
+      mProteinsPanel.setDisplay(controller.getProteins());
       // TODO
    }
 
@@ -281,15 +288,25 @@ public class View extends JDialog {
             break;
          default:
             assert false;
-
          }
       }
    };
 
    protected void saveGcContent() {
-      String display = mGcContentInfoPanel.getDisplay();
+      saveString(mGcContentInfoPanel.getDisplay());
+   }
 
-      if (display.equals("")) {
+   protected void saveCalculations() {
+      // TODO
+   }
+
+   protected void saveProteins() {
+      saveString(mProteinsPanel.getDisplay());
+   }
+   
+   
+   protected void saveString(String data) {
+      if (data.equals("")) {
          JOptionPane.showMessageDialog(null, "No output to save",
                "Empty output", JOptionPane.ERROR_MESSAGE);
          return;
@@ -301,7 +318,7 @@ public class View extends JDialog {
       if (ret == JFileChooser.APPROVE_OPTION) {
          try {
             FileWriter writer = new FileWriter(chooser.getSelectedFile());
-            writer.write(display);
+            writer.write(data);
             writer.close();
          } catch (java.io.IOException ioErr) {
             JOptionPane.showMessageDialog(null,
@@ -313,14 +330,6 @@ public class View extends JDialog {
                "Encountered unknown error when saving output",
                "Unable to save output", JOptionPane.ERROR_MESSAGE);
       }
-   }
-
-   protected void saveCalculations() {
-      // TODO
-   }
-
-   protected void saveProteins() {
-      // TODO
    }
 
    protected ActionListener quitButtonActionListener = new ActionListener() {

@@ -46,4 +46,22 @@ public enum Nucleotide {
          return null;
       }
    }
+   
+   public char toChar() {
+      switch (this) {
+      case ADENINE:
+         return 'A';
+      case CYTOSINE:
+         return 'C';
+      case GUANINE:
+         return 'G';
+      case THYMINE:
+         return 'T';
+      case UNKNOWN:
+        return '?';
+      default:
+         assert false;
+         return 0;
+      }
+   }
 }

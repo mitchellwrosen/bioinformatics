@@ -37,9 +37,20 @@ public class Sequence {
       r.close();
    }
    
-   // Slices this sequence and returns a new sequence of range [from, to)
+   /**
+    * Slices this sequence and returns a new sequence of range [from, to)
+    */
    public Sequence slice(int from, int to) {
       return new Sequence(nucleotides.subList(from, to));
+   }
+   
+   /**
+    * Get the number of nucleotides (including unknowns) in this sequence.
+    * 
+    * @return the size of this sequence.
+    */
+   public int size() {
+      return nucleotides.size();
    }
 
    /**
@@ -102,13 +113,20 @@ public class Sequence {
 
       return numGC / (double) nucleotides.size();
    }
-
-   /**
-    * Get the number of nucleotides (including unknowns) in this sequence.
-    * 
-    * @return the size of this sequence.
-    */
-   public int size() {
-      return nucleotides.size();
+   
+   public String toString() {
+      StringBuilder sb = new StringBuilder();
+      for (Nucleotide n : nucleotides)
+         sb.append(n.toChar());
+      return sb.toString();
+   }
+   
+   public String toProteinString() {
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < nucleotides.size()-2; ++i) {
+         Sequence codon = slice(i, i+3);
+         sb.append(AminoAcid.fromSequence(codon));
+      }
+      return sb.toString();
    }
 }
