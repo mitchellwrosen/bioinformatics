@@ -3,18 +3,20 @@ package model;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Getter;
+
 public class GeneIsoform extends GffFeature {
    protected Gene gene;
-   protected List<Exon> exons;
+   @Getter protected List<Exon> exons;
    
    public GeneIsoform(String chromosome, String source, String feature, int start, int stop,
          String score, boolean reverse, String frame, Map<String, String> attributes) {
       super(chromosome, source, feature, start, stop, score, reverse, frame, attributes);
       
-      if (isReverse())
-         start -= 3;
+      if (reverse)
+         this.start -= 3;
       else
-         stop += 3;
+         this.stop += 3;
    }
 
    public String getGeneId() {

@@ -1,6 +1,7 @@
 package model;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import model.Nucleotide;
 
 import org.junit.Test;
 

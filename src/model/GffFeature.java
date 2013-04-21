@@ -28,7 +28,7 @@ public class GffFeature {
       if (line == null)
          return null;
       
-      String[] tokens = line.split(" ");
+      String[] tokens = line.split("\\s+");
 
       String chromosome = tokens[0];
       String source = tokens[1];
@@ -36,7 +36,7 @@ public class GffFeature {
       int start = Integer.parseInt(tokens[3]);
       int stop = Integer.parseInt(tokens[4]);
       String score = tokens[5];
-      boolean reverse = tokens[6] == "-";
+      boolean reverse = tokens[6].equals("-");
       String frame = tokens[7];
 
       Map<String, String> attributes = new HashMap<String, String>();
@@ -58,5 +58,24 @@ public class GffFeature {
    
    public int size() {
       return start - stop;
+   }
+   
+   @Override
+   public String toString() {
+      StringBuilder sb = new StringBuilder();
+      sb.append(String.format("Chromosome: %s\n", chromosome));
+      sb.append(String.format("Source: %s\n", source));
+      sb.append(String.format("Feature: %s\n", feature));
+      sb.append(String.format("Start: %d\n", start));
+      sb.append(String.format("Stop: %d\n", stop));
+      sb.append(String.format("Score: %s\n", score));
+      sb.append(String.format("Reverse: %s\n", reverse));
+      sb.append(String.format("Frame: %s\n", frame));
+      
+      sb.append("Attributes: {\n");
+      for (Map.Entry<String, String> entry : attributes.entrySet())
+         sb.append(String.format("   %s: %s\n", entry.getKey(), entry.getValue()));
+      sb.append("}\n");
+      return sb.toString();
    }
 }

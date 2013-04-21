@@ -18,7 +18,7 @@ import lombok.Setter;
  * @version 20-Apr-2013
  */
 public class Gene {
-   @Getter          protected List<GeneIsoform> isoforms;
+   @Getter protected List<GeneIsoform> isoforms;
    @Getter @Setter  protected Sequence sequence;
    
    public Gene(GeneIsoform isoform) {
@@ -38,9 +38,9 @@ public class Gene {
       List<Gene> genes = new ArrayList<Gene>();
 
       GffFeature feature = GffFeature.fromLine(r.readLine());
-      for (; feature != null; feature = GffFeature.fromLine(r.readLine())) {
+      while (feature != null) {
          if (!(feature instanceof GeneIsoform)) {
-            System.err.println("Unexpected feature: " + feature.getFeature());
+            System.err.println("Unexpected feature: " + feature.toString());
             continue;
          }
          
@@ -82,13 +82,11 @@ public class Gene {
          isoform = (GeneIsoform) feature;
          if (!isoform.getGeneId().equals(geneId))
             break;
-         
+            
          exons = new ArrayList<Exon>();
          feature = addExonsFromGffFile(r, exons);
          isoform.setExons(exons);
          gene.addIsoform(isoform);
-         
-         feature = GffFeature.fromLine(r.readLine());
       }
       
       return feature;
@@ -102,13 +100,10 @@ public class Gene {
    protected static GffFeature addExonsFromGffFile(BufferedReader r, List<Exon> exons)
          throws IOException {
       GffFeature feature = GffFeature.fromLine(r.readLine());
-
-      while (feature != null) {
+      for (; feature != null; feature = GffFeature.fromLine(r.readLine())) {
          if (!(feature instanceof Exon))
             break;
          exons.add((Exon) feature);
-         
-         feature = GffFeature.fromLine(r.readLine());
       }
 
       return feature;

@@ -1,0 +1,12 @@
+fosmid10	 .	 mRNA	736 	4493	 .	 -	 .	 gene_id "alphaCop"; transcript_id "alphaCop-RA";
+fosmid10	 . 	 CDS	3548	4493	 .	 -	 .	 gene_id "alphaCop"; transcript_id "alphaCop-RA";
+fosmid10	 .	 CDS 	733 	3491	 .	 -	 .	 gene_id "alphaCop"; transcript_id "alphaCop-RA";
+fosmid10	 .	 mRNA 	736 	4493	 .	 -	 .	 gene_id "alphaCop"; transcript_id "alphaCop-RB";
+fosmid10	 .	 CDS 	3548 	4493	 .	 -	 .	 gene_id "alphaCop"; transcript_id "alphaCop-RB";
+fosmid10	 .	 CDS 	733 	3491	 .	 -	 .	 gene_id "alphaCop"; transcript_id "alphaCop-RB";
+fosmid10	 .	 mRNA	733 	4490	 .	 +	 .	 gene_id "alphaCop2"; transcript_id "alphaCop2-RA";
+fosmid10	 . 	 CDS	3548	4493	 .	 +	 .	 gene_id "alphaCop2"; transcript_id "alphaCop2-RA";
+fosmid10	 .	 CDS 	733 	3491	 .	 +	 .	 gene_id "alphaCop2"; transcript_id "alphaCop2-RA";
+fosmid10	 .	 mRNA 	733 	4490	 .	 +	 .	 gene_id "alphaCop2"; transcript_id "alphaCop2-RB";
+fosmid10	 .	 CDS 	3548 	4493	 .	 +	 .	 gene_id "alphaCop2"; transcript_id "alphaCop2-RB";
+fosmid10	 .	 CDS 	733 	3491	 .	 +	 .	 gene_id "alphaCop2"; transcript_id "alphaCop2-RB";
