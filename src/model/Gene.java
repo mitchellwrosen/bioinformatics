@@ -1,68 +1,162 @@
 package model;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import utils.Folder;
-import static utils.Functional.*;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * A single Gene.
+ * A single Gene, represented by one or more isoforms.
  * 
  * @author Mitchell Rosen
  * @version 20-Apr-2013
  */
 public class Gene {
-   protected String name;
-   protected Sequence sequence;
-   protected int from; // inclusive
-   protected int to; // exclusive
-   protected boolean reverse; // Relative to |sequence|
-   protected List<GeneIsoform> isoforms;
+   @Getter          protected List<GeneIsoform> isoforms;
+   @Getter @Setter  protected Sequence sequence;
    
-   public Gene() {
-      // TODO
+   public Gene(GeneIsoform isoform) {
+      isoforms = new ArrayList<GeneIsoform>();
+      isoforms.add(isoform);
    }
    
-   // Getters & Setters
-   public String            getName()     { return name; }
-   public Sequence          getSequence() { return sequence; }
-   public int               getFrom()     { return from; }
-   public int               getTo()       { return to; }
-   public List<GeneIsoform> getIsoforms() { return isoforms; }
+   public void addIsoform(GeneIsoform isoform) {
+      isoforms.add(isoform);
+   }
+
+   /**
+    * Parses a list of Genes from a GFF file.
+    */
+   public static List<Gene> fromGffFile(String filename) throws Exception {
+      BufferedReader r = new BufferedReader(new FileReader(filename));
+      List<Gene> genes = new ArrayList<Gene>();
+
+      GffFeature feature = GffFeature.fromLine(r.readLine());
+      for (; feature != null; feature = GffFeature.fromLine(r.readLine())) {
+         if (!(feature instanceof GeneIsoform)) {
+            System.err.println("Unexpected feature: " + feature.getFeature());
+            continue;
+         }
+         
+         GeneIsoform isoform = (GeneIsoform) feature;
+         Gene gene = new Gene(isoform);
+         feature = addIsoformsFromGffFile(r, isoform, gene);
+
+         genes.add(gene);
+      }
+      r.close();
+
+      return genes;
+   }
+
+   /**
+    * Helper to fromGffFile. Reads features from |r|, adding isoforms to
+    * |gene|'s isoforms until a feature is encountered that is not an isoform of
+    * the same gene. Returns this feature, or null if EOF is encountered.
+    * 
+    * @throws IOException
+    */
+   protected static GffFeature addIsoformsFromGffFile(BufferedReader r, GeneIsoform isoform, Gene gene) 
+         throws IOException {
+      List<Exon> exons;
+      GffFeature feature;
+      
+      String geneId = isoform.getGeneId();
+      
+      // Fill out the current Isoform with Exons (gene already initialized with it).
+      exons = new ArrayList<Exon>();
+      feature = addExonsFromGffFile(r, exons);
+      isoform.setExons(exons);
+      
+      // Fill out the rest of the Isoforms.
+      while (feature != null) {
+         if (!(feature instanceof GeneIsoform))
+            break;
+         
+         isoform = (GeneIsoform) feature;
+         if (!isoform.getGeneId().equals(geneId))
+            break;
+         
+         exons = new ArrayList<Exon>();
+         feature = addExonsFromGffFile(r, exons);
+         isoform.setExons(exons);
+         gene.addIsoform(isoform);
+         
+         feature = GffFeature.fromLine(r.readLine());
+      }
+      
+      return feature;
+   }
+
+   /**
+    * Helper to addIsoformsFromGffFile. Reads features from |r|, adding Exons to
+    * |exons|, until a feature is encountered that is not an Exon. Returns this
+    * feature, or null if EOF is encountered.
+    */
+   protected static GffFeature addExonsFromGffFile(BufferedReader r, List<Exon> exons)
+         throws IOException {
+      GffFeature feature = GffFeature.fromLine(r.readLine());
+
+      while (feature != null) {
+         if (!(feature instanceof Exon))
+            break;
+         exons.add((Exon) feature);
+         
+         feature = GffFeature.fromLine(r.readLine());
+      }
+
+      return feature;
+   }
+   
+   public String getId() {
+      return isoforms.get(0).getGeneId();
+   }
+   
+   public int getStart() {
+      return isoforms.get(0).getStart();
+   }
+   
+   public int getStop() {
+      return isoforms.get(0).getStop();
+   }
 
    public int numIsoforms() {
       return isoforms.size();
    }
-   
+
    public int numExons() {
-      return foldl(new Folder<Integer, GeneIsoform>() {
-         public Integer execute(Integer n, GeneIsoform iso) {
-            return n + iso.numExons();
-         }
-      }, 0, isoforms);
+      int size = 0;
+      for (GeneIsoform iso : isoforms)
+         size += iso.numExons();
+      return size;
    }
-   
+
    public int numIntrons() {
-      return foldl(new Folder<Integer, GeneIsoform>() {
-         public Integer execute(Integer n, GeneIsoform iso) {
-            return n + iso.numIntrons();
-         }
-      }, 0, isoforms);
+      int size = 0;
+      for (GeneIsoform iso : isoforms)
+         size += iso.numIntrons();
+      return size;
    }
 
    public int size() {
-      return to - from;
+      return isoforms.get(0).size();
    }
 
-   // Gets the CDS size of this Gene by including the CDS regions of each
-   // isoform, taking care not to double count overlapping regions.
+   /**
+    * Gets the CDS size of this Gene by including the CDS regions of each
+    * isoform, taking care not to double count overlapping regions.
+    */
    public int cdsSize() {
       Set<Integer> set = new HashSet<Integer>();
       for (GeneIsoform isoform : isoforms) {
          for (Exon exon : isoform.exons) {
-            for (int i = exon.from; i <= exon.to; ++i)
+            for (int i = exon.getStart(); i <= exon.getStop(); ++i)
                set.add(i);
          }
       }
@@ -73,21 +167,19 @@ public class Gene {
     * Gets the total Exon size of all Isoforms, overlap included.
     */
    public int exonSize() {
-      return foldl(new Folder<Integer, GeneIsoform>() {
-         public Integer execute(Integer n, GeneIsoform iso) {
-            return n + iso.exonSize();
-         }
-      }, 0, isoforms);
+      int size = 0;
+      for (GeneIsoform iso : isoforms)
+         size += iso.exonSize();
+      return size;
    }
-   
+
    /**
     * Gets the total Intron size of all Isoforms, overlap included.
     */
    public int intronSize() {
-      return foldl(new Folder<Integer, GeneIsoform>() {
-         public Integer execute(Integer n, GeneIsoform iso) {
-            return n + iso.intronSize();
-         };
-      }, 0, isoforms);
+      int size = 0;
+      for (GeneIsoform iso : isoforms)
+         size += iso.intronSize();
+      return size;
    }
 }

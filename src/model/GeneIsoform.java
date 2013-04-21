@@ -1,29 +1,43 @@
 package model;
 
 import java.util.List;
+import java.util.Map;
 
-import utils.Folder;
-import static utils.Functional.*;
-
-public class GeneIsoform {
+public class GeneIsoform extends GffFeature {
    protected Gene gene;
-   protected String name;
    protected List<Exon> exons;
    
-   public Gene   getGene() { return gene; }
-   public String getName() { return name; }
+   public GeneIsoform(String chromosome, String source, String feature, int start, int stop,
+         String score, boolean reverse, String frame, Map<String, String> attributes) {
+      super(chromosome, source, feature, start, stop, score, reverse, frame, attributes);
+      
+      if (isReverse())
+         start -= 3;
+      else
+         stop += 3;
+   }
+
+   public String getGeneId() {
+      return attributes.get("gene_id");
+   }
+   
+   public String getIsoformName() {
+      return attributes.get("transcript_id");
+   }
    
    /**
     * Gets the Sequence that this Isoform's coding regions consist of.
     */
    public Sequence getSequence() {
-      return foldl(new Folder<Sequence, Exon>() {
-         public Sequence execute(Sequence s, Exon e) {
-            Sequence exonSequence = gene.getSequence().slice(e.from, e.to);
-            return s.concat(exonSequence);
-         }
-      }, new Sequence(), exons);
+      Sequence s = new Sequence();
+      for (Exon e : exons) {
+         Sequence exonSequence = gene.getSequence().slice(e.getStart(), e.getStop());
+         s = s.concat(exonSequence);
+      }
+      return s;
    }
+   
+   public void setExons(List<Exon> exons) { this.exons = exons; }
    
    public int numExons() {
       return exons.size();
@@ -34,17 +48,16 @@ public class GeneIsoform {
    }
 
    public int exonSize() {
-      return foldl(new Folder<Integer, Exon>() {
-         public Integer execute(Integer n, Exon e) {
-            return n + e.size();
-         }
-      }, 0, exons);
+      int size = 0;
+      for (Exon e : exons)
+         size += e.size();
+      return size;
    }
    
    public int intronSize() {
       int size = 0;
       for (int i = 0; i < exons.size()-1; ++i)
-         size += exons.get(i+1).from - exons.get(i).to;
+         size += exons.get(i+1).getStart() - exons.get(i).getStop();
       return size;
    }
 }

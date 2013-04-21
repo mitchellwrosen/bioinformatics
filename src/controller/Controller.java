@@ -1,9 +1,6 @@
 package controller;
 
-import static utils.Functional.foldl;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import model.GCContentInfo;
@@ -11,13 +8,12 @@ import model.Gene;
 import model.GeneIsoform;
 import model.GeneUtils;
 import model.Sequence;
-import utils.Folder;
 
 /**
  * The Controller
  * 
  * @author MitchellRosen
- * @version 20-Apr-2013
+ * @version 21-Apr-2013
  */
 public class Controller {
    protected String mSequenceFile;
@@ -26,21 +22,18 @@ public class Controller {
    protected Sequence mSequence;
    protected List<Gene> mGenes;
 
-   public Controller() {
-      mSequenceFile = new String();
-      mGffFile = new String();
-   }
-
    public void useSequenceFile(String filename) throws IOException, IllegalArgumentException {
       if (!mSequenceFile.equals(filename)) {
-         mSequenceFile = new String(filename);
+         mSequenceFile = filename;
          mSequence = new Sequence(mSequenceFile);
       }
    }
 
-   public void useGffFile(String filename) throws IOException {
-      // TODO
-      mGenes = new ArrayList<Gene>();
+   public void useGffFile(String filename) throws Exception {
+      if (!mGffFile.equals(filename)) {
+         mGffFile = filename;
+         mGenes = Gene.fromGffFile(mGffFile);
+      }
    }
 
    /**
@@ -125,22 +118,17 @@ public class Controller {
    }
 
    public String getProteins() {
-      return foldl(new Folder<StringBuilder, Gene>() {
-         public StringBuilder execute(StringBuilder sb, Gene g) {
-            final String geneName = g.getName();
+      StringBuilder sb = new StringBuilder("gene name, isoform name, protein");
 
-            String isos = foldl(new Folder<StringBuilder, GeneIsoform>() {
-               public StringBuilder execute(StringBuilder sb, GeneIsoform iso) {
-                  sb.append(geneName + ", ");
-                  sb.append(iso.getName() + ", ");
-                  sb.append(iso.getSequence().toProteinString() + "\n");
-                  return sb;
-               }
-            }, new StringBuilder(), g.getIsoforms()).toString();
-
-            sb.append(isos);
-            return sb;
+      for (Gene g : mGenes) {
+         String geneName = g.getId();
+         for (GeneIsoform iso : g.getIsoforms()) {
+            sb.append(geneName + ", ");
+            sb.append(iso.getIsoformName() + ", ");
+            sb.append(iso.getSequence().toProteinString() + "\n");
          }
-      }, new StringBuilder("gene name, isoform name, protein"), mGenes).toString();
+      }
+
+      return sb.toString();
    }
 }

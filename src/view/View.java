@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.FileWriter;
 
 import javax.swing.Box;
@@ -63,7 +62,7 @@ public class View extends JDialog {
       // Took this out of initializeControlsBox() for now, since the tabbed pane
       // change listener needs to update it. Will refactor later.
       mRunButton = new JButton("Run");
-      
+
       Box sequenceBox = initializeSequenceBox();
       initializeGffBox(); // Box is member variable (for hiding)
       initializeTabbedPane(); // Tabbed pane is member variable
@@ -82,8 +81,7 @@ public class View extends JDialog {
       mValidSequenceFile = false;
 
       mBrowseSequenceButton = new JButton("Browse");
-      mBrowseSequenceButton
-            .addActionListener(browseSequenceButtonActionListener);
+      mBrowseSequenceButton.addActionListener(browseSequenceButtonActionListener);
 
       Box fileBox = Box.createHorizontalBox();
       fileBox.add(new JLabel("Sequence File:"));
@@ -96,10 +94,9 @@ public class View extends JDialog {
       mGffFile = new JTextField(20);
       mGffFile.setEditable(false);
       mValidGffFile = false;
-      
+
       mBrowseGffButton = new JButton("Browse");
-      mBrowseGffButton
-            .addActionListener(browseGffButtonActionListener);
+      mBrowseGffButton.addActionListener(browseGffButtonActionListener);
 
       mGffFileBox = Box.createHorizontalBox();
       mGffFileBox.add(new JLabel("GFF File:"));
@@ -107,17 +104,17 @@ public class View extends JDialog {
       mGffFileBox.add(mBrowseGffButton);
       mGffFileBox.setVisible(false);
    }
-   
+
    protected void initializeTabbedPane() {
       mGcContentInfoPanel = new GCContentInfoPanel();
       mCalculationsPanel = new CalculationsPanel();
       mProteinsPanel = new ProteinsPanel();
-      
+
       mTabbedPane = new JTabbedPane();
       mTabbedPane.addChangeListener(new ChangeListener() {
          public void stateChanged(ChangeEvent e) {
             updateRunButton();
-            
+
             switch (mTabbedPane.getSelectedIndex()) {
             case GC_CONTENT_TAB:
                mGffFileBox.setVisible(false);
@@ -131,7 +128,7 @@ public class View extends JDialog {
             }
          }
       });
-      
+
       mTabbedPane.addTab("GC Content", mGcContentInfoPanel);
       mTabbedPane.addTab("Calculations", mCalculationsPanel);
       mTabbedPane.addTab("Proteins", mProteinsPanel);
@@ -146,13 +143,13 @@ public class View extends JDialog {
 
       mQuitButton = new JButton("Quit");
       mQuitButton.addActionListener(quitButtonActionListener);
-      
+
       Box box = Box.createHorizontalBox();
       box.add(mRunButton);
       box.add(mSaveButton);
       box.add(mQuitButton);
       box.setAlignmentX(Component.CENTER_ALIGNMENT);
-      
+
       return box;
    }
 
@@ -175,7 +172,7 @@ public class View extends JDialog {
    }
 
    // Action listeners ////////////////////////////////////////////////////////
-   
+
    protected ActionListener browseSequenceButtonActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
          JFileChooser chooser = new JFileChooser();
@@ -199,7 +196,7 @@ public class View extends JDialog {
          }
       }
    };
-   
+
    protected ActionListener browseGffButtonActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
          JFileChooser chooser = new JFileChooser();
@@ -223,12 +220,11 @@ public class View extends JDialog {
       }
    };
 
-
    protected ActionListener runButtonActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
          if (mSequenceFile.getText().equals("")) {
-            JOptionPane.showMessageDialog(null, "No FASTA file was selected",
-                  "Invalid File", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "No FASTA file was selected", "Invalid File",
+                  JOptionPane.ERROR_MESSAGE);
             return;
          }
 
@@ -249,13 +245,10 @@ public class View extends JDialog {
    };
 
    protected void runGCContent() {
-      mGcContentInfoPanel.setDisplay(
-         controller.getGcContent(
-            mGcContentInfoPanel.getStartPos(), mGcContentInfoPanel.getEndPos(),
-            mGcContentInfoPanel.getUseSlidingWindow(),
-            mGcContentInfoPanel.getWinSize(),
-            mGcContentInfoPanel.getShiftIncr()));
-            
+      mGcContentInfoPanel.setDisplay(controller.getGcContent(mGcContentInfoPanel.getStartPos(),
+            mGcContentInfoPanel.getEndPos(), mGcContentInfoPanel.getUseSlidingWindow(),
+            mGcContentInfoPanel.getWinSize(), mGcContentInfoPanel.getShiftIncr()));
+
    }
 
    protected void runCalculations() {
@@ -302,12 +295,11 @@ public class View extends JDialog {
    protected void saveProteins() {
       saveString(mProteinsPanel.getDisplay());
    }
-   
-   
+
    protected void saveString(String data) {
       if (data.equals("")) {
-         JOptionPane.showMessageDialog(null, "No output to save",
-               "Empty output", JOptionPane.ERROR_MESSAGE);
+         JOptionPane.showMessageDialog(null, "No output to save", "Empty output",
+               JOptionPane.ERROR_MESSAGE);
          return;
       }
 
@@ -320,13 +312,11 @@ public class View extends JDialog {
             writer.write(data);
             writer.close();
          } catch (java.io.IOException ioErr) {
-            JOptionPane.showMessageDialog(null,
-                  "Encountered unknown error when saving output",
+            JOptionPane.showMessageDialog(null, "Encountered unknown error when saving output",
                   "Unable to save output", JOptionPane.ERROR_MESSAGE);
          }
       } else if (ret == JFileChooser.ERROR_OPTION) {
-         JOptionPane.showMessageDialog(null,
-               "Encountered unknown error when saving output",
+         JOptionPane.showMessageDialog(null, "Encountered unknown error when saving output",
                "Unable to save output", JOptionPane.ERROR_MESSAGE);
       }
    }

@@ -44,7 +44,7 @@ public class GeneUtils {
    public static double avgIntergenicRegionSize(List<Gene> genes) {
       int size = 0;
       for (int i = 0; i < genes.size()-1; ++i)
-         size += genes.get(i+1).getFrom() - genes.get(i).getTo();
+         size += genes.get(i+1).getStart() - genes.get(i).getStop();
       return size;
    }
    

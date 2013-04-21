@@ -1,22 +1,22 @@
 package model;
 
-public class GCContentInfo {
-   // Note that from is indexed in array format. Must convert any time a user
-   // sees the value.
-   public int from;
-   // to is exclusively indexed in array format, which is fine because it is the
-   // same as inclusive when indexing from 1.
-   public int to;
-   public double min;
-   public double max;
+import lombok.Getter;
+import lombok.Setter;
 
-   /**
-    * Gives a 4-tuple description of this {@link GCContentInfo} as a String.
-    * 
-    * @return the description of this {@link GCContentInfo}.
-    */
+/**
+ * A simple 4-tuple representing a frame of GC content information.
+ * 
+ * @author Mitchell Rosen
+ * @version 21-Apr-2013
+ */
+public class GCContentInfo {
+   @Getter @Setter protected int start; // inclusive
+   @Getter @Setter protected int stop;  // exclusive
+   @Getter protected double min;
+   @Getter protected double max;
+
    @Override
    public String toString() {
-      return String.format("%d,%d,%.2f%%,%.2f%%", from + 1, to, min * 100, max * 100);
+      return String.format("%d,%d,%.2f%%,%.2f%%", start+1, stop, min*100, max*100);
    }
 }

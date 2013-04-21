@@ -1,10 +1,10 @@
 package model;
 
-public class Exon {
-   public int from; // inclusive
-   public int to; // exculsive
+import java.util.Map;
 
-   public int size() {
-      return to - from;
+public class Exon extends GffFeature {
+   public Exon(String chromosome, String source, String feature, int start, int stop, String score,
+         boolean reverse, String frame, Map<String, String> attributes) {
+      super(chromosome, source, feature, start, stop, score, reverse, frame, attributes);
    }
 }

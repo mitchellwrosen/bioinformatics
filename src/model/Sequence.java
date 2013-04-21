@@ -6,13 +6,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+
 /**
  * A Sequence of Nucleotides.
  * 
  * @author Mitchell Rosen
  */
 public class Sequence {
-   protected List<Nucleotide> nucleotides;
+   @Getter protected List<Nucleotide> nucleotides;
 
    public Sequence() {
       this.nucleotides = new ArrayList<Nucleotide>();
@@ -40,8 +42,6 @@ public class Sequence {
 
       r.close();
    }
-   
-   public List<Nucleotide> getNucleotides() { return nucleotides; }
    
    /**
     * Get the number of nucleotides (including unknowns) in this sequence.
@@ -86,9 +86,9 @@ public class Sequence {
       GCContentInfo[] gc = new GCContentInfo[histogramLen];
       for (int i = 0; i < histogramLen; ++i) {
          gc[i] = new GCContentInfo();
-         gc[i].from = i * shiftLen;
-         gc[i].to = Math.min(nucleotides.size(), i * shiftLen + windowSize);
-         Sequence slice = slice(gc[i].from, gc[i].to);
+         gc[i].setStart(i * shiftLen);
+         gc[i].setStop(Math.min(nucleotides.size(), i * shiftLen + windowSize));
+         Sequence slice = slice(gc[i].getStart(), gc[i].getStop());
          gc[i].min = slice.gcContentMin();
          gc[i].max = slice.gcContentMax();
       }
