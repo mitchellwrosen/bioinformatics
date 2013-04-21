@@ -31,6 +31,7 @@ public class View extends JDialog {
 
    protected Container mPane;
 
+   protected Box mSequenceFileBox;
    protected JTextField mSequenceFile;
    protected boolean mValidSequenceFile;
    protected JButton mBrowseSequenceButton;
@@ -63,19 +64,19 @@ public class View extends JDialog {
       // change listener needs to update it. Will refactor later.
       mRunButton = new JButton("Run");
 
-      Box sequenceBox = initializeSequenceBox();
+      initializeSequenceBox(); // Box is member variable (for hiding)
       initializeGffBox(); // Box is member variable (for hiding)
       initializeTabbedPane(); // Tabbed pane is member variable
       Box controlsBox = initializeControlsBox();
 
-      mPane.add(sequenceBox);
+      mPane.add(mSequenceFileBox);
       mPane.add(mGffFileBox);
       mPane.add(mTabbedPane);
       mPane.add(controlsBox);
       mPane.validate();
    }
 
-   protected Box initializeSequenceBox() {
+   protected void initializeSequenceBox() {
       mSequenceFile = new JTextField(20);
       mSequenceFile.setEditable(false);
       mValidSequenceFile = false;
@@ -83,11 +84,10 @@ public class View extends JDialog {
       mBrowseSequenceButton = new JButton("Browse");
       mBrowseSequenceButton.addActionListener(browseSequenceButtonActionListener);
 
-      Box fileBox = Box.createHorizontalBox();
-      fileBox.add(new JLabel("Sequence File:"));
-      fileBox.add(mSequenceFile);
-      fileBox.add(mBrowseSequenceButton);
-      return fileBox;
+      mSequenceFileBox = Box.createHorizontalBox();
+      mSequenceFileBox.add(new JLabel("Sequence File:"));
+      mSequenceFileBox.add(mSequenceFile);
+      mSequenceFileBox.add(mBrowseSequenceButton);
    }
 
    protected void initializeGffBox() {
@@ -117,10 +117,15 @@ public class View extends JDialog {
 
             switch (mTabbedPane.getSelectedIndex()) {
             case GC_CONTENT_TAB:
+               mSequenceFileBox.setVisible(true);
                mGffFileBox.setVisible(false);
                break;
             case CALCULATIONS_TAB:
+               mSequenceFileBox.setVisible(false);
+               mGffFileBox.setVisible(true);
+               break;
             case PROTEINS_TAB:
+               mSequenceFileBox.setVisible(true);
                mGffFileBox.setVisible(true);
                break;
             default:
@@ -154,8 +159,10 @@ public class View extends JDialog {
    }
 
    /**
-    * The Run button is enabled conditionally on valid Sequence/GFF files. Only
-    * a valid Sequence file is required for the GC content tab.
+    * The Run button is enabled conditionally on valid Sequence/GFF files. 
+    * GC Content: Requires valid sequence file
+    * Calculations: Requires valid GFF file
+    * Proteins: Requires both
     */
    protected void updateRunButton() {
       switch (mTabbedPane.getSelectedIndex()) {
@@ -163,6 +170,8 @@ public class View extends JDialog {
          mRunButton.setEnabled(mValidSequenceFile);
          break;
       case CALCULATIONS_TAB:
+         mRunButton.setEnabled(mValidGffFile);
+         break;
       case PROTEINS_TAB:
          mRunButton.setEnabled(mValidSequenceFile && mValidGffFile);
          break;
