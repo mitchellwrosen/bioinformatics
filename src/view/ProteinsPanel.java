@@ -24,4 +24,6 @@ public class ProteinsPanel extends JPanel {
    }
    
    public String getDisplay() { return mDisplay.getText(); }
+   
+   public void setDisplay(String text) { mDisplay.setText(text); }
 }

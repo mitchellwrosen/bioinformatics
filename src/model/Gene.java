@@ -26,10 +26,11 @@ public class Gene {
    }
    
    // Getters & Setters
-   public String   getName()     { return name; }
-   public Sequence getSequence() { return sequence; }
-   public int      getFrom()     { return from; }
-   public int      getTo()       { return to; }
+   public String            getName()     { return name; }
+   public Sequence          getSequence() { return sequence; }
+   public int               getFrom()     { return from; }
+   public int               getTo()       { return to; }
+   public List<GeneIsoform> getIsoforms() { return isoforms; }
 
    public int numIsoforms() {
       return isoforms.size();

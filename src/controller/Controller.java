@@ -1,14 +1,17 @@
 package controller;
 
+import static utils.Functional.foldl;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import model.GCContentInfo;
 import model.Gene;
-import model.Gene.Isoform;
+import model.GeneIsoform;
 import model.GeneUtils;
 import model.Sequence;
+import utils.Folder;
 
 /**
  * The Controller
@@ -19,22 +22,22 @@ import model.Sequence;
 public class Controller {
    protected String mSequenceFile;
    protected String mGffFile;
-   
+
    protected Sequence mSequence;
    protected List<Gene> mGenes;
-   
+
    public Controller() {
       mSequenceFile = new String();
-      mGffFile= new String();
+      mGffFile = new String();
    }
-   
+
    public void useSequenceFile(String filename) throws IOException, IllegalArgumentException {
       if (!mSequenceFile.equals(filename)) {
          mSequenceFile = new String(filename);
          mSequence = new Sequence(mSequenceFile);
       }
    }
-   
+
    public void useGffFile(String filename) throws IOException {
       // TODO
       mGenes = new ArrayList<Gene>();
@@ -61,8 +64,8 @@ public class Controller {
     *         an appropriate error message detailing why one could not be
     *         provided.
     */
-   public String getGcContent(String startPos, String endPos,
-         boolean useSlidingWindow, String winSize, String shiftIncr) {
+   public String getGcContent(String startPos, String endPos, boolean useSlidingWindow,
+         String winSize, String shiftIncr) {
       StringBuilder sb = new StringBuilder();
       sb.append("Start, stop, min %, max %\n");
 
@@ -72,62 +75,72 @@ public class Controller {
       if (endPos.isEmpty())
          endPos = Integer.toString(mSequence.size());
 
-      mSequence = mSequence.slice(Integer.parseInt(startPos) - 1,
-            Integer.parseInt(endPos));
+      mSequence = mSequence.slice(Integer.parseInt(startPos) - 1, Integer.parseInt(endPos));
 
       if (useSlidingWindow) {
-         GCContentInfo[] gcs = mSequence.gcContentHistogram(
-               Integer.parseInt(winSize), Integer.parseInt(shiftIncr));
+         GCContentInfo[] gcs = mSequence.gcContentHistogram(Integer.parseInt(winSize),
+               Integer.parseInt(shiftIncr));
 
          for (GCContentInfo gc : gcs)
             sb.append(gc + "\n");
       } else {
-         sb.append(String.format("%5d, %5d, %5.2f%%, %5.2f%%",
-               Integer.parseInt(startPos), Integer.parseInt(endPos),
-               mSequence.gcContentMin() * 100, mSequence.gcContentMax() * 100));
+         sb.append(String.format("%5d, %5d, %5.2f%%, %5.2f%%", Integer.parseInt(startPos),
+               Integer.parseInt(endPos), mSequence.gcContentMin() * 100,
+               mSequence.gcContentMax() * 100));
       }
 
       return sb.toString();
    }
-   
+
    public String avgGeneSize() {
       return String.format("%.2f", GeneUtils.avgGeneSize(mGenes));
    }
-   
+
    public String avgCdsSize() {
       return String.format("%.2f", GeneUtils.avgCdsSize(mGenes));
    }
-   
+
    public String avgExonSize() {
       return String.format("%.2f", GeneUtils.avgExonSize(mGenes));
    }
-   
+
    public String avgIntronSize() {
       return String.format("%.2f", GeneUtils.avgIntronSize(mGenes));
    }
-   
+
    public String avgIntergenicRegionSize() {
       return String.format("%.2f", GeneUtils.avgIntergenicRegionSize(mGenes));
    }
-   
+
    public String cdsDensity() {
       return String.format("%.2f", GeneUtils.cdsDensity(mGenes));
    }
-   
+
    public String genesPerKilobase() {
       return String.format("%.2f", GeneUtils.genesPerKilobase(mGenes));
    }
-   
+
    public String kilobasesPerGene() {
       return String.format("%.2f", GeneUtils.kilobasesPerGene(mGenes));
    }
-   
+
    public String getProteins() {
-      StringBuilder sb = new StringBuilder();
-      for (Gene g : mGenes) {
-         for (Isoform i : g.getIsoforms()) {
-            
+      return foldl(new Folder<StringBuilder, Gene>() {
+         public StringBuilder execute(StringBuilder sb, Gene g) {
+            final String geneName = g.getName();
+
+            String isos = foldl(new Folder<StringBuilder, GeneIsoform>() {
+               public StringBuilder execute(StringBuilder sb, GeneIsoform iso) {
+                  sb.append(geneName + ", ");
+                  sb.append(iso.getName() + ", ");
+                  sb.append(iso.getSequence().toProteinString() + "\n");
+                  return sb;
+               }
+            }, new StringBuilder(), g.getIsoforms()).toString();
+
+            sb.append(isos);
+            return sb;
          }
-      }
+      }, new StringBuilder("gene name, isoform name, protein"), mGenes).toString();
    }
 }

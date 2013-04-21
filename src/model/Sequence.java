@@ -14,6 +14,10 @@ import java.util.List;
 public class Sequence {
    protected List<Nucleotide> nucleotides;
 
+   public Sequence() {
+      this.nucleotides = new ArrayList<Nucleotide>();
+   }
+   
    public Sequence(List<Nucleotide> nucleotides) {
       this.nucleotides = nucleotides;
    }
@@ -37,12 +41,7 @@ public class Sequence {
       r.close();
    }
    
-   /**
-    * Slices this sequence and returns a new sequence of range [from, to)
-    */
-   public Sequence slice(int from, int to) {
-      return new Sequence(nucleotides.subList(from, to));
-   }
+   public List<Nucleotide> getNucleotides() { return nucleotides; }
    
    /**
     * Get the number of nucleotides (including unknowns) in this sequence.
@@ -51,6 +50,22 @@ public class Sequence {
     */
    public int size() {
       return nucleotides.size();
+   }
+   
+   /**
+    * Slices this sequence and returns a new sequence of range [from, to)
+    */
+   public Sequence slice(int from, int to) {
+      return new Sequence(nucleotides.subList(from, to));
+   }
+   
+   /**
+    * Concatenates a sequence onto this one, returns a new Sequence.
+    */
+   public Sequence concat(Sequence s) {
+      List<Nucleotide> nucleotides = new ArrayList<Nucleotide>(this.nucleotides);
+      nucleotides.addAll(s.getNucleotides());
+      return new Sequence(nucleotides);
    }
 
    /**

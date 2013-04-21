@@ -271,7 +271,6 @@ public class View extends JDialog {
 
    protected void runProteins() {
       mProteinsPanel.setDisplay(controller.getProteins());
-      // TODO
    }
 
    protected ActionListener saveButtonActionListener = new ActionListener() {
