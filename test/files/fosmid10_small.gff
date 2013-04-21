@@ -1,0 +1,8 @@
+fosmid10	.	mRNA	5056	5448	.	+	.	gene_id "CG13919"; transcript_id "CG13919-RA";
+fosmid10	.	CDS	5056	5451	.	+	.	gene_id "CG13919"; transcript_id "CG13919-RA";
+fosmid10	.	mRNA	7419	8057	.	+	.	gene_id "Bro"; transcript_id "Bro-RB";
+fosmid10	.	CDS	7419	8060	.	+	.	gene_id "Bro"; transcript_id "Bro-RB";
+fosmid10	.	mRNA	8876	10641	.	+	.	gene_id "CG13920"; transcript_id "CG13920-RA";
+fosmid10	.	CDS	8876	8998	.	+	.	gene_id "CG13920"; transcript_id "CG13920-RA";
+fosmid10	.	CDS	10225	10363	.	+	.	gene_id "CG13920"; transcript_id "CG13920-RA";
+fosmid10	.	CDS	10424	10644	.	+	.	gene_id "CG13920"; transcript_id "CG13920-RA";
