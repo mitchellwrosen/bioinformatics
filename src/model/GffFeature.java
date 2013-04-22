@@ -100,6 +100,7 @@ public class GffFeature {
       source = source2;
       feature = feature2;
       start = start2;
+      stop = stop2;
       score = score2;
       reverse = reverse2;
       frame = frame2;
