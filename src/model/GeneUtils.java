@@ -45,7 +45,7 @@ public class GeneUtils {
       int size = 0;
       for (int i = 0; i < genes.size()-1; ++i)
          size += genes.get(i+1).getStart() - genes.get(i).getStop();
-      return size;
+      return (double) size / (genes.size()-1);
    }
    
    /**
