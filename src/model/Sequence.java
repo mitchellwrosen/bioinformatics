@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -149,5 +150,11 @@ public class Sequence {
 
    public void setNucleotides(List<Nucleotide> nucleotides) {
       this.nucleotides = nucleotides;
+   }
+
+   public Sequence reverseCompliment() {
+      List<Nucleotide> toReverse = new ArrayList<Nucleotide>(nucleotides);
+      Collections.reverse(toReverse);
+      return new Sequence(toReverse);
    }
 }
