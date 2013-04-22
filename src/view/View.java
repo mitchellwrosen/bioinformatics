@@ -121,9 +121,6 @@ public class View extends JDialog {
                mGffFileBox.setVisible(false);
                break;
             case CALCULATIONS_TAB:
-               mSequenceFileBox.setVisible(false);
-               mGffFileBox.setVisible(true);
-               break;
             case PROTEINS_TAB:
                mSequenceFileBox.setVisible(true);
                mGffFileBox.setVisible(true);
@@ -170,8 +167,6 @@ public class View extends JDialog {
          mRunButton.setEnabled(mValidSequenceFile);
          break;
       case CALCULATIONS_TAB:
-         mRunButton.setEnabled(mValidGffFile);
-         break;
       case PROTEINS_TAB:
          mRunButton.setEnabled(mValidSequenceFile && mValidGffFile);
          break;
