@@ -132,7 +132,7 @@ public class Controller {
    }
 
    public String getProteins() {
-      StringBuilder sb = new StringBuilder("gene name, isoform name, protein");
+      StringBuilder sb = new StringBuilder("gene name, isoform name, protein\n");
 
       for (Gene g : mGenes) {
          String geneName = g.getId();

@@ -6,15 +6,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
-
 /**
  * A Sequence of Nucleotides.
  * 
  * @author Mitchell Rosen
  */
 public class Sequence {
-   @Getter protected List<Nucleotide> nucleotides;
+   protected List<Nucleotide> nucleotides;
 
    public Sequence() {
       this.nucleotides = new ArrayList<Nucleotide>();
@@ -143,5 +141,13 @@ public class Sequence {
          sb.append(AminoAcid.fromSequence(codon));
       }
       return sb.toString();
+   }
+
+   public List<Nucleotide> getNucleotides() {
+      return nucleotides;
+   }
+
+   public void setNucleotides(List<Nucleotide> nucleotides) {
+      this.nucleotides = nucleotides;
    }
 }
