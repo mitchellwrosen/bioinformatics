@@ -10,6 +10,16 @@ import java.util.Map;
  * @version 20-Apr-2013
  */
 public class GffFeature {
+   /**
+    * Dummy class for unknown GffFeatures.
+    */
+   public static class Unknown extends GffFeature {
+      public Unknown(String chromosome, String source, String feature, int start, int stop,
+            String score, boolean reverse, String frame, Map<String, String> attributes) {
+         super(chromosome, source, feature, start, stop, score, reverse, frame, attributes);
+      }
+   }
+   
    protected String chromosome; // chromosome/scaffold
 
    protected String source; // name of program that generated this feature
@@ -93,18 +103,18 @@ public class GffFeature {
       this.attributes = attributes;
    }
 
-   public GffFeature(String chromosome2, String source2, String feature2,
-         int start2, int stop2, String score2, boolean reverse2, String frame2,
-         Map<String, String> attributes2) {
-      chromosome = chromosome2;
-      source = source2;
-      feature = feature2;
-      start = start2;
-      stop = stop2;
-      score = score2;
-      reverse = reverse2;
-      frame = frame2;
-      attributes = attributes2;
+   public GffFeature(String chromosome, String source, String feature,
+         int start, int stop, String score, boolean reverse, String frame,
+         Map<String, String> attributes) {
+      this.chromosome = chromosome;
+      this.source = source;
+      this.feature = feature;
+      this.start = start;
+      this.stop = stop;
+      this.score = score;
+      this.reverse = reverse;
+      this.frame = frame;
+      this.attributes = attributes;
    }
 
    public static GffFeature fromLine(String line) {
@@ -133,7 +143,7 @@ public class GffFeature {
          return new Exon(chromosome, source, feature, start, stop, score,
                reverse, frame, attributes);
       } else {
-         return new GffFeature(chromosome, source, feature, start, stop, score,
+         return new Unknown(chromosome, source, feature, start, stop, score,
                reverse, frame, attributes);
       }
    }
