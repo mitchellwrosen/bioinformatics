@@ -8,9 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import lombok.Getter;
-import lombok.Setter;
-
 /**
  * A single Gene, represented by one or more isoforms.
  * 
@@ -18,8 +15,8 @@ import lombok.Setter;
  * @version 20-Apr-2013
  */
 public class Gene {
-   @Getter protected List<GeneIsoform> isoforms;
-   @Getter @Setter  protected Sequence sequence;
+    private List<GeneIsoform> isoforms;
+    private Sequence sequence;
    
    public Gene(GeneIsoform isoform) {
       isoforms = new ArrayList<GeneIsoform>();
@@ -176,5 +173,21 @@ public class Gene {
       for (GeneIsoform iso : isoforms)
          size += iso.intronSize();
       return size;
+   }
+
+   public void setSequence(Sequence sequence) {
+      this.sequence = sequence;
+   }
+
+   public Sequence getSequence() {
+      return sequence;
+   }
+
+   public void setIsoforms(List<GeneIsoform> isoforms) {
+      this.isoforms = isoforms;
+   }
+
+   public List<GeneIsoform> getIsoforms() {
+      return isoforms;
    }
 }
