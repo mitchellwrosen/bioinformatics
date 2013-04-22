@@ -57,7 +57,7 @@ public class GffFeature {
    }
    
    public int size() {
-      return start - stop;
+      return stop - start;
    }
    
    @Override
