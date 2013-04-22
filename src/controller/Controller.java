@@ -140,7 +140,10 @@ public class Controller {
             sb.append(geneName + ", ");
             sb.append(iso.getIsoformName() + ", ");
             if (iso.isReverse()) {
-               sb.append(iso.getSequence().reverseCompliment().toProteinString() + "\n");
+               System.out.println("Reverse detected!");
+               sb.append(iso.getSequence().reverseCompliment()
+                     .toProteinString()
+                     + "\n");
             } else {
                sb.append(iso.getSequence().toProteinString() + "\n");
             }
