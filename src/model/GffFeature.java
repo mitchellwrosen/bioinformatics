@@ -24,8 +24,8 @@ public class GffFeature {
 
    protected String source; // name of program that generated this feature
    protected String feature;
-   protected int start; // inclusive
-   protected int stop; // exclusive
+   protected int start; // inclusive, 0 indexed
+   protected int stop; // exclusive, 0 indexed
    protected String score;
    protected boolean reverse; // Relative to |sequence|
    protected String frame;
@@ -109,7 +109,7 @@ public class GffFeature {
       this.chromosome = chromosome;
       this.source = source;
       this.feature = feature;
-      this.start = start;
+      this.start = start-1; // Index from 0
       this.stop = stop;
       this.score = score;
       this.reverse = reverse;

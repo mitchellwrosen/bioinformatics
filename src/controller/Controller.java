@@ -139,7 +139,14 @@ public class Controller {
          for (GeneIsoform iso : g.getIsoforms()) {
             sb.append(geneName + ", ");
             sb.append(iso.getIsoformName() + ", ");
-            sb.append(iso.getSequence().toProteinString() + "\n");
+            if (iso.isReverse()) {
+               System.out.println("Reverse detected!");
+               sb.append(iso.getSequence().reverseCompliment()
+                     .toProteinString()
+                     + "\n");
+            } else {
+               sb.append(iso.getSequence().toProteinString() + "\n");
+            }
          }
       }
 

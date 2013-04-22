@@ -1,7 +1,7 @@
 package model;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class GeneTest {
       
       Map<String, String> attrs = gffFeature.getAttributes();
       assertThat(attrs.size(),         is(attrSize));
-      assertThat(attrKeyVals.length*2, is(attrSize)); // Make sure we're testing all of them
+      assertThat(attrKeyVals.length, is(attrSize*2)); // Make sure we're testing all of them
       
       for (int i = 0; i < attrKeyVals.length-1; i += 2)
          assertThat(attrs.get(attrKeyVals[i]), is(attrKeyVals[i+1]));
