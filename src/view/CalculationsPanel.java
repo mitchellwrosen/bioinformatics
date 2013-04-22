@@ -31,6 +31,18 @@ public class CalculationsPanel extends JPanel {
       add(prepareBox("Kilobases per gene:", mKilobasesPerGene));
    }
    
+   public String[] getKeys() {
+      return new String[]{"avg gene size", "avg cds size", "avg exon size", "avg intron size",
+                          "avg intergenic region size", "cds density", "genes per kilobase",
+                          "kilobases per gene"};
+   }
+   
+   public String[] getValues() {
+      return new String[]{mAvgGene.getText(), mAvgCds.getText(), mAvgExon.getText(), mAvgIntron.getText(),
+                          mAvgIntergenic.getText(), mCdsDensity.getText(), mGenesPerKilobase.getText(),
+                          mKilobasesPerGene.getText()};
+   }
+   
    public void setAvgGene(String text)          { mAvgGene.setText(text); }
    public void setAvgCds(String text)           { mAvgCds.setText(text); }
    public void setAvgExon(String text)          { mAvgExon.setText(text); }

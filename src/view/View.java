@@ -293,7 +293,21 @@ public class View extends JDialog {
    }
 
    protected void saveCalculations() {
-      // TODO
+      StringBuilder sb = new StringBuilder();
+      
+      for (String key : mCalculationsPanel.getKeys()) {
+         sb.append(key);
+         sb.append(",");
+      }
+      sb.append("\n");
+
+      for (String value : mCalculationsPanel.getValues()) {
+         sb.append(value);
+         sb.append(",");
+      }
+      sb.append("\n");
+      
+      saveString(sb.toString());
    }
 
    protected void saveProteins() {
