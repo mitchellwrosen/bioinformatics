@@ -46,7 +46,9 @@ public class Gene {
 
          feature = addIsoformsFromGffFile(r, isoform, gene);
 
+         
          genes.add(gene);
+         
       }
       r.close();
 
@@ -71,6 +73,7 @@ public class Gene {
       exons = new ArrayList<Exon>();
       feature = addExonsFromGffFile(r, exons);
       isoform.setExons(exons);
+      isoform.setGene(gene);
       
       // Fill out the rest of the Isoforms.
       while (feature != null) {
@@ -84,7 +87,9 @@ public class Gene {
          exons = new ArrayList<Exon>();
          feature = addExonsFromGffFile(r, exons);
          isoform.setExons(exons);
+         isoform.setGene(gene);
          gene.addIsoform(isoform);
+         
       }
       
       return feature;
