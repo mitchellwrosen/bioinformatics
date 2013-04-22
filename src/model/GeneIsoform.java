@@ -43,6 +43,8 @@ public class GeneIsoform extends GffFeature {
    public Sequence getSequence() {
       Sequence s = new Sequence();
       for (Exon e : exons) {
+         System.out.println(e);
+         System.out.println(gene);
          Sequence exonSequence = gene.getSequence().slice(e.getStart(), e.getStop());
          s = s.concat(exonSequence);
       }

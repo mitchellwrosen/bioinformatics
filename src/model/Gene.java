@@ -37,12 +37,13 @@ public class Gene {
       GffFeature feature = GffFeature.fromLine(r.readLine());
       while (feature != null) {
          if (!(feature instanceof GeneIsoform)) {
-            System.err.println("Unexpected feature: " + feature.toString());
+            // If we see score, cigar, etc. Just skip the line.
+            feature = GffFeature.fromLine(r.readLine());
             continue;
          }
-         
          GeneIsoform isoform = (GeneIsoform) feature;
          Gene gene = new Gene(isoform);
+
          feature = addIsoformsFromGffFile(r, isoform, gene);
 
          genes.add(gene);
