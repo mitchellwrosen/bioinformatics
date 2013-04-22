@@ -21,11 +21,21 @@ public class Controller {
 
    protected Sequence mSequence;
    protected List<Gene> mGenes;
+   
+   public Controller() {
+      mSequenceFile = new String();
+      mGffFile = new String();
+   }
 
    public void useSequenceFile(String filename) throws IOException, IllegalArgumentException {
       if (!mSequenceFile.equals(filename)) {
          mSequenceFile = filename;
          mSequence = new Sequence(mSequenceFile);
+         if (mGenes != null) {
+            for (Gene gene : mGenes) {
+               gene.setSequence(mSequence);
+            }
+         }
       }
    }
 
@@ -33,6 +43,10 @@ public class Controller {
       if (!mGffFile.equals(filename)) {
          mGffFile = filename;
          mGenes = Gene.fromGffFile(mGffFile);
+         if (mSequence != null) {
+            for (Gene gene : mGenes)
+               gene.setSequence(mSequence);
+         }
       }
    }
 
