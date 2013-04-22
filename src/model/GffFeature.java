@@ -21,7 +21,6 @@ public class GffFeature {
    }
    
    protected String chromosome; // chromosome/scaffold
-
    protected String source; // name of program that generated this feature
    protected String feature;
    protected int start; // inclusive, 0 indexed

@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -42,6 +44,12 @@ public class GeneUtils {
    }
    
    public static double avgIntergenicRegionSize(List<Gene> genes) {
+      Collections.sort(genes, new Comparator<Gene>() {
+         public int compare(Gene g1, Gene g2) {
+            return g1.getStart() - g2.getStart();
+         }
+      });
+      
       int size = 0;
       for (int i = 0; i < genes.size()-1; ++i)
          size += genes.get(i+1).getStart() - genes.get(i).getStop();

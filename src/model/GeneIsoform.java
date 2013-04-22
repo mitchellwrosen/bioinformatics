@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +51,9 @@ public class GeneIsoform extends GffFeature {
       return s;
    }
    
-   public void setExons(List<Exon> exons) { this.exons = exons; }
+   public void setExons(List<Exon> exons) { 
+      this.exons = exons; 
+   }
    
    public int numExons() {
       return exons.size();
@@ -67,6 +71,14 @@ public class GeneIsoform extends GffFeature {
    }
    
    public int intronSize() {
+      // Sort here so as to not create a dependency between this function and, 
+      // say, setExons().
+      Collections.sort(exons, new Comparator<Exon>() {
+         public int compare(Exon e1, Exon e2) {
+            return e1.getStart() - e2.getStart();
+         }
+      });
+      
       int size = 0;
       for (int i = 0; i < exons.size()-1; ++i)
          size += exons.get(i+1).getStart() - exons.get(i).getStop();
