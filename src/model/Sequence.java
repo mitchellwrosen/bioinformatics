@@ -152,9 +152,17 @@ public class Sequence {
       this.nucleotides = nucleotides;
    }
 
-   public Sequence reverseCompliment() {
-      List<Nucleotide> toReverse = new ArrayList<Nucleotide>(nucleotides);
-      Collections.reverse(toReverse);
-      return new Sequence(toReverse);
+   /**
+    * @return Returns the reverse complement of this sequence as a sequence.
+    */
+   public Sequence reverseComplement() {
+      List<Nucleotide> reversedList = new ArrayList<Nucleotide>(nucleotides);
+      List<Nucleotide> reverseComplementedList = new ArrayList<Nucleotide>();
+      Collections.reverse(reversedList);
+
+      for (Nucleotide n : reversedList) {
+         reverseComplementedList.add(n.complement());
+      }
+      return new Sequence(reverseComplementedList);
    }
 }
