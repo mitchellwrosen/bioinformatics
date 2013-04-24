@@ -7,8 +7,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class CalculationsPanel extends JPanel {
-   protected JTextField mAvgGene, mAvgCds, mAvgExon, mAvgIntron, 
-      mAvgIntergenic, mCdsDensity, mGenesPerKilobase, mKilobasesPerGene;
+   protected JTextField mAvgGene, mAvgCds, mAvgExon, mAvgIntron, mAvgIntergenic, 
+         mGeneDensity, mCdsDensity, mGenesPerKilobase, mKilobasesPerGene;
    
    public CalculationsPanel() {
       mAvgGene = prepareTextField(40);
@@ -16,6 +16,7 @@ public class CalculationsPanel extends JPanel {
       mAvgExon = prepareTextField(40);
       mAvgIntron = prepareTextField(40);
       mAvgIntergenic = prepareTextField(40);
+      mGeneDensity = prepareTextField(40);
       mCdsDensity = prepareTextField(40);
       mGenesPerKilobase = prepareTextField(40);
       mKilobasesPerGene = prepareTextField(40);
@@ -26,6 +27,7 @@ public class CalculationsPanel extends JPanel {
       add(prepareBox("Average exon size:", mAvgExon));
       add(prepareBox("Average intron size:", mAvgIntron));
       add(prepareBox("Average intergenic region size:", mAvgIntergenic));
+      add(prepareBox("Average gene density:", mGeneDensity));
       add(prepareBox("CDS density:", mCdsDensity));
       add(prepareBox("Genes per kilobase:", mGenesPerKilobase));
       add(prepareBox("Kilobases per gene:", mKilobasesPerGene));
@@ -36,6 +38,7 @@ public class CalculationsPanel extends JPanel {
    public void setAvgExon(String text)          { mAvgExon.setText(text); }
    public void setAvgIntron(String text)        { mAvgIntron.setText(text); }
    public void setAvgIntergenic(String text)    { mAvgIntergenic.setText(text); }
+   public void setGeneDensity(String text)      { mGeneDensity.setText(text); }
    public void setCdsDensity(String text)       { mCdsDensity.setText(text); }
    public void setGenesPerKilobase(String text) { mGenesPerKilobase.setText(text); }
    public void setKilobasesPerGene(String text) { mKilobasesPerGene.setText(text); }
