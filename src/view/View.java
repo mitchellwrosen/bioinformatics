@@ -256,6 +256,9 @@ public class View extends JDialog {
    }
 
    protected void runCalculations() {
+      mCalculationsPanel.setNucleotides(controller.getNucleotides());
+      mCalculationsPanel.setGenes(controller.getGenes());
+      mCalculationsPanel.setIsoforms(controller.getIsoforms());
       mCalculationsPanel.setAvgGene(controller.avgGeneSize());
       mCalculationsPanel.setAvgCds(controller.avgCdsSize());
       mCalculationsPanel.setAvgExon(controller.avgExonSize());
