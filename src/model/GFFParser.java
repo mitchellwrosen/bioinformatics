@@ -84,9 +84,9 @@ public class GFFParser {
       /**
        * Creates a GeneIsoform from this Feature.
        */
-      public GeneIsoform toGeneIsoform() throws ParseException {
+      public GeneIsoform toGeneIsoform() {
          if (!(feature.equals("mRNA")))
-            throw new ParseException();
+            return null;
          String geneId = attributes.get("gene_id");
          String transcriptId = attributes.get("transcript_id");
          return new GeneIsoform(chromosome, start, stop, reverse, geneId, transcriptId);
@@ -95,9 +95,9 @@ public class GFFParser {
       /**
        * Creates an Exon from this Feature.
        */
-      public Exon toExon() throws ParseException {
+      public Exon toExon() {
          if (!(feature.equals("CDS")))
-            throw new ParseException();
+            return null;
          return new Exon(start, stop);
       }
 
@@ -126,6 +126,7 @@ public class GFFParser {
    protected List<Gene> genes; // Output
    
    protected Gene gene;        // Current gene, to know when to switch genes
+   protected GeneIsoform iso;  // Current isoform
    protected Feature feature;  // Current line
    
    public GFFParser(String filename) throws IOException {
@@ -163,14 +164,15 @@ public class GFFParser {
    
    // gene -> isoform+
    protected Gene parseGene() throws IOException, ParseException {
-      gene = Gene.create(parseIsoform());
+      GeneIsoform iso = parseIsoform();
+      if (iso == null)
+         throw new ParseException();
+      gene = Gene.create(iso);
       
-      while (feature != null) {
-         try {
-            gene.addIsoform(parseIsoform());
-         } catch (ParseException e) {
-            return gene; // No more isoforms
-         }
+      iso = parseIsoform();
+      while (feature != null && iso != null) {
+         gene.addIsoform(iso);
+         iso = parseIsoform();
       }
    
       return gene;
@@ -179,14 +181,19 @@ public class GFFParser {
    // isoform -> isoform_data exon+
    protected GeneIsoform parseIsoform() throws IOException, ParseException {
       GeneIsoform iso = parseIsoformData();
-      iso.addExon(parseExon()); // iso should never be null here
+      // Per the logic of the parser, and not the actual contents of the file,
+      // iso should never be null.
+      assert iso != null;
       
-      while (feature != null) {
-         try {
-            iso.addExon(parseExon());
-         } catch (ParseException e) {
-            return iso; // No more exons
-         }
+      Exon exon = parseExon();
+      if (exon == null)
+         throw new ParseException();
+      iso.addExon(exon);
+      
+      exon = parseExon();
+      while (feature != null && exon != null) {
+         iso.addExon(exon);
+         exon = parseExon();
       }
       
       return iso;
@@ -196,26 +203,28 @@ public class GFFParser {
    protected Exon parseExon() throws IOException, ParseException {
       return parseExonData();
    }
-
    
    protected GeneIsoform parseIsoformData() throws ParseException, IOException {
       GeneIsoform iso = feature.toGeneIsoform();
+      if (iso == null)
+         return null;
       
       // Only advance if this is an isoform of the current gene.
       if (gene != null && !(gene.getId().equals(iso.getGeneId()))) 
-         throw new ParseException();
+         return null;
       
       next();
       return iso;
    }
    
-   
    protected Exon parseExonData() throws ParseException, IOException {
       Exon exon = feature.toExon();
+      if (exon == null)
+         return null;
+      
       next();
       return exon;
    }
-   
    
    protected Feature parseUnknown() throws ParseException, IOException {
       Feature f = feature;
