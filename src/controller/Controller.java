@@ -141,7 +141,7 @@ public class Controller {
             sb.append(iso.getIsoformName() + ", ");
             if (iso.isReverse()) {
                System.out.println("Reverse detected!");
-               sb.append(iso.getSequence().reverseCompliment()
+               sb.append(iso.getSequence().reverseComplement()
                      .toProteinString()
                      + "\n");
             } else {
