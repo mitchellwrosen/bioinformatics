@@ -102,6 +102,18 @@ public class Controller {
 
       return sb.toString();
    }
+   
+   public String getNucleotides() {
+      return String.format("%d", mSequence.size());
+   }
+   
+   public String getGenes() {
+      return String.format("%d", mGenes.size());
+   }
+   
+   public String getIsoforms() {
+      return String.format("%d", GeneUtils.numIsoforms(mGenes));
+   }
 
    public String avgGeneSize() {
       return String.format("%.2f", GeneUtils.avgGeneSize(mGenes));
@@ -145,7 +157,7 @@ public class Controller {
             sb.append(iso.getTranscriptId() + ", ");
             if (iso.isReverse()) {
                System.out.println("Reverse detected!");
-               sb.append(iso.getSequence().reverseCompliment()
+               sb.append(iso.getSequence().reverseComplement()
                      .toProteinString()
                      + "\n");
             } else {

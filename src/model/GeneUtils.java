@@ -11,6 +11,13 @@ import java.util.List;
  * @version 19-Apr-2013
  */
 public class GeneUtils {
+   public static int numIsoforms(List<Gene> genes) {
+      int size = 0;
+      for (Gene gene : genes)
+         size += gene.numIsoforms();
+      return size;
+   }
+   
    public static double avgGeneSize(List<Gene> genes) {
       int size = 0;
       for (Gene gene : genes)

@@ -256,6 +256,9 @@ public class View extends JDialog {
    }
 
    protected void runCalculations() {
+      mCalculationsPanel.setNucleotides(controller.getNucleotides());
+      mCalculationsPanel.setGenes(controller.getGenes());
+      mCalculationsPanel.setIsoforms(controller.getIsoforms());
       mCalculationsPanel.setAvgGene(controller.avgGeneSize());
       mCalculationsPanel.setAvgCds(controller.avgCdsSize());
       mCalculationsPanel.setAvgExon(controller.avgExonSize());
@@ -293,7 +296,21 @@ public class View extends JDialog {
    }
 
    protected void saveCalculations() {
-      // TODO
+      StringBuilder sb = new StringBuilder();
+      
+      for (String key : mCalculationsPanel.getKeys()) {
+         sb.append(key);
+         sb.append(",");
+      }
+      sb.append("\n");
+
+      for (String value : mCalculationsPanel.getValues()) {
+         sb.append(value);
+         sb.append(",");
+      }
+      sb.append("\n");
+      
+      saveString(sb.toString());
    }
 
    protected void saveProteins() {
