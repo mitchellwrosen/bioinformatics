@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import model.GCContentInfo;
+import model.GFFParser;
 import model.Gene;
 import model.GeneIsoform;
 import model.GeneUtils;
@@ -39,10 +40,11 @@ public class Controller {
       }
    }
 
-   public void useGffFile(String filename) throws Exception {
+   public void useGffFile(String filename) throws IOException {
       if (!mGffFile.equals(filename)) {
          mGffFile = filename;
-         mGenes = Gene.fromGffFile(mGffFile);
+
+         mGenes = GFFParser.parse(filename);
          if (mSequence != null) {
             for (Gene gene : mGenes)
                gene.setSequence(mSequence);
@@ -150,7 +152,7 @@ public class Controller {
          String geneName = g.getId();
          for (GeneIsoform iso : g.getIsoforms()) {
             sb.append(geneName + ", ");
-            sb.append(iso.getIsoformName() + ", ");
+            sb.append(iso.getTranscriptId() + ", ");
             if (iso.isReverse()) {
                System.out.println("Reverse detected!");
                sb.append(iso.getSequence().reverseComplement()
