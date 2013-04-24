@@ -4,8 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
+
 
 /**
  * A Sequence of Nucleotides.
@@ -152,9 +153,19 @@ public class Sequence {
       this.nucleotides = nucleotides;
    }
 
-   public Sequence reverseCompliment() {
-      List<Nucleotide> toReverse = new ArrayList<Nucleotide>(nucleotides);
-      Collections.reverse(toReverse);
-      return new Sequence(toReverse);
+   /**
+    * @return Returns the reverse complement of this sequence as a sequence.
+    */
+   public Sequence reverseComplement() {
+      List<Nucleotide> reversedList = new ArrayList<Nucleotide>();
+
+      ListIterator<Nucleotide> iter = nucleotides.listIterator(nucleotides
+         .size());
+
+      while (iter.hasPrevious()) {
+         Nucleotide n = iter.previous();
+         reversedList.add(n.complement());
+      }
+      return new Sequence(reversedList);
    }
 }
