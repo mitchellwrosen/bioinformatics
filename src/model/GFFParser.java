@@ -27,27 +27,36 @@ import java.util.Map;
  * isoforms as it can, but rather stops once the isoform's gene_id changes.
  * 
  * @author Mitchell Rosen
- * @version 22-Apr-2013
+ * @author Erik Sandberg
+ * @version 23-Apr-2013
  */
 public class GFFParser {
-   public static class ParseException extends Exception { }
-   
+
    /**
     * Class representing one feature constructed from one line of a GFF file.
     */
    protected static class Feature {
-      public String chromosome; // chromosome/scaffold
-      public String source; // name of program that generated this feature
-      public String feature;
-      public int start; // inclusive, 0 indexed
-      public int stop; // exclusive, 0 indexed
-      public String score;
-      public boolean reverse; // Relative to |sequence|
-      public String frame;
+      public static final String ISOFORM_FEATURE = "mRNA";
+      public static final String EXON_FEATURE    = "CDS";
+
+      public String              chromosome;              // chromosome/scaffold
+      public String              source;                  // name of program
+                                                           // that generated
+                                                           // this feature
+      public String              feature;
+      public int                 start;                   // inclusive, 0
+                                                           // indexed
+      public int                 stop;                    // exclusive, 0
+                                                           // indexed
+      public String              score;
+      public boolean             reverse;                 // Relative to
+                                                           // |sequence|
+      public String              frame;
       public Map<String, String> attributes;
 
-      public Feature(String chromosome, String source, String feature, int start, int stop,
-            String score, boolean reverse, String frame, Map<String, String> attributes) {
+      public Feature(String chromosome, String source, String feature,
+            int start, int stop, String score, boolean reverse, String frame,
+            Map<String, String> attributes) {
          this.chromosome = chromosome;
          this.source = source;
          this.feature = feature;
@@ -58,11 +67,11 @@ public class GFFParser {
          this.frame = frame;
          this.attributes = attributes;
       }
-      
+
       public static Feature fromLine(String line) {
          if (line == null)
             return null;
-                  
+
          String[] tokens = line.split("\\s+");
 
          String chromosome = tokens[0];
@@ -77,27 +86,31 @@ public class GFFParser {
          Map<String, String> attributes = new HashMap<String, String>();
          for (int i = 8; i < tokens.length; i += 2)
             attributes.put(tokens[i], tokens[i + 1]);
-         
-         return new Feature(chromosome, source, feature, start, stop, score, reverse, frame, attributes);
+
+         return new Feature(chromosome, source, feature, start, stop, score,
+               reverse, frame, attributes);
       }
-      
+
       /**
        * Creates a GeneIsoform from this Feature.
        */
-      public GeneIsoform toGeneIsoform() throws ParseException {
-         if (!(feature.equals("mRNA")))
-            throw new ParseException();
+      public GeneIsoform toGeneIsoform() {
+         if (!Feature.ISOFORM_FEATURE.equals(feature)) {
+            return null;
+         }
          String geneId = attributes.get("gene_id");
          String transcriptId = attributes.get("transcript_id");
-         return new GeneIsoform(chromosome, start, stop, reverse, geneId, transcriptId);
+         return new GeneIsoform(chromosome, start, stop, reverse, geneId,
+               transcriptId);
       }
-      
+
       /**
        * Creates an Exon from this Feature.
        */
-      public Exon toExon() throws ParseException {
-         if (!(feature.equals("CDS")))
-            throw new ParseException();
+      public Exon toExon() {
+         if (!Feature.EXON_FEATURE.equals(feature)) {
+            return null;
+         }
          return new Exon(start, stop);
       }
 
@@ -121,105 +134,90 @@ public class GFFParser {
          return sb.toString();
       }
    }
-   
-   protected BufferedReader r; // Input stream
-   protected List<Gene> genes; // Output
-   
-   protected Gene gene;        // Current gene, to know when to switch genes
-   protected Feature feature;  // Current line
-   
-   public GFFParser(String filename) throws IOException {
+
+   protected enum State {
+      INIT, GENE_START, ISOFORM_START, EXON;
+   }
+
+   protected State          state = State.INIT;
+
+   protected BufferedReader r;                 // Input stream
+   protected List<Gene>     genes;             // Output
+
+   protected Gene           gene;              // Current gene, to know when to
+                                                // switch genes
+   protected GeneIsoform    iso;
+   protected Feature        feature;           // Current line
+
+   public static List<Gene> parse(String filename) throws IOException {
+      GFFParser parser = new GFFParser(filename);
+      return parser.parse();
+   }
+
+   protected GFFParser(String filename) throws IOException {
       r = new BufferedReader(new FileReader(filename));
       genes = new ArrayList<Gene>();
       feature = Feature.fromLine(r.readLine());
    }
-   
+
    protected void next() throws IOException {
       feature = Feature.fromLine(r.readLine());
    }
-   
-   public List<Gene> parse() throws IOException, ParseException {
-      parseData();
+
+   protected List<Gene> parse() throws IOException {
+      while (feature != null) {
+         parseFeature();
+      }
       return genes;
    }
-   
-   // gene -> feature+
-   protected void parseData() throws IOException, ParseException {
-      parseFeature();
-      while (feature != null)
-         parseFeature();
-   }
-   
-   // feature -> gene | unknown
-   protected void parseFeature() throws IOException, ParseException {
-      if (feature.feature.equals("mRNA")) {
-         genes.add(parseGene());
-         gene = null; // Forces the next isoform to initialize a new gene
-      }
-      else {
-         parseUnknown();
-      }
-   }
-   
-   // gene -> isoform+
-   protected Gene parseGene() throws IOException, ParseException {
-      gene = Gene.create(parseIsoform());
-      
-      while (feature != null) {
-         try {
-            gene.addIsoform(parseIsoform());
-         } catch (ParseException e) {
-            return gene; // No more isoforms
-         }
-      }
-   
-      return gene;
-   }
-   
-   // isoform -> isoform_data exon+
-   protected GeneIsoform parseIsoform() throws IOException, ParseException {
-      GeneIsoform iso = parseIsoformData();
-      iso.addExon(parseExon()); // iso should never be null here
-      
-      while (feature != null) {
-         try {
-            iso.addExon(parseExon());
-         } catch (ParseException e) {
-            return iso; // No more exons
-         }
-      }
-      
-      return iso;
-   }
-   
-   // exon -> exon_data
-   protected Exon parseExon() throws IOException, ParseException {
-      return parseExonData();
-   }
 
-   
-   protected GeneIsoform parseIsoformData() throws ParseException, IOException {
-      GeneIsoform iso = feature.toGeneIsoform();
-      
-      // Only advance if this is an isoform of the current gene.
-      if (gene != null && !(gene.getId().equals(iso.getGeneId()))) 
-         throw new ParseException();
-      
-      next();
-      return iso;
-   }
-   
-   
-   protected Exon parseExonData() throws ParseException, IOException {
-      Exon exon = feature.toExon();
-      next();
-      return exon;
-   }
-   
-   
-   protected Feature parseUnknown() throws ParseException, IOException {
-      Feature f = feature;
-      next();
-      return f;
+   protected void parseFeature() throws IOException {
+      switch (state) {
+         case INIT:
+            if (Feature.ISOFORM_FEATURE.equals(feature.feature)) {
+               state = State.GENE_START;
+            } else {
+               next();
+            }
+            break;
+         case GENE_START:
+            gene = new Gene();
+            genes.add(gene);
+            state = State.ISOFORM_START;
+            break;
+         case ISOFORM_START:
+            iso = feature.toGeneIsoform();
+            if (iso != null) {
+               if (gene.getIsoforms().size() == 0
+                     || gene.getId().equals(iso.getGeneId())) {
+                  // This is the first isoform of the gene or part of the
+                  // current
+                  // gene.
+                  gene.addIsoform(iso);
+                  state = State.EXON;
+                  next();
+               } else {
+                  // This is part of a different gene.
+                  state = State.GENE_START;
+               }
+            } else {
+               // Feature is not an isoform so ignore it.
+               next();
+            }
+            break;
+         case EXON:
+            if (Feature.EXON_FEATURE.equals(feature.feature)) {
+               iso.addExon(feature.toExon());
+               next();
+            } else if (Feature.ISOFORM_FEATURE.equals(feature.feature)) {
+               state = State.ISOFORM_START;
+            } else {
+               next();
+            }
+            break;
+         default:
+            // This should never happen.
+            assert false;
+      }
    }
 }

@@ -5,7 +5,6 @@ import java.util.List;
 
 import model.GCContentInfo;
 import model.GFFParser;
-import model.GFFParser.ParseException;
 import model.Gene;
 import model.GeneIsoform;
 import model.GeneUtils;
@@ -41,12 +40,11 @@ public class Controller {
       }
    }
 
-   public void useGffFile(String filename) throws IOException, ParseException {
+   public void useGffFile(String filename) throws IOException {
       if (!mGffFile.equals(filename)) {
          mGffFile = filename;
-         
-         GFFParser parser = new GFFParser(filename);
-         mGenes = parser.parse();
+
+         mGenes = GFFParser.parse(filename);
          if (mSequence != null) {
             for (Gene gene : mGenes)
                gene.setSequence(mSequence);

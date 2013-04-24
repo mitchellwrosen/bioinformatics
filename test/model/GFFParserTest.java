@@ -6,7 +6,6 @@ import static org.junit.Assert.assertThat;
 import java.io.IOException;
 import java.util.List;
 
-import model.GFFParser.ParseException;
 
 import org.junit.Test;
 
@@ -27,7 +26,7 @@ public class GFFParserTest {
    }
    
    @Test
-   public void parse() throws IOException, ParseException {
+   public void parse() throws IOException {
       Gene g;
       GeneIsoform iso;
       
