@@ -5,6 +5,7 @@ import java.util.List;
 
 import model.GCContentInfo;
 import model.Gene;
+import model.Gene.ParseException;
 import model.GeneIsoform;
 import model.GeneUtils;
 import model.Sequence;
@@ -39,7 +40,7 @@ public class Controller {
       }
    }
 
-   public void useGffFile(String filename) throws Exception {
+   public void useGffFile(String filename) throws IOException, ParseException {
       if (!mGffFile.equals(filename)) {
          mGffFile = filename;
          mGenes = Gene.fromGffFile(mGffFile);
@@ -117,6 +118,10 @@ public class Controller {
 
    public String avgIntergenicRegionSize() {
       return String.format("%.2f", GeneUtils.avgIntergenicRegionSize(mGenes));
+   }
+   
+   public String geneDensity() {
+      return String.format("%.2f", GeneUtils.geneDensity(mGenes));
    }
 
    public String cdsDensity() {

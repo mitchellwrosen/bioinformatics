@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -17,6 +18,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import model.Gene.ParseException;
 
 import controller.Controller;
 
@@ -213,7 +216,7 @@ public class View extends JDialog {
                controller.useGffFile(mGffFile.getText());
                mValidGffFile = true;
                updateRunButton();
-            } catch (Exception ex) {
+            } catch (IOException | ParseException ex) {
                JOptionPane.showMessageDialog(null, ex.toString(), "Error",
                      JOptionPane.ERROR_MESSAGE);
                mValidGffFile = false;
@@ -261,6 +264,7 @@ public class View extends JDialog {
       mCalculationsPanel.setAvgExon(controller.avgExonSize());
       mCalculationsPanel.setAvgIntron(controller.avgIntronSize());
       mCalculationsPanel.setAvgIntergenic(controller.avgIntergenicRegionSize());
+      mCalculationsPanel.setGeneDensity(controller.geneDensity());
       mCalculationsPanel.setCdsDensity(controller.cdsDensity());
       mCalculationsPanel.setGenesPerKilobase(controller.genesPerKilobase());
       mCalculationsPanel.setKilobasesPerGene(controller.kilobasesPerGene());
