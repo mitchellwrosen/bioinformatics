@@ -103,4 +103,16 @@ public class SequenceTest {
       assertEquals(.31, contig1234.gcContentMax(), .001);
    }
 
+   @Test
+   public void testReverseComplement() {
+      List<Nucleotide> shortList = new ArrayList<Nucleotide>();
+      shortList.add(Nucleotide.ADENINE);
+      shortList.add(Nucleotide.THYMINE);
+      shortList.add(Nucleotide.GUANINE);
+      shortList.add(Nucleotide.CYTOSINE);
+      shortList.add(Nucleotide.UNKNOWN);
+      Sequence shortSeq = new Sequence(shortList);
+      assertEquals("?GCAT", shortSeq.reverseComplement().toString());
+      assertEquals("", emptySequence.reverseComplement().toString());
+   }
 }

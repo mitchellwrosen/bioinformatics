@@ -10,7 +10,7 @@ import java.util.Set;
 
 /**
  * A single Gene, represented by one or more isoforms.
- * 
+ *
  * @author Mitchell Rosen
  * @version 20-Apr-2013
  */
@@ -20,114 +20,26 @@ public class Gene {
          super(str);
       }
    }
-   
+
    protected List<GeneIsoform> isoforms;
    protected Sequence sequence;
 
-   public Gene(GeneIsoform isoform) {
+   /**
+    * Genes should be constructed with the create method.
+    */
+   protected Gene() {
       isoforms = new ArrayList<GeneIsoform>();
-      isoforms.add(isoform);
+   }
+
+   public static Gene create(GeneIsoform isoform) {
+      Gene gene = new Gene();
+      gene.addIsoform(isoform);
+      return gene;
    }
 
    public void addIsoform(GeneIsoform isoform) {
+      isoform.setGene(this);
       isoforms.add(isoform);
-   }
-
-   /**
-    * Parses a list of Genes from a GFF file.
-    */
-   public static List<Gene> fromGffFile(String filename) throws IOException, ParseException {
-      BufferedReader r = new BufferedReader(new FileReader(filename));
-      List<Gene> genes = new ArrayList<Gene>();
-
-      GffFeature feature = GffFeature.fromLine(r.readLine());
-      while (feature != null) {
-         if (feature instanceof GffFeature.Unknown) {
-            feature = GffFeature.fromLine(r.readLine());
-            continue;
-         }
-
-         if (!(feature instanceof GeneIsoform)) {
-            throw new ParseException(String.format("Expected GeneIsoform, encountered %s",
-                  feature.toString()));
-         }
-
-         GeneIsoform isoform = (GeneIsoform) feature;
-         Gene gene = new Gene(isoform);
-
-         feature = addIsoformsFromGffFile(r, isoform, gene);
-
-         genes.add(gene);
-
-      }
-      r.close();
-
-      return genes;
-   }
-
-   /**
-    * Helper to fromGffFile. Reads features from |r|, adding isoforms to
-    * |gene|'s isoforms until a feature is encountered that is not an isoform of
-    * the same gene. Returns this feature, or null if EOF is encountered.
-    * 
-    * @throws IOException
-    */
-   protected static GffFeature addIsoformsFromGffFile(BufferedReader r, GeneIsoform isoform,
-         Gene gene) throws IOException {
-      List<Exon> exons;
-      GffFeature feature;
-
-      String geneId = isoform.getGeneId();
-
-      // Fill out the current Isoform with Exons (gene already initialized with
-      // it).
-      exons = new ArrayList<Exon>();
-      feature = addExonsFromGffFile(r, exons);
-      isoform.setExons(exons);
-      isoform.setGene(gene);
-
-      // Fill out the rest of the Isoforms.
-      while (feature != null) {
-         if (feature instanceof GffFeature.Unknown) {
-            feature = GffFeature.fromLine(r.readLine());
-            continue;
-         }
-         
-         if (!(feature instanceof GeneIsoform))
-            break;
-
-         isoform = (GeneIsoform) feature;
-         if (!isoform.getGeneId().equals(geneId))
-            break;
-
-         exons = new ArrayList<Exon>();
-         feature = addExonsFromGffFile(r, exons);
-         isoform.setExons(exons);
-         isoform.setGene(gene);
-         gene.addIsoform(isoform);
-
-      }
-
-      return feature;
-   }
-
-   /**
-    * Helper to addIsoformsFromGffFile. Reads features from |r|, adding Exons to
-    * |exons|, until a feature is encountered that is not an Exon. Returns this
-    * feature, or null if EOF is encountered.
-    */
-   protected static GffFeature addExonsFromGffFile(BufferedReader r, List<Exon> exons)
-         throws IOException {
-      GffFeature feature = GffFeature.fromLine(r.readLine());
-      for (; feature != null; feature = GffFeature.fromLine(r.readLine())) {
-         if (feature instanceof GffFeature.Unknown)
-            continue;
-         if (!(feature instanceof Exon))
-            break;
-         exons.add((Exon) feature);
-      }
-
-      return feature;
    }
 
    public String getId()                  { return isoforms.get(0).getGeneId(); }
@@ -136,7 +48,7 @@ public class Gene {
    public List<GeneIsoform> getIsoforms() { return isoforms; }
    public int numIsoforms()               { return isoforms.size(); }
    public Sequence getSequence()          { return sequence; }
-   
+
    public void setSequence(Sequence sequence) { this.sequence = sequence; }
 
    public int numExons() {
