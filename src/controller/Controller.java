@@ -134,6 +134,10 @@ public class Controller {
    public String avgIntergenicRegionSize() {
       return String.format("%.2f", GeneUtils.avgIntergenicRegionSize(mGenes));
    }
+   
+   public String geneDensity() {
+      return String.format("%.2f", GeneUtils.geneDensity(mGenes));
+   }
 
    public String cdsDensity() {
       return String.format("%.2f", GeneUtils.cdsDensity(mGenes));

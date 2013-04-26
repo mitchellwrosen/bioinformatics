@@ -10,7 +10,7 @@ import java.util.Set;
 
 /**
  * A single Gene, represented by one or more isoforms.
- * 
+ *
  * @author Mitchell Rosen
  * @version 20-Apr-2013
  */
@@ -24,33 +24,26 @@ public class Gene {
    protected Gene() {
       isoforms = new ArrayList<GeneIsoform>();
    }
-   
+
    public static Gene create(GeneIsoform isoform) {
       Gene gene = new Gene();
       gene.addIsoform(isoform);
       return gene;
    }
-   
+
    public void addIsoform(GeneIsoform isoform) {
       isoform.setGene(this);
       isoforms.add(isoform);
    }
 
-   public String getId() {
-      return isoforms.get(0).getGeneId();
-   }
+   public String getId()                  { return isoforms.get(0).getGeneId(); }
+   public int getStart()                  { return isoforms.get(0).getStart(); }
+   public int getStop()                   { return isoforms.get(0).getStop(); }
+   public List<GeneIsoform> getIsoforms() { return isoforms; }
+   public int numIsoforms()               { return isoforms.size(); }
+   public Sequence getSequence()          { return sequence; }
 
-   public int getStart() {
-      return isoforms.get(0).getStart();
-   }
-
-   public int getStop() {
-      return isoforms.get(0).getStop();
-   }
-
-   public int numIsoforms() {
-      return isoforms.size();
-   }
+   public void setSequence(Sequence sequence) { this.sequence = sequence; }
 
    public int numExons() {
       int size = 0;
@@ -103,21 +96,5 @@ public class Gene {
       for (GeneIsoform iso : isoforms)
          size += iso.intronSize();
       return size;
-   }
-
-   public void setSequence(Sequence sequence) {
-      this.sequence = sequence;
-   }
-
-   public Sequence getSequence() {
-      return sequence;
-   }
-
-   public void setIsoforms(List<GeneIsoform> isoforms) {
-      this.isoforms = isoforms;
-   }
-
-   public List<GeneIsoform> getIsoforms() {
-      return isoforms;
    }
 }
