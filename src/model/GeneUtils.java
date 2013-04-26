@@ -67,8 +67,16 @@ public class GeneUtils {
     * @requires genes.size > 0
     * @requires gene.sequence is the same for all in |genes|
     */
+   public static double geneDensity(List<Gene> genes) {
+      return genes.size() * avgGeneSize(genes) / genes.get(0).getSequence().size();
+   }
+   
+   /**
+    * @requires genes.size > 0
+    * @requires gene.sequence is the same for all in |genes|
+    */
    public static double cdsDensity(List<Gene> genes) {
-      return avgCdsSize(genes) / genes.get(0).getSequence().size();
+      return genes.size() * avgCdsSize(genes) / genes.get(0).getSequence().size();
    }
    
    /**

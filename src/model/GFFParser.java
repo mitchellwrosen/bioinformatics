@@ -170,8 +170,10 @@ public class GFFParser {
       gene = Gene.create(iso);
       
       iso = parseIsoform();
-      while (feature != null && iso != null) {
+      while (iso != null) {
          gene.addIsoform(iso);
+         if (feature == null)
+            break;
          iso = parseIsoform();
       }
    
@@ -181,9 +183,8 @@ public class GFFParser {
    // isoform -> isoform_data exon+
    protected GeneIsoform parseIsoform() throws IOException, ParseException {
       GeneIsoform iso = parseIsoformData();
-      // Per the logic of the parser, and not the actual contents of the file,
-      // iso should never be null.
-      assert iso != null;
+      if (iso == null)
+         return null;
       
       Exon exon = parseExon();
       if (exon == null)
@@ -191,8 +192,10 @@ public class GFFParser {
       iso.addExon(exon);
       
       exon = parseExon();
-      while (feature != null && exon != null) {
+      while (exon != null) {
          iso.addExon(exon);
+         if (feature == null)
+            break;
          exon = parseExon();
       }
       
