@@ -1,42 +1,52 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
-public class GeneIsoform extends GffFeature {
+public class GeneIsoform {
+   protected String chromosome;
+   protected int start;
+   protected int stop;
+   protected boolean reverse;
+   protected String geneId;
+   protected String transcriptId;
+   
    protected Gene gene;
    protected List<Exon> exons;
-   
-   public Gene getGene() {
-      return gene;
-   }
 
-   public void setGene(Gene gene) {
-      this.gene = gene;
-   }
-
-   public List<Exon> getExons() {
-      return exons;
-   }
-
-   public GeneIsoform(String chromosome, String source, String feature, int start, int stop,
-         String score, boolean reverse, String frame, Map<String, String> attributes) {
-      super(chromosome, source, feature, start, stop, score, reverse, frame, attributes);
+   public GeneIsoform(String chromosome, int start, int stop, boolean reverse, String geneId,
+         String transcriptId) {
+      this.chromosome = chromosome;
+      this.start = start;
+      this.stop = stop;
+      this.reverse = reverse;
+      this.geneId = geneId;
+      this.transcriptId = transcriptId;
       
       if (reverse)
          this.start -= 3;
       else
          this.stop += 3;
-   }
-
-   public String getGeneId() {
-      return attributes.get("gene_id");
+      
+      this.exons = new ArrayList<Exon>();
    }
    
-   public String getIsoformName() {
-      return attributes.get("transcript_id");
+   public String getChromosome()   { return chromosome; }
+   public int getStart()           { return start; }
+   public int getStop()            { return stop; }
+   public boolean isReverse()      { return reverse; }
+   public String getGeneId()       { return geneId; }
+   public String getTranscriptId() { return transcriptId; }
+   public Gene getGene()           { return gene; }
+   public List<Exon> getExons()    { return exons; }
+   public int size()               { return stop-start; }
+   
+   public void setGene(Gene gene)         { this.gene = gene; }
+
+   public void addExon(Exon exon) {
+      exons.add(exon);
    }
    
    /**
@@ -49,10 +59,6 @@ public class GeneIsoform extends GffFeature {
          s = s.concat(exonSequence);
       }
       return s;
-   }
-   
-   public void setExons(List<Exon> exons) { 
-      this.exons = exons; 
    }
    
    public int numExons() {
