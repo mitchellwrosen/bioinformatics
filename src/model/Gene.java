@@ -66,8 +66,29 @@ public class Gene {
       return size;
    }
 
+   /**
+    * Calculates the size in nucleotides of this genes. To calculate this, we
+    * take the difference between the latest stop and earliest start for all
+    * isoforms of this gene.
+    * @return the size of the gene in nucleotides.
+    */
    public int size() {
-      return isoforms.get(0).size();
+      if(isoforms.size() == 0) {
+         return 0;
+      }
+
+      int minStart = Integer.MAX_VALUE;
+      int maxStop = Integer.MIN_VALUE;
+
+      for(GeneIsoform isoform : isoforms) {
+         if(isoform.getStart() < minStart) {
+            minStart = isoform.getStart();
+         }
+         if(isoform.getStop() > maxStop) {
+            maxStop = isoform.getStop();
+         }
+      }
+      return maxStop - minStart;
    }
 
    /**
