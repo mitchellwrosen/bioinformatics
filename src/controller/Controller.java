@@ -7,7 +7,6 @@ import model.GCContentInfo;
 import model.GFFParser;
 import model.GFFParser.ParseException;
 import model.Gene;
-import model.Gene.ParseException;
 import model.GeneIsoform;
 import model.GeneUtils;
 import model.Sequence;

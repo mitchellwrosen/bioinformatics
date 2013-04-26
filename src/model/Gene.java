@@ -15,12 +15,6 @@ import java.util.Set;
  * @version 20-Apr-2013
  */
 public class Gene {
-   public static class ParseException extends Exception {
-      public ParseException(String str) {
-         super(str);
-      }
-   }
-
    protected List<GeneIsoform> isoforms;
    protected Sequence sequence;
 

@@ -19,7 +19,7 @@ import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import model.Gene.ParseException;
+import model.GFFParser.ParseException;
 
 import controller.Controller;
 
