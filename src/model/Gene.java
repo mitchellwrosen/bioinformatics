@@ -59,8 +59,19 @@ public class Gene {
       return size;
    }
 
+   /**
+    * A Gene spans the extremes of its isoforms.
+    */
    public int size() {
-      return isoforms.get(0).size();
+      int min = isoforms.get(0).getStart();
+      int max = isoforms.get(0).getStop();
+      
+      for (int i = 1; i < isoforms.size(); ++i) {
+         min = Math.min(min, isoforms.get(i).getStart());
+         max = Math.max(max,  isoforms.get(i).getStop());
+      }
+      
+      return max - min;
    }
 
    /**
