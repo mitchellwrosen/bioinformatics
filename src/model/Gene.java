@@ -1,8 +1,5 @@
 package model;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -73,20 +70,12 @@ public class Gene {
     * @return the size of the gene in nucleotides.
     */
    public int size() {
-      if(isoforms.size() == 0) {
-         return 0;
-      }
-
       int minStart = Integer.MAX_VALUE;
       int maxStop = Integer.MIN_VALUE;
 
       for(GeneIsoform isoform : isoforms) {
-         if(isoform.getStart() < minStart) {
-            minStart = isoform.getStart();
-         }
-         if(isoform.getStop() > maxStop) {
-            maxStop = isoform.getStop();
-         }
+        minStart = Math.min(minStart, isoform.getStart());
+        maxStop = Math.max(maxStop, isoform.getStop());
       }
       return maxStop - minStart;
    }
