@@ -1,8 +1,5 @@
 package model;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -59,8 +56,21 @@ public class Gene {
       return size;
    }
 
+   /**
+    * Calculates the size in nucleotides of this genes. To calculate this, we
+    * take the difference between the latest stop and earliest start for all
+    * isoforms of this gene.
+    * @return the size of the gene in nucleotides.
+    */
    public int size() {
-      return isoforms.get(0).size();
+      int minStart = Integer.MAX_VALUE;
+      int maxStop = Integer.MIN_VALUE;
+
+      for(GeneIsoform isoform : isoforms) {
+        minStart = Math.min(minStart, isoform.getStart());
+        maxStop = Math.max(maxStop, isoform.getStop());
+      }
+      return maxStop - minStart;
    }
 
    /**
