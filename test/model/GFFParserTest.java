@@ -40,40 +40,40 @@ public class GFFParserTest {
       g = genes.get(0);
       assertThat(g.getIsoforms().size(), is(2));
       iso = g.getIsoforms().get(0);
-      testGeneIsoform(iso, "fosmid10", 733, 4493, true, "\"alphaCop\";", "\"alphaCop-RA\";");
+      testGeneIsoform(iso, "fosmid10", 732, 4493, true, "\"alphaCop\";", "\"alphaCop-RA\";");
       
       // Gene 1 isoform 1 exons
       assertThat(iso.getExons().size(), is(2));
-      testExon(iso.getExons().get(0), 3548, 4493);
-      testExon(iso.getExons().get(1), 733, 3491);
+      testExon(iso.getExons().get(0), 3547, 4493);
+      testExon(iso.getExons().get(1), 732, 3491);
       
       // Gene 1 isoform 2
       iso = g.getIsoforms().get(1);
-      testGeneIsoform(iso, "fosmid10", 733, 4493, true, "\"alphaCop\";", "\"alphaCop-RB\";");
+      testGeneIsoform(iso, "fosmid10", 732, 4493, true, "\"alphaCop\";", "\"alphaCop-RB\";");
       
       // Gene 1 isoform 2 exons
       assertThat(iso.getExons().size(), is(2));
-      testExon(iso.getExons().get(0), 3548, 4493);
-      testExon(iso.getExons().get(1), 733, 3491);
+      testExon(iso.getExons().get(0), 3547, 4493);
+      testExon(iso.getExons().get(1), 732, 3491);
       
       // Gene 2 isoform 1
       g = genes.get(1);
       assertThat(g.getIsoforms().size(), is(2));
       iso = g.getIsoforms().get(0);
-      testGeneIsoform(iso, "fosmid10", 733, 4493, false, "\"alphaCop2\";", "\"alphaCop2-RA\";");
+      testGeneIsoform(iso, "fosmid10", 732, 4493, false, "\"alphaCop2\";", "\"alphaCop2-RA\";");
       
       // Gene 2 isoform 1 exons
       assertThat(iso.getExons().size(), is(2));
-      testExon(iso.getExons().get(0), 3548, 4493);
-      testExon(iso.getExons().get(1), 733, 3491);
+      testExon(iso.getExons().get(0), 3547, 4493);
+      testExon(iso.getExons().get(1), 732, 3491);
       
       // Gene 2 isoform 2
       iso = g.getIsoforms().get(1);
-      testGeneIsoform(iso, "fosmid10", 733, 4493, false, "\"alphaCop2\";", "\"alphaCop2-RB\";");
+      testGeneIsoform(iso, "fosmid10", 732, 4493, false, "\"alphaCop2\";", "\"alphaCop2-RB\";");
       
       // Gene 2 isoform 2 exons
       assertThat(iso.getExons().size(), is(2));
-      testExon(iso.getExons().get(0), 3548, 4493);
-      testExon(iso.getExons().get(1), 733, 3491);
+      testExon(iso.getExons().get(0), 3547, 4493);
+      testExon(iso.getExons().get(1), 732, 3491);
    }
 }

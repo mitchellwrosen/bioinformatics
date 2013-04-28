@@ -51,7 +51,7 @@ public class GFFParser {
          this.chromosome = chromosome;
          this.source = source;
          this.feature = feature;
-         this.start = start;
+         this.start = start - 1;
          this.stop = stop;
          this.score = score;
          this.reverse = reverse;
