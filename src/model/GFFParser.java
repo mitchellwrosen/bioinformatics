@@ -172,8 +172,6 @@ public class GFFParser {
       iso = parseIsoform();
       while (iso != null) {
          gene.addIsoform(iso);
-         if (feature == null)
-            break;
          iso = parseIsoform();
       }
    
@@ -194,8 +192,6 @@ public class GFFParser {
       exon = parseExon();
       while (exon != null) {
          iso.addExon(exon);
-         if (feature == null)
-            break;
          exon = parseExon();
       }
       
@@ -208,6 +204,9 @@ public class GFFParser {
    }
    
    protected GeneIsoform parseIsoformData() throws ParseException, IOException {
+      if (feature == null)
+         return null;
+      
       GeneIsoform iso = feature.toGeneIsoform();
       if (iso == null)
          return null;
@@ -221,6 +220,9 @@ public class GFFParser {
    }
    
    protected Exon parseExonData() throws ParseException, IOException {
+      if (feature == null)
+         return null;
+      
       Exon exon = feature.toExon();
       if (exon == null)
          return null;
