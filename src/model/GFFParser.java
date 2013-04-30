@@ -51,7 +51,7 @@ public class GFFParser {
          this.chromosome = chromosome;
          this.source = source;
          this.feature = feature;
-         this.start = start;
+         this.start = start - 1;
          this.stop = stop;
          this.score = score;
          this.reverse = reverse;
@@ -107,7 +107,7 @@ public class GFFParser {
          sb.append(String.format("Chromosome: %s\n", chromosome));
          sb.append(String.format("Source: %s\n", source));
          sb.append(String.format("Feature: %s\n", feature));
-         sb.append(String.format("Start: %d\n", start));
+         sb.append(String.format("Start: %d\n", start + 1));
          sb.append(String.format("Stop: %d\n", stop));
          sb.append(String.format("Score: %s\n", score));
          sb.append(String.format("Reverse: %s\n", reverse));
