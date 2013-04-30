@@ -216,7 +216,13 @@ public class View extends JDialog {
                controller.useGffFile(mGffFile.getText());
                mValidGffFile = true;
                updateRunButton();
-            } catch (Exception ex) {
+            } catch (IOException ex) {
+               JOptionPane.showMessageDialog(null, ex.toString(), "Error",
+                     JOptionPane.ERROR_MESSAGE);
+               mValidGffFile = false;
+               updateRunButton();
+               return;
+            } catch (ParseException ex) {
                JOptionPane.showMessageDialog(null, ex.toString(), "Error",
                      JOptionPane.ERROR_MESSAGE);
                mValidGffFile = false;
