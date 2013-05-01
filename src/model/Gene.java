@@ -34,8 +34,31 @@ public class Gene {
    }
 
    public String getId()                  { return isoforms.get(0).getGeneId(); }
-   public int getStart()                  { return isoforms.get(0).getStart(); }
-   public int getStop()                   { return isoforms.get(0).getStop(); }
+
+   /**
+    * Gets the earliest start of any isoform of this gene.
+    * @return The earliest start for this gene.
+    */
+   public int getStart() {
+      int start = Integer.MAX_VALUE;
+      for(GeneIsoform isoform : isoforms) {
+         start = Math.min(isoform.getStart(), start);
+      }
+      return start;
+   }
+
+   /**
+    * Gets the latest stop of any isoform of this gene.
+    * @return The latest stop for this gene.
+    */
+   public int getStop() {
+      int stop = Integer.MIN_VALUE;
+      for (GeneIsoform isoform : isoforms) {
+         stop = Math.max(isoform.getStop(), stop);
+      }
+      return stop;
+   }
+
    public List<GeneIsoform> getIsoforms() { return isoforms; }
    public int numIsoforms()               { return isoforms.size(); }
    public Sequence getSequence()          { return sequence; }
