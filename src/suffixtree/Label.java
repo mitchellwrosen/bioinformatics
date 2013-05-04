@@ -11,12 +11,20 @@ public class Label {
       setEnd(end);
    }
 
+   public char get(int index) {
+      return this.string.charAt(begin + index);
+   }
+
    public int getBegin() {
       return begin;
    }
 
    public void setBegin(int begin) {
       this.begin = begin;
+   }
+
+   public void shiftBegin(int shift) {
+      this.begin += shift;
    }
 
    public int getEnd() {
@@ -29,6 +37,12 @@ public class Label {
 
    public int getLength() {
       return end - begin;
+   }
+
+   public Label split(int at) {
+      Label newLabel = new Label(this.string, this.begin, this.begin + at);
+      this.begin = at;
+      return newLabel;
    }
 
    @Override
