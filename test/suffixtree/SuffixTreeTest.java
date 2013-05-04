@@ -9,7 +9,8 @@ public class SuffixTreeTest {
    @Test
    public void testAdd() {
       SuffixTree tree = new SuffixTree();
-      tree.add("CATCAT$");
+      //tree.add("CATCAT$");
+      tree.add("AABABC$");
       System.out.print(tree.getLeaves());
       System.out.print(tree.toString());
       assertEquals("", tree.toString());

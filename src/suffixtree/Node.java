@@ -11,58 +11,71 @@ import java.util.Map;
  * 
  */
 public class Node {
-   private Node                 parent   = null;
-   private Label                label    = null;
-   private Map<Character, Node> children = new HashMap<Character, Node>();
+   protected Node                 parent   = null;
+   protected String               string;
+   protected int                  begin;
+   protected int                  end;
+   protected int                  count;
+   protected Map<Character, Node> children = new HashMap<Character, Node>();
 
    public Node() {
+      this.string = "";
+      this.begin = 0;
+      this.end = 0;
+      this.count = 0;
    }
 
    public Node(String string, int begin, int end) {
-      this.label = new Label(string, begin, end);
+      this.string = string;
+      this.begin = begin;
+      this.end = end;
+      this.count = 0;
+   }
+   
+   public int getCount() {
+      return count;
    }
 
-   public Node(Label label) {
-      this.label = label;
+   public int length() {
+      return end - begin;
    }
 
-   public Node getParent() {
-      return parent;
-   }
-
-   public Label getLabel() {
-      return label;
+   public char charAt(int n) {
+      return string.charAt(begin + n);
    }
 
    public void insertNode(Node node) {
-      if (label != null && parent != null) {
-         String thisString = this.getLabel().toString();
-         String otherString = node.getLabel().toString();
-         int i = 0;
-         while (i < thisString.length()
-               && otherString.charAt(i) == thisString.charAt(i)) {
-            i++;
-         }
-         node.label.shiftBegin(i);
-         if (i < thisString.length()) {
-            Node newNode = new Node(this.label.split(i));
-            this.parent.addChild(newNode);
-            newNode.addChild(this);
-            newNode.addChild(node);
-            return;
-         }
-      }
-      Node child = this.getChild(node.getLabel().get(0));
-      if (child == null) {
-         this.addChild(node);
+      int i = 0;
+      while (i < length() && node.charAt(i) == charAt(i))
+         i++;
+
+      node.begin += i;
+      if (i < length()) {
+         Node newNode = new Node(this.string, this.begin, this.begin + i);
+         this.begin += i;
+         
+         parent.addChild(newNode);
+         newNode.parent = this.parent;
+         
+         newNode.addChild(this);
+         this.parent = newNode;
+         
+         newNode.addChild(node);
+         node.parent = newNode;
       } else {
-         child.insertNode(node);
+         Node child = this.getChild(node.charAt(0));
+         
+         if (child == null) {
+            this.addChild(node);
+            node.parent = this;
+         } else {
+            child.insertNode(node);
+         }
       }
    }
 
    private void addChild(Node child) {
-      child.parent = this;
-      children.put(child.getLabel().toString().charAt(0), child);
+      children.put(child.charAt(0), child);
    }
 
    public Node getChild(Character nextChar) {
@@ -90,10 +103,10 @@ public class Node {
       }
       String tabs = sb.toString();
       sb = new StringBuilder(tabs);
-      if (label == null) {
+      if (string.equals("")) {
          sb.append("<root>\n");
       } else {
-         sb.append(label.toString()).append("\n");
+         sb.append(string.substring(begin, end)).append(String.format(" (%d)", count)).append("\n");
       }
       for (Character key : children.keySet()) {
          sb.append(tabs).append("[").append(key).append("]\n").append(tabs)
