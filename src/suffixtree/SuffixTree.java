@@ -27,9 +27,8 @@ public class SuffixTree {
       }
    }
 
-   @Override
-   public String toString() {
-      return root.toString();
+   public String debugString() {
+      return root.debugString();
    }
 
    private void insertSuffix(String string, int begin) {
@@ -46,27 +45,27 @@ public class SuffixTree {
    public List<Node> getLeaves() {
       return leaves;
    }
-   
+
    public int numOccurrences(String string) {
       int nodeCharIndex = 0;
-      
+
       Node node = root.getChild(string.charAt(0));
       if (node == null)
          return 0;
-      
+
       for (int i = 0; i < string.length(); ++i, ++nodeCharIndex) {
          if (nodeCharIndex >= node.length()) {
             node = node.getChild(string.charAt(i));
             if (node == null)
                return 0;
-            
+
             nodeCharIndex = 0;
          }
-         
+
          if (string.charAt(i) != node.charAt(nodeCharIndex))
             return 0;
       }
-      
+
       return node.getCount();
    }
 }

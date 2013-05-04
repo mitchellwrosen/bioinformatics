@@ -31,7 +31,7 @@ public class Node {
       this.end = end;
       this.count = 0;
    }
-   
+
    public int getCount() {
       return count;
    }
@@ -53,18 +53,18 @@ public class Node {
       if (i < length()) {
          Node newNode = new Node(this.string, this.begin, this.begin + i);
          this.begin += i;
-         
+
          parent.addChild(newNode);
          newNode.parent = this.parent;
-         
+
          newNode.addChild(this);
          this.parent = newNode;
-         
+
          newNode.addChild(node);
          node.parent = newNode;
       } else {
          Node child = this.getChild(node.charAt(0));
-         
+
          if (child == null) {
             this.addChild(node);
             node.parent = this;
@@ -94,8 +94,15 @@ public class Node {
       }
    }
 
-   @Override
    public String toString() {
+      if (parent != null) {
+         return parent.toString() + string.substring(begin, end);
+      } else {
+         return string.substring(begin, end);
+      }
+   }
+
+   public String debugString() {
       StringBuilder sb = new StringBuilder();
       int level = getLevel();
       for (int i = 0; i < level; i++) {
@@ -106,11 +113,12 @@ public class Node {
       if (string.equals("")) {
          sb.append("<root>\n");
       } else {
-         sb.append(string.substring(begin, end)).append(String.format(" (%d)", count)).append("\n");
+         sb.append(string.substring(begin, end))
+               .append(String.format(" (%d)", count)).append("\n");
       }
       for (Character key : children.keySet()) {
          sb.append(tabs).append("[").append(key).append("]\n").append(tabs)
-               .append(children.get(key).toString());
+               .append(children.get(key).debugString());
       }
       return sb.toString();
    }
