@@ -7,38 +7,42 @@ import java.util.List;
 
 public class SuffixTree {
    private Node               root;
-   private Collection<String> strings = new ArrayList<String>();
-   private List<Node>         leaves  = new LinkedList<Node>();
+   private Collection<String> strings;
+   private List<Node>         leaves;
 
-   public SuffixTree() {
-      this.root = new Node();
+   protected SuffixTree(List<String> strings) {
+      root = new Node();
+      leaves = new LinkedList<Node>();
+      this.strings = strings;
    }
-
-   public void add(String string) {
-      this.strings.add(string);
-      insertSuffix(string, 0);
-
+   
+   public static SuffixTree create(String string) {
+      List<String> strings = new ArrayList<String>(1);
+      strings.add(string);
+      return create(strings);
+   }
+   
+   public static SuffixTree create(List<String> strings) {
+      SuffixTree tree = new SuffixTree(strings);
+      tree.fill();
+      return tree;
+   }
+   
+   protected void fill() {
+      for (String string : strings) {
+         for (int i = 0; i < string.length(); ++i) {
+            Node leaf = new LeafNode(string, i, string.length());
+            root.insertNode(leaf);
+            leaves.add(leaf);
+         }
+      }
+      
       for (Node leaf : leaves) {
          Node ptr = leaf;
          while (ptr != null) {
             ptr.count++;
             ptr = ptr.parent;
          }
-      }
-   }
-
-   public String debugString() {
-      return root.debugString();
-   }
-
-   private void insertSuffix(String string, int begin) {
-      Node leaf = new LeafNode(string, begin, string.length());
-      root.insertNode(leaf);
-      leaves.add(leaf);
-
-      begin++;
-      if (begin < string.length()) {
-         insertSuffix(string, begin);
       }
    }
 
@@ -67,5 +71,9 @@ public class SuffixTree {
       }
 
       return node.getCount();
+   }
+
+   public String debugString() {
+      return root.debugString();
    }
 }
