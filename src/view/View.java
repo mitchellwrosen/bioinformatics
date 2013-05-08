@@ -28,7 +28,7 @@ public class View extends JDialog {
    protected final int DIALOG_HEIGHT = 400, DIALOG_WIDTH = 500;
 
    // Selected tab "enum"
-   protected final int GC_CONTENT_TAB = 0, CALCULATIONS_TAB = 1, PROTEINS_TAB = 2;
+   protected final int GC_CONTENT_TAB = 0, CALCULATIONS_TAB = 1, PROTEINS_TAB = 2, FIND_REPEATS_TAB = 3;
 
    protected Controller controller;
 
@@ -48,6 +48,7 @@ public class View extends JDialog {
    protected GCContentInfoPanel mGcContentInfoPanel;
    protected CalculationsPanel mCalculationsPanel;
    protected ProteinsPanel mProteinsPanel;
+   protected FindRepeatsPanel mFindRepeatsPanel;
 
    protected JButton mRunButton, mSaveButton, mQuitButton;
 
@@ -112,6 +113,7 @@ public class View extends JDialog {
       mGcContentInfoPanel = new GCContentInfoPanel();
       mCalculationsPanel = new CalculationsPanel();
       mProteinsPanel = new ProteinsPanel();
+      mFindRepeatsPanel = new FindRepeatsPanel();
 
       mTabbedPane = new JTabbedPane();
       mTabbedPane.addChangeListener(new ChangeListener() {
@@ -123,6 +125,7 @@ public class View extends JDialog {
                mSequenceFileBox.setVisible(true);
                mGffFileBox.setVisible(false);
                break;
+            case FIND_REPEATS_TAB:
             case CALCULATIONS_TAB:
             case PROTEINS_TAB:
                mSequenceFileBox.setVisible(true);
@@ -137,6 +140,7 @@ public class View extends JDialog {
       mTabbedPane.addTab("GC Content", mGcContentInfoPanel);
       mTabbedPane.addTab("Calculations", mCalculationsPanel);
       mTabbedPane.addTab("Proteins", mProteinsPanel);
+      mTabbedPane.addTab("Find Repeats", mFindRepeatsPanel);
    }
 
    protected Box initializeControlsBox() {
@@ -169,6 +173,7 @@ public class View extends JDialog {
       case GC_CONTENT_TAB:
          mRunButton.setEnabled(mValidSequenceFile);
          break;
+      case FIND_REPEATS_TAB:
       case CALCULATIONS_TAB:
       case PROTEINS_TAB:
          mRunButton.setEnabled(mValidSequenceFile && mValidGffFile);
@@ -250,6 +255,9 @@ public class View extends JDialog {
             break;
          case PROTEINS_TAB:
             runProteins();
+            break;
+         case FIND_REPEATS_TAB:
+            // TODO: FIND REPEATS
             break;
          default:
             assert false;
