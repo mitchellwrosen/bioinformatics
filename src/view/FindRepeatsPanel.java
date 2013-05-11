@@ -24,13 +24,20 @@ public class FindRepeatsPanel extends JPanel {
    /** Optional field representing a specific string to be matched. */
    protected JTextField mSearchForString;
 
-   /** The box that contains the search field. */
-   protected Box mSearchBox;
-   /** The box that contains the filter components. */
-   protected Box mFilterBox;
+   /** Label for the min length filter. */
+   protected JLabel mMinimumLengthLabel;
+   /** Label for the max distance filter. */
+   protected JLabel mMaxDistanceLabel;
+   /** Label for the mSearchButton */
+   protected JLabel mSearchLabel;
 
-   protected JRadioButton filterButton;
-   protected JRadioButton searchButton;
+   /**
+    * Radio button option for selecting to use filters instead of exact string
+    * matching.
+    */
+   protected JRadioButton mFilterButton;
+   /** Radio button option for exact string matching. */
+   protected JRadioButton mSearchButton;
 
    public FindRepeatsPanel() {
       mDisplay = new JTextArea();
@@ -54,51 +61,60 @@ public class FindRepeatsPanel extends JPanel {
 
    protected Box setupFilterBox() {
       Box controlBox = Box.createVerticalBox();
-      searchButton = new JRadioButton("Use Exact Match");
-
+ 
       Box filterContainerBox = Box.createVerticalBox();
       Box searchContainerBox = Box.createVerticalBox();
 
       Box minLengthBox = Box.createHorizontalBox();
       Box maxDistanceBox = Box.createHorizontalBox();
 
-      mFilterBox = Box.createVerticalBox();
-      mSearchBox = Box.createHorizontalBox();
+      Box filterBox = Box.createVerticalBox();
+      Box searchBox = Box.createHorizontalBox();
 
-      filterButton = new JRadioButton("Use Filtering");
+      mSearchButton = new JRadioButton("Use Exact Match");
+      mFilterButton = new JRadioButton("Use Filtering");
 
-      filterContainerBox.add(filterButton);
-      filterContainerBox.add(mFilterBox);
-      mFilterBox.add(minLengthBox);
-      mFilterBox.add(maxDistanceBox);
-      minLengthBox.add(new JLabel("Minimum Length:"));
+      mMinimumLengthLabel = new JLabel("Minimum Length:");
+      mMaxDistanceLabel = new JLabel("Maximum distance to next mRNA start:");
+      mSearchLabel = new JLabel("Exact String to match:");
+
+      filterContainerBox.add(mFilterButton);
+      filterContainerBox.add(filterBox);
+      filterBox.add(minLengthBox);
+      filterBox.add(maxDistanceBox);
+      minLengthBox.add(mMinimumLengthLabel);
       minLengthBox.add(mMinimumLength);
-      maxDistanceBox.add(new JLabel("Maximum distance to next mRNA start:"));
+      maxDistanceBox.add(mMaxDistanceLabel);
       maxDistanceBox.add(mMaxDistanceFromStart);
-      mSearchBox.add(new JLabel("Exact String to match:"));
-      mSearchBox.add(mSearchForString);
-      searchContainerBox.add(searchButton);
-      searchContainerBox.add(mSearchBox);
+      searchBox.add(mSearchLabel);
+      searchBox.add(mSearchForString);
+      searchContainerBox.add(mSearchButton);
+      searchContainerBox.add(searchBox);
 
       controlBox.add(filterContainerBox);
       controlBox.add(searchContainerBox);
 
       ButtonGroup filterChooser = new ButtonGroup();
-      filterChooser.add(filterButton);
-      filterChooser.add(searchButton);
+      filterChooser.add(mFilterButton);
+      filterChooser.add(mSearchButton);
 
-      filterButton.addActionListener(radioListen);
-      filterButton.setSelected(true);
-      searchButton.addActionListener(radioListen);
+      mFilterButton.setSelected(true);
+
+      mFilterButton.addActionListener(radioListen);
+      mSearchButton.addActionListener(radioListen);
+      radioListen.actionPerformed(null);
       return controlBox;
    }
 
    protected ActionListener radioListen = new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-         mMaxDistanceFromStart.setEnabled(filterButton.isSelected());
-         mMinimumLength.setEnabled(filterButton.isSelected());
-         mSearchForString.setEnabled(searchButton.isSelected());
+         mMaxDistanceFromStart.setEnabled(mFilterButton.isSelected());
+         mMinimumLength.setEnabled(mFilterButton.isSelected());
+         mMaxDistanceLabel.setEnabled(mFilterButton.isSelected());
+         mMinimumLengthLabel.setEnabled(mFilterButton.isSelected());
+         mSearchForString.setEnabled(mSearchButton.isSelected());
+         mSearchLabel.setEnabled(mSearchButton.isSelected());
       }
    };
 
@@ -117,6 +133,6 @@ public class FindRepeatsPanel extends JPanel {
     *         false if we expect to use filtering.
     */
    public boolean isMatchExactString() {
-      return searchButton.isSelected();
+      return mSearchButton.isSelected();
    }
 }

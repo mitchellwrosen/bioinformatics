@@ -257,7 +257,7 @@ public class View extends JDialog {
             runProteins();
             break;
          case FIND_REPEATS_TAB:
-            // TODO: FIND REPEATS
+            runFindRepeats();
             break;
          default:
             assert false;
@@ -289,6 +289,15 @@ public class View extends JDialog {
 
    protected void runProteins() {
       mProteinsPanel.setDisplay(controller.getProteins());
+   }
+   protected void runFindRepeats() {
+      if(mFindRepeatsPanel.isMatchExactString()) {
+         // Find incidences of exact string match
+         mFindRepeatsPanel.setDisplay("Exact Match!");
+      } else {
+         // Find all indices of repeats that meat filter criteria.
+         mFindRepeatsPanel.setDisplay("Filtering...");
+      }
    }
 
    protected ActionListener saveButtonActionListener = new ActionListener() {
