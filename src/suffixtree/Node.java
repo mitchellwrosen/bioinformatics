@@ -4,6 +4,8 @@
 package suffixtree;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,25 +17,31 @@ public class Node {
    protected String               string;
    protected int                  begin;
    protected int                  end;
-   protected int                  count;
+   protected List<LeafNode>       leaves   = new LinkedList<LeafNode>();
    protected Map<Character, Node> children = new HashMap<Character, Node>();
 
    public Node() {
       this.string = "";
       this.begin = 0;
       this.end = 0;
-      this.count = 0;
    }
 
    public Node(String string, int begin, int end) {
       this.string = string;
       this.begin = begin;
       this.end = end;
-      this.count = 0;
    }
 
    public int getCount() {
-      return count;
+      return leaves.size();
+   }
+
+   public void addLeaf(LeafNode leaf) {
+      this.leaves.add(leaf);
+   }
+
+   public List<LeafNode> getLeaves() {
+      return this.leaves;
    }
 
    public int length() {
@@ -44,7 +52,7 @@ public class Node {
       return string.charAt(begin + n);
    }
 
-   public void insertNode(Node node) {
+   public void insertNode(LeafNode node) {
       int i = 0;
       while (i < length() && node.charAt(i) == charAt(i))
          i++;
@@ -114,7 +122,7 @@ public class Node {
          sb.append("<root>\n");
       } else {
          sb.append(string.substring(begin, end))
-               .append(String.format(" (%d)", count)).append("\n");
+               .append(String.format(" (%d)", this.getCount())).append("\n");
       }
       for (Character key : children.keySet()) {
          sb.append(tabs).append("[").append(key).append("]\n").append(tabs)
