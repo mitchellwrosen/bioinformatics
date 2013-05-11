@@ -3,6 +3,8 @@ package controller;
 import java.io.IOException;
 import java.util.List;
 
+import suffixtree.SuffixTree;
+
 import model.GCContentInfo;
 import model.GFFParser;
 import model.GFFParser.ParseException;
@@ -39,6 +41,7 @@ public class Controller {
             }
          }
       }
+      
    }
 
    public void useGffFile(String filename) throws IOException, ParseException {
@@ -171,5 +174,46 @@ public class Controller {
       }
 
       return sb.toString();
+   }
+
+   /**
+    * Find all repeats. Currently a TODO.
+    * 
+    * @param minimumRepeatLength
+    *           The minimum length of a repeat.
+    * @param maxDistanceFromMRNAStart
+    *           The maximum distance from the next mRNA start. If negative, all
+    *           occurrences will be included regardless of distance from mRNA
+    *           start.
+    * @return Returns formatted output representing all repeated strings within
+    *         the sequence.
+    */
+   public String getRepeats(int minimumRepeatLength,
+         int maxDistanceFromMRNAStart) {
+      return "Filtering...";
+   }
+
+   /**
+    * Find all occurences of the given search string.
+    * 
+    * @param searchString
+    *           The string to be searched for.
+    * @param maxDistanceFromMRNAStart
+    *           The maximum distance from the next mRNA start. If negative, all
+    *           occurrences will be included regardless of distance from mRNA
+    *           start.
+    * @return Returns formatted output representing all repeated strings within
+    *         the sequence.
+    */
+   public String matchString(String searchString, int maxDistanceFromMRNAStart) {
+      SuffixTree tree = SuffixTree.create(mSequence.toString());
+      List<Integer> occurances = tree.getOccurrences(searchString);
+      StringBuilder occurancesInfo = new StringBuilder();
+      occurancesInfo
+            .append("Repeated sequence,Frequency,Fold Expression,Average Distance,From mRNA Start,Coordinates\n ");
+      for (Integer occurance : occurances) {
+         occurancesInfo.append(occurance + ", ");
+      }
+      return occurancesInfo.toString();
    }
 }

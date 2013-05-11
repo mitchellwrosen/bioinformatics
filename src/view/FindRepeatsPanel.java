@@ -20,7 +20,7 @@ public class FindRepeatsPanel extends JPanel {
    /** Optional field representing minimum length for returned repeat sequences. */
    protected JTextField mMinimumLength;
    /** Maximum distance from END of repeat to START of gene sequence. */
-   protected JTextField mMaxDistanceFromStart;
+   protected JTextField mMaxDistanceToStart;
    /** Optional field representing a specific string to be matched. */
    protected JTextField mSearchForString;
 
@@ -42,11 +42,11 @@ public class FindRepeatsPanel extends JPanel {
    public FindRepeatsPanel() {
       mDisplay = new JTextArea();
       mMinimumLength = new JTextField(20);
-      mMaxDistanceFromStart = new JTextField(20);
+      mMaxDistanceToStart = new JTextField(20);
       mSearchForString = new JTextField(20);
 
       mMinimumLength.setEnabled(true);
-      mMaxDistanceFromStart.setEnabled(true);
+      mMaxDistanceToStart.setEnabled(true);
 
       setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
       add(setupFilterBox());
@@ -72,7 +72,7 @@ public class FindRepeatsPanel extends JPanel {
       Box searchBox = Box.createHorizontalBox();
 
       mSearchButton = new JRadioButton("Use Exact Match");
-      mFilterButton = new JRadioButton("Use Filtering");
+      mFilterButton = new JRadioButton("Use Minimum Length Filter");
 
       mMinimumLengthLabel = new JLabel("Minimum Length:");
       mMaxDistanceLabel = new JLabel("Maximum distance to next mRNA start:");
@@ -81,16 +81,17 @@ public class FindRepeatsPanel extends JPanel {
       filterContainerBox.add(mFilterButton);
       filterContainerBox.add(filterBox);
       filterBox.add(minLengthBox);
-      filterBox.add(maxDistanceBox);
+      //filterBox.add(maxDistanceBox);
       minLengthBox.add(mMinimumLengthLabel);
       minLengthBox.add(mMinimumLength);
       maxDistanceBox.add(mMaxDistanceLabel);
-      maxDistanceBox.add(mMaxDistanceFromStart);
+      maxDistanceBox.add(mMaxDistanceToStart);
       searchBox.add(mSearchLabel);
       searchBox.add(mSearchForString);
       searchContainerBox.add(mSearchButton);
       searchContainerBox.add(searchBox);
 
+      controlBox.add(maxDistanceBox);
       controlBox.add(filterContainerBox);
       controlBox.add(searchContainerBox);
 
@@ -109,9 +110,9 @@ public class FindRepeatsPanel extends JPanel {
    protected ActionListener radioListen = new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-         mMaxDistanceFromStart.setEnabled(mFilterButton.isSelected());
+         //mMaxDistanceFromStart.setEnabled(mFilterButton.isSelected());
          mMinimumLength.setEnabled(mFilterButton.isSelected());
-         mMaxDistanceLabel.setEnabled(mFilterButton.isSelected());
+         //mMaxDistanceLabel.setEnabled(mFilterButton.isSelected());
          mMinimumLengthLabel.setEnabled(mFilterButton.isSelected());
          mSearchForString.setEnabled(mSearchButton.isSelected());
          mSearchLabel.setEnabled(mSearchButton.isSelected());
@@ -134,5 +135,26 @@ public class FindRepeatsPanel extends JPanel {
     */
    public boolean isMatchExactString() {
       return mSearchButton.isSelected();
+   }
+
+   /**
+    * @return Return the minimum length filter as a string.
+    */
+   public String getMinimumLengthText() {
+      return mMinimumLength.getText();
+   }
+
+   /**
+    * @return Return the maximum distance to the next mRNA start as a string.
+    */
+   public String getMaximumDistanceToStartText() {
+      return mMaxDistanceToStart.getText();
+   }
+
+   /**
+    * @return Return the String to be searched for in the sequence.
+    */
+   public String getMatchStringText() {
+      return mSearchForString.getText();
    }
 }

@@ -290,13 +290,39 @@ public class View extends JDialog {
    protected void runProteins() {
       mProteinsPanel.setDisplay(controller.getProteins());
    }
+
    protected void runFindRepeats() {
-      if(mFindRepeatsPanel.isMatchExactString()) {
-         // Find incidences of exact string match
-         mFindRepeatsPanel.setDisplay("Exact Match!");
+      String maxDistanceFromStartText = mFindRepeatsPanel
+            .getMaximumDistanceToStartText();
+      int maxDistanceFromStart = 0;
+      if (maxDistanceFromStartText.isEmpty()) {
+         maxDistanceFromStart = -1;
       } else {
+         try {
+            maxDistanceFromStart = Integer.parseInt(maxDistanceFromStartText);
+         } catch (NumberFormatException e) {
+            // TODO: Handle exception gracefully.
+            return;
+         }
+      }
+      if (mFindRepeatsPanel.isMatchExactString()) {
+         // Find incidences of exact string match
+         controller.matchString(mFindRepeatsPanel.getMatchStringText(),
+               maxDistanceFromStart);
+      } else {
+         String minRepeatLengthText = mFindRepeatsPanel.getMinimumLengthText();
+         int minRepeatLength = 0;
+         if (!minRepeatLengthText.isEmpty()) {
+            try {
+               minRepeatLength = Integer.parseInt(minRepeatLengthText);
+            } catch (NumberFormatException e) {
+               // TODO: Handle exception gracefully.
+               return;
+            }
+         }
          // Find all indices of repeats that meat filter criteria.
-         mFindRepeatsPanel.setDisplay("Filtering...");
+         mFindRepeatsPanel.setDisplay(controller.getRepeats(minRepeatLength,
+               maxDistanceFromStart));
       }
    }
 
