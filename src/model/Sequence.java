@@ -128,7 +128,76 @@ public class Sequence {
 
       return numGC / (double) nucleotides.size();
    }
-   
+
+   /**
+    * @return The guanine content of this sequence, unknowns treated as their
+    *         own class of acids.
+    */
+   public double gContent() {
+      int gCount = 0;
+      for (Nucleotide n : nucleotides) {
+         if (n.equals(Nucleotide.GUANINE)) {
+            gCount++;
+         }
+      }
+      return gCount / (double) nucleotides.size();
+   }
+
+   /**
+    * @return The cytosine content of this sequence, unknowns treated as their
+    *         own class of acids.
+    */
+   public double cContent() {
+      int cCount = 0;
+      for (Nucleotide n : nucleotides) {
+         if (n.equals(Nucleotide.CYTOSINE)) {
+            cCount++;
+         }
+      }
+      return cCount / (double) nucleotides.size();
+   }
+
+   /**
+    * @return The adenine content of this sequence, unknowns treated as their
+    *         own class of acids.
+    */
+   public double aContent() {
+      int aCount = 0;
+      for (Nucleotide n : nucleotides) {
+         if (n.equals(Nucleotide.ADENINE)) {
+            aCount++;
+         }
+      }
+      return aCount / (double) nucleotides.size();
+   }
+
+   /**
+    * @return The thymine content of this sequence, unknowns treated as their
+    *         own class of acids.
+    */
+   public double tContent() {
+      int tCount = 0;
+      for (Nucleotide n : nucleotides) {
+         if (n.equals(Nucleotide.THYMINE)) {
+            tCount++;
+         }
+      }
+      return tCount / (double) nucleotides.size();
+   }
+
+   /**
+    * @return The unknown content of this sequence.
+    */
+   public double unknownContent() {
+      int uCount = 0;
+      for (Nucleotide n : nucleotides) {
+         if (n.equals(Nucleotide.UNKNOWN)) {
+            uCount++;
+         }
+      }
+      return uCount / (double) nucleotides.size();
+   }
+
    public String toString() {
       StringBuilder sb = new StringBuilder();
       for (Nucleotide n : nucleotides)

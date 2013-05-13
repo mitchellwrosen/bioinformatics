@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import suffixtree.SuffixTree;
+import suffixtree.SuffixTreeUtils;
 
 import model.GCContentInfo;
 import model.GFFParser;
@@ -11,6 +12,7 @@ import model.GFFParser.ParseException;
 import model.Gene;
 import model.GeneIsoform;
 import model.GeneUtils;
+import model.Nucleotide;
 import model.Sequence;
 
 /**
@@ -41,7 +43,6 @@ public class Controller {
             }
          }
       }
-      
    }
 
    public void useGffFile(String filename) throws IOException, ParseException {
@@ -55,6 +56,7 @@ public class Controller {
                gene.setSequence(mSequence);
          }
       }
+      
    }
 
    /**
@@ -193,27 +195,72 @@ public class Controller {
       return "Filtering...";
    }
 
+
+
    /**
-    * Find all occurences of the given search string.
+    * Find all occurrences of the given search string.
     * 
     * @param searchString
     *           The string to be searched for.
     * @param maxDistanceFromMRNAStart
     *           The maximum distance from the next mRNA start. If negative, all
     *           occurrences will be included regardless of distance from mRNA
-    *           start.
+    *           start. <Currently excluded from calculations!>
     * @return Returns formatted output representing all repeated strings within
     *         the sequence.
     */
    public String matchString(String searchString, int maxDistanceFromMRNAStart) {
+      SuffixTreeUtils treeUtil = new SuffixTreeUtils(mSequence, mGenes);
+
+      String reverseSearchString = SuffixTreeUtils
+            .reverseComplement(searchString);
+
       SuffixTree tree = SuffixTree.create(mSequence.toString());
-      List<Integer> occurances = tree.getOccurrences(searchString);
-      StringBuilder occurancesInfo = new StringBuilder();
-      occurancesInfo
-            .append("Repeated sequence,Frequency,Fold Expression,Average Distance,From mRNA Start,Coordinates\n ");
-      for (Integer occurance : occurances) {
-         occurancesInfo.append(occurance + ", ");
+
+      List<Integer> occurences = tree.getOccurrences(searchString);
+      List<Integer> revOccurences = tree.getOccurrences(reverseSearchString);
+
+      StringBuilder matchInfo = new StringBuilder();
+
+      int absoluteFrequency = occurences.size();
+      int reverseAbsoluteFrequency = revOccurences.size();
+
+      double averageDistance = treeUtil
+            .averageDistanceToNextPositiveMRNA(occurences);
+      double averageDistanceNegative = treeUtil
+            .averageDistanceToNextNegativeMRNA(occurences);
+
+      double reverseAverageDistance = treeUtil
+            .averageDistanceToNextPositiveMRNA(revOccurences);
+      double reverseAverageDistanceNegative = treeUtil
+            .averageDistanceToNextNegativeMRNA(revOccurences);
+
+      double expectedFoldExpression = treeUtil
+            .findExpectedFoldExpression(searchString);
+      double reverseExpectedFoldExpression = treeUtil
+            .findExpectedFoldExpression(reverseSearchString);
+
+      double relativeFoldExpression = absoluteFrequency
+            / expectedFoldExpression;
+      double reverseRelativeFoldExpression = reverseAbsoluteFrequency
+            / reverseExpectedFoldExpression;
+      matchInfo.append("Repeated sequence,Frequency,Fold Expression,Average"
+            + " Distance From (+) mRNA Start,Average Distance From (-)"
+            + " mRNA Start,Coordinates\n ");
+
+      matchInfo.append(searchString + "," + absoluteFrequency + ","
+            + relativeFoldExpression + "," + averageDistance + ","
+            + averageDistanceNegative);
+      for (Integer occurance : occurences) {
+         matchInfo.append("," + occurance);
       }
-      return occurancesInfo.toString();
+
+      matchInfo.append(reverseSearchString + "," + reverseAbsoluteFrequency
+            + "," + reverseRelativeFoldExpression + ","
+            + reverseAverageDistance + "," + reverseAverageDistanceNegative);
+      for (Integer occurance : revOccurences) {
+         matchInfo.append("," + occurance);
+      }
+      return matchInfo.toString();
    }
 }
