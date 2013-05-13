@@ -46,7 +46,8 @@ public class FindRepeatsPanel extends JPanel {
       mSearchForString = new JTextField(20);
 
       mMinimumLength.setEnabled(true);
-      mMaxDistanceToStart.setEnabled(true);
+      // TODO: remove.
+      mMaxDistanceToStart.setEnabled(false);
 
       setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
       add(setupFilterBox());
@@ -76,6 +77,8 @@ public class FindRepeatsPanel extends JPanel {
 
       mMinimumLengthLabel = new JLabel("Minimum Length:");
       mMaxDistanceLabel = new JLabel("Maximum distance to next mRNA start:");
+      // TODO: remove.
+      mMaxDistanceLabel.setEnabled(false);
       mSearchLabel = new JLabel("Exact String to match:");
 
       filterContainerBox.add(mFilterButton);
@@ -110,9 +113,7 @@ public class FindRepeatsPanel extends JPanel {
    protected ActionListener radioListen = new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-         //mMaxDistanceFromStart.setEnabled(mFilterButton.isSelected());
          mMinimumLength.setEnabled(mFilterButton.isSelected());
-         //mMaxDistanceLabel.setEnabled(mFilterButton.isSelected());
          mMinimumLengthLabel.setEnabled(mFilterButton.isSelected());
          mSearchForString.setEnabled(mSearchButton.isSelected());
          mSearchLabel.setEnabled(mSearchButton.isSelected());

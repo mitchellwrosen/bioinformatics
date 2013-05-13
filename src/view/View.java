@@ -301,7 +301,9 @@ public class View extends JDialog {
          try {
             maxDistanceFromStart = Integer.parseInt(maxDistanceFromStartText);
          } catch (NumberFormatException e) {
-            // TODO: Handle exception gracefully.
+            JOptionPane.showMessageDialog(null,
+                  "Max distance to next mRNA start must be a number.", "Error",
+                  JOptionPane.ERROR_MESSAGE);
             return;
          }
       }
@@ -316,7 +318,9 @@ public class View extends JDialog {
             try {
                minRepeatLength = Integer.parseInt(minRepeatLengthText);
             } catch (NumberFormatException e) {
-               // TODO: Handle exception gracefully.
+               JOptionPane.showMessageDialog(null,
+                     "Minimum length must be a number.", "Error",
+                     JOptionPane.ERROR_MESSAGE);
                return;
             }
          }
