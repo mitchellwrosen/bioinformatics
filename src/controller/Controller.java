@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import suffixtree.SuffixTree;
+import suffixtree.SuffixTree.RepeatEntry;
 import suffixtree.SuffixTreeUtils;
 
 import model.GCContentInfo;
@@ -192,10 +193,28 @@ public class Controller {
     */
    public String getRepeats(int minimumRepeatLength,
          int maxDistanceFromMRNAStart) {
-      return "Filtering...";
+      StringBuilder matchInfo = new StringBuilder();
+      SuffixTreeUtils treeUtil = new SuffixTreeUtils(mSequence, mGenes);
+      
+      SuffixTree tree = SuffixTree.create(mSequence.toString());
+      List<RepeatEntry> repeats = tree.findRepeats(minimumRepeatLength);
+      matchInfo.append("Repeated sequence,Frequency,Fold Expression,Average"
+            + " Distance From (+) mRNA Start,Average Distance From (-)"
+            + " mRNA Start,Coordinates\n");
+      for(RepeatEntry repeat : repeats) {
+         matchInfo.append(repeat + ",");
+         matchInfo.append(repeat.getStarts().size() + ",");
+         matchInfo.append(repeat.getStarts().size()
+               / treeUtil.findExpectedFoldExpression(repeat.toString()) + ",");
+         matchInfo.append(treeUtil.averageDistanceToNextPositiveMRNA(repeat.getStarts()) + ",");
+         matchInfo.append(treeUtil.averageDistanceToNextNegativeMRNA(repeat.getStarts()));
+         for(Integer occurence : repeat.getStarts()) {
+            matchInfo.append("," + occurence);
+         }
+         matchInfo.append("\n");
+      }
+      return matchInfo.toString();
    }
-
-
 
    /**
     * Find all occurrences of the given search string.
@@ -246,7 +265,7 @@ public class Controller {
             / reverseExpectedFoldExpression;
       matchInfo.append("Repeated sequence,Frequency,Fold Expression,Average"
             + " Distance From (+) mRNA Start,Average Distance From (-)"
-            + " mRNA Start,Coordinates\n ");
+            + " mRNA Start,Coordinates\n");
 
       matchInfo.append(searchString + "," + absoluteFrequency + ","
             + relativeFoldExpression + "," + averageDistance + ","
@@ -255,7 +274,7 @@ public class Controller {
          matchInfo.append("," + occurance);
       }
 
-      matchInfo.append(reverseSearchString + "," + reverseAbsoluteFrequency
+      matchInfo.append("\n" + reverseSearchString + "," + reverseAbsoluteFrequency
             + "," + reverseRelativeFoldExpression + ","
             + reverseAverageDistance + "," + reverseAverageDistanceNegative);
       for (Integer occurance : revOccurences) {
