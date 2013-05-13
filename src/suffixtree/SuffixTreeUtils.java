@@ -42,7 +42,7 @@ public class SuffixTreeUtils {
       for(Gene gene : genes) {
          for(GeneIsoform isoform : gene.getIsoforms()) {
             if(isoform.isReverse()) {
-               negativeStarts.add(isoform.getStart());
+               negativeStarts.add(isoform.getStop());
             } else {
                positiveStarts.add(isoform.getStart());
             }
@@ -148,13 +148,13 @@ public class SuffixTreeUtils {
       for (int i = forwardStrand.length() - 1; i >= 0; i--) {
          char nextChar = forwardStrand.charAt(i);
          if (nextChar == Nucleotide.ADENINE.toChar()) {
-            reverseComplementString += Nucleotide.ADENINE.complement();
+            reverseComplementString += Nucleotide.ADENINE.complement().toChar();
          } else if (nextChar == Nucleotide.CYTOSINE.toChar()) {
-            reverseComplementString += Nucleotide.CYTOSINE.complement();
+            reverseComplementString += Nucleotide.CYTOSINE.complement().toChar();
          } else if (nextChar == Nucleotide.GUANINE.toChar()) {
-            reverseComplementString += Nucleotide.GUANINE.complement();
+            reverseComplementString += Nucleotide.GUANINE.complement().toChar();
          } else if (nextChar == Nucleotide.THYMINE.toChar()) {
-            reverseComplementString += Nucleotide.THYMINE.complement();
+            reverseComplementString += Nucleotide.THYMINE.complement().toChar();
          } else {
             // Directly just copy the current character if we do not know a
             // reverse complement.
