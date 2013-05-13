@@ -20,22 +20,6 @@ public class LeafNode extends Node {
       }
    }
 
-   public String debugString() {
-      StringBuilder sb = new StringBuilder();
-      int level = getLevel();
-      for (int i = 0; i < level; i++) {
-         sb.append('\t');
-      }
-      String tabs = sb.toString();
-      sb = new StringBuilder(tabs);
-      if (string.equals("")) {
-         sb.append("<root>\n");
-      } else {
-         sb.append(string.substring(begin, end)).append(" * ").append("\n");
-      }
-      return sb.toString();
-   }
-
    public void insertNode(LeafNode node) {
       int i = 0;
       while (i < length() && node.charAt(i) == charAt(i))
@@ -60,5 +44,22 @@ public class LeafNode extends Node {
          // TODO: This might happen when we make this generalized.
          throw new RuntimeException();
       }
+   }
+
+   public String debugString() {
+      StringBuilder sb = new StringBuilder();
+      int level = getLevel();
+      for (int i = 0; i < level; i++) {
+         sb.append('\t');
+      }
+      // String tabs = sb.toString();
+      sb = new StringBuilder();
+      sb.append("{").append(getLeftChar()).append("} ");
+      if (string.equals("")) {
+         sb.append("<root>\n");
+      } else {
+         sb.append(string.substring(begin, end)).append(" * ").append("\n");
+      }
+      return sb.toString();
    }
 }

@@ -72,13 +72,12 @@ public class SuffixTree {
       }
 
       for (LeafNode leaf : leaves) {
-         // Add all leaves to internal nodes
          InternalNode node = leaf.parent;
+         // Add all leaves to internal nodes
          while (node != null) {
             node.addLeaf(leaf);
             node = node.parent;
          }
-
       }
    }
 

@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 public class InternalNode extends Node {
-   protected Map<Character, Node> children = new HashMap<Character, Node>();
-   protected List<LeafNode>       leaves   = new LinkedList<LeafNode>();
+   protected Map<Character, Node> children    = new HashMap<Character, Node>();
+   protected List<LeafNode>       leaves      = new LinkedList<LeafNode>();
+   protected Character            leftChar    = null;
+   private boolean                leftCharSet = false;
 
    public InternalNode(String string, int begin, int end) {
       super(string, begin, end);
@@ -68,25 +70,45 @@ public class InternalNode extends Node {
       return this.leaves;
    }
 
+   @Override
+   public Character getLeftChar() {
+      if (!leftCharSet) {
+         for (Node child : children.values()) {
+            if (!leftCharSet) {
+               leftChar = child.getLeftChar();
+               leftCharSet = true;
+            } else if (child.getLeftChar() != leftChar) {
+               leftChar = null;
+            }
+
+         }
+      }
+      return leftChar;
+   }
+
+   public void setLeftChar(Character c) {
+      this.leftChar = c;
+   }
+
    public String debugString() {
       StringBuilder sb = new StringBuilder();
       int level = getLevel();
-      for (int i = 0; i < level; i++) {
+      for (int i = 0; i < level + 1; i++) {
          sb.append('\t');
       }
       String tabs = sb.toString();
-      sb = new StringBuilder(tabs);
+      sb = new StringBuilder();
+      sb.append("{").append(getLeftChar()).append("} ");
       if (string.equals("")) {
-         sb.append("<root>\n");
+         sb.append("<root>");
       } else {
-         sb.append(string.substring(begin, end))
-               .append(String.format(" (%d)", this.getCount())).append("\n");
+         sb.append(string.substring(begin, end));
       }
+      sb.append(String.format(" (%d)", this.getCount())).append("\n");
       for (Character key : children.keySet()) {
-         sb.append(tabs).append("[").append(key).append("]\n").append(tabs)
+         sb.append(tabs).append("[").append(key).append("]\t")
                .append(children.get(key).debugString());
       }
       return sb.toString();
    }
-
 }

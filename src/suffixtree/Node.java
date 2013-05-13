@@ -13,8 +13,6 @@ public abstract class Node {
    protected int          end;
    protected int          labelSize = -1;
    protected InternalNode parent    = null;
-   /** If leftChar == null, then node is left diverse. */
-   protected Character    leftChar  = null;
 
    public Node() {
       this.string = "";
@@ -29,16 +27,11 @@ public abstract class Node {
    }
 
    public boolean isLeftDiverse() {
-      return leftChar == null;
+      return getLeftChar() == null;
    }
 
-   public Character getLeftChar() {
-      return leftChar;
-   }
-
-   public void setLeftChar(Character c) {
-      this.leftChar = c;
-   }
+   /** If leftChar == null, then node is left diverse. */
+   public abstract Character getLeftChar();
 
    public int length() {
       return end - begin;

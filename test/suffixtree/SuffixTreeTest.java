@@ -8,13 +8,13 @@ public class SuffixTreeTest {
 
    @Test
    public void testAdd() {
-      String string = "AAAAAAAAAAAAA$";
+      String string = "ABCDABAB$";
       SuffixTree tree = SuffixTree.create(string);
-      System.out.print(tree.getLeaves());
-      System.out.print(tree.debugString());
-      List<Integer> o = tree.getOccurrences("A");
+      System.out.println(tree.getLeaves());
+      System.out.println(tree.debugString());
+      List<Integer> o = tree.getOccurrences("B");
       System.out.println(o);
-      o = tree.getOccurrences("AA");
+      o = tree.getOccurrences("AB");
       System.out.println(o);
    }
 }
