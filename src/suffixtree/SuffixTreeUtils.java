@@ -163,4 +163,47 @@ public class SuffixTreeUtils {
       }
       return reverseComplementString;
    }
+
+   /**
+    * Removes all indices that are outside of the acceptable maxDistance from an
+    * mRNA start. If an index is within maxDistance from a positive start, or
+    * maxDistance + the string's length from a negative mRNA start, it is kept.
+    * Otherwise, it is discarded.
+    * 
+    * @param maxDistance
+    *           The maximum distance from an mRNA start.
+    * @param startIndices
+    *           A list of start indices for a given string.
+    * @param lengthOfMatchString
+    *           The length of the string, which is used when calculating whether
+    *           a given index is within the range of a reverse mRNA strand.
+    */
+   public void stripStartsOutsideRange(int maxDistance,
+         List<Integer> startIndices, int lengthOfMatchString) {
+      List<Integer> toRemove = new ArrayList<Integer>();
+      for (Integer startIndex : startIndices) {
+         boolean keepThisIndex = false;
+
+         for (Integer positiveStart : mRNAStartsPositive) {
+            if (startIndex + maxDistance >= positiveStart &&
+                  startIndex + lengthOfMatchString <= positiveStart) {
+               keepThisIndex = true;
+               break;
+            }
+         }
+         for (Integer negativeStart : mRNAStartsNegative) {
+            if (lengthOfMatchString + startIndex - maxDistance <= negativeStart &&
+                  startIndex >= negativeStart) {
+               keepThisIndex = true;
+               break;
+            }
+         }
+         // If we are not keeping this index, put it in the list to remove.
+         if(!keepThisIndex) {
+            toRemove.add(startIndex);
+         }
+      }
+      // Remove indices
+      startIndices.removeAll(toRemove);
+   }
 }

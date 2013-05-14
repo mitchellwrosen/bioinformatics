@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import suffixtree.SuffixTree;
@@ -202,14 +203,22 @@ public class Controller {
             + " Distance From (+) mRNA Start,Average Distance From (-)"
             + " mRNA Start,Coordinates\n");
       for(RepeatEntry repeat : repeats) {
+         List<Integer> occurences = repeat.getStarts();
+         if (maxDistanceFromMRNAStart >= 0) {
+            treeUtil.stripStartsOutsideRange(maxDistanceFromMRNAStart,
+                  occurences, repeat.toString().length());
+         }
+
          matchInfo.append(repeat + ",");
          matchInfo.append(repeat.getStarts().size() + ",");
          matchInfo.append(repeat.getStarts().size()
                / treeUtil.findExpectedFoldExpression(repeat.toString()) + ",");
          matchInfo.append(treeUtil.averageDistanceToNextPositiveMRNA(repeat.getStarts()) + ",");
          matchInfo.append(treeUtil.averageDistanceToNextNegativeMRNA(repeat.getStarts()));
-         for(Integer occurence : repeat.getStarts()) {
-            matchInfo.append("," + occurence);
+         
+         for(Integer occurence : occurences) {
+            // Represent as 1-indexed for ease of bio students.
+            matchInfo.append("," + (occurence + 1));
          }
          matchInfo.append("\n");
       }
@@ -238,6 +247,13 @@ public class Controller {
 
       List<Integer> occurences = tree.getOccurrences(searchString);
       List<Integer> revOccurences = tree.getOccurrences(reverseSearchString);
+
+      if (maxDistanceFromMRNAStart >= 0) {
+         treeUtil.stripStartsOutsideRange(maxDistanceFromMRNAStart, occurences,
+               searchString.length());
+         treeUtil.stripStartsOutsideRange(maxDistanceFromMRNAStart, revOccurences,
+               searchString.length());
+      }
 
       StringBuilder matchInfo = new StringBuilder();
 
@@ -274,11 +290,13 @@ public class Controller {
          matchInfo.append("," + occurance);
       }
 
-      matchInfo.append("\n" + reverseSearchString + "," + reverseAbsoluteFrequency
-            + "," + reverseRelativeFoldExpression + ","
-            + reverseAverageDistance + "," + reverseAverageDistanceNegative);
+      matchInfo.append("\n" + reverseSearchString + ","
+            + reverseAbsoluteFrequency + "," + reverseRelativeFoldExpression
+            + "," + reverseAverageDistance + ","
+            + reverseAverageDistanceNegative);
       for (Integer occurance : revOccurences) {
-         matchInfo.append("," + occurance);
+         // Represent as 1-indexed for ease of bio students.
+         matchInfo.append("," + (occurance + 1));
       }
       return matchInfo.toString();
    }
