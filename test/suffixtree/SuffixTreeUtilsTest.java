@@ -93,7 +93,7 @@ public class SuffixTreeUtilsTest {
 
       int maxDistance = 5;
       List<Integer> starts = new ArrayList<Integer>();
-      starts.add(0); // Discard
+      starts.add(0); // keep
       starts.add(5); // Keep
       starts.add(11); // Discard
       starts.add(30); // Keep
@@ -103,9 +103,10 @@ public class SuffixTreeUtilsTest {
       starts.add(500); // Discard.
 
       List<Integer> expectedStarts = new ArrayList<Integer>();
-      expectedStarts.add(5); // Keep
-      expectedStarts.add(30); // Keep
-      expectedStarts.add(32); // Keep
+      expectedStarts.add(0);
+      expectedStarts.add(5);
+      expectedStarts.add(30);
+      expectedStarts.add(32);
       int stringLength = 3;
 
       Sequence sequence = new Sequence();
