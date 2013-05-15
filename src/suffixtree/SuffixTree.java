@@ -33,7 +33,8 @@ public class SuffixTree {
       }
 
       public String toString() {
-         return tree.strings.get(stringIndex).substring(starts.get(0), length);
+         int start = starts.get(0);
+         return tree.strings.get(stringIndex).substring(start, start + length);
       }
    }
 
