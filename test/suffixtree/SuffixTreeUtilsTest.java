@@ -78,4 +78,40 @@ public class SuffixTreeUtilsTest {
       Assert.assertEquals(1.25, utils.averageDistanceToNextNegativeMRNA(starts),
             .0001);
    }
+
+   @Test
+   public void testStripStartsOutsideRange() {
+      GeneIsoform positive1 = new GeneIsoform("", 10, 10, false, "", "");
+      GeneIsoform positive2 = new GeneIsoform("", 20, 20, false, "", "");
+      GeneIsoform negative1 = new GeneIsoform("", 30, 30, true, "", "");
+      GeneIsoform negative2 = new GeneIsoform("", 40, 40, true, "", "");
+
+      Gene gene = Gene.create(positive1);
+      gene.addIsoform(positive2);
+      gene.addIsoform(negative1);
+      gene.addIsoform(negative2);
+
+      int maxDistance = 5;
+      List<Integer> starts = new ArrayList<Integer>();
+      starts.add(0); // Discard
+      starts.add(5); // Keep
+      starts.add(11); // Discard
+      starts.add(30); // Keep
+      starts.add(32); // Keep
+      starts.add(34); // Discard
+      starts.add(39); // Discard
+      starts.add(500); // Discard.
+
+      List<Integer> expectedStarts = new ArrayList<Integer>();
+      expectedStarts.add(5); // Keep
+      expectedStarts.add(30); // Keep
+      expectedStarts.add(32); // Keep
+      int stringLength = 3;
+
+      Sequence sequence = new Sequence();
+      utils = new SuffixTreeUtils(sequence, Collections.singletonList(gene));
+
+      utils.stripStartsOutsideRange(maxDistance, starts, stringLength);
+      Assert.assertEquals(expectedStarts, starts);
+   }
 }

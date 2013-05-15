@@ -48,7 +48,7 @@ public class View extends JDialog {
    protected GCContentInfoPanel mGcContentInfoPanel;
    protected CalculationsPanel mCalculationsPanel;
    protected ProteinsPanel mProteinsPanel;
-   protected FindRepeatsPanel mFindRepeatsPanel;
+   protected volatile FindRepeatsPanel mFindRepeatsPanel;
 
    protected JButton mRunButton, mSaveButton, mQuitButton;
 
@@ -291,6 +291,42 @@ public class View extends JDialog {
       mProteinsPanel.setDisplay(controller.getProteins());
    }
 
+   /**
+    * Hacky inner class for running string matching in a separate thread.
+    */
+   private class ExactStringMatchRunner implements Runnable {
+      int maxDistanceFromStart;
+
+      public ExactStringMatchRunner(int maxDistanceFromStart) {
+         this.maxDistanceFromStart = maxDistanceFromStart;
+      }
+
+      public void run() {
+         String output = controller.matchString(
+               mFindRepeatsPanel.getMatchStringText(), maxDistanceFromStart);
+         mFindRepeatsPanel.setDisplay(output);
+      }
+   }
+
+   /**
+    * Hacky inner class for running find repeats in a seperate thread.
+    */
+   private class FilterRepeatRunner implements Runnable {
+      int maxDistanceFromStart;
+      int minRepeatLength;
+
+      public FilterRepeatRunner(int minRepeatLength, int maxDistanceFromStart) {
+         this.maxDistanceFromStart = maxDistanceFromStart;
+         this.minRepeatLength = minRepeatLength;
+      }
+
+      public void run() {
+         String output = controller.getRepeats(minRepeatLength,
+               maxDistanceFromStart);
+         mFindRepeatsPanel.setDisplay(output);
+      }
+   }
+
    protected void runFindRepeats() {
       String maxDistanceFromStartText = mFindRepeatsPanel
             .getMaximumDistanceToStartText();
@@ -309,8 +345,10 @@ public class View extends JDialog {
       }
       if (mFindRepeatsPanel.isMatchExactString()) {
          // Find incidences of exact string match
-         mFindRepeatsPanel.setDisplay(controller.matchString(
-               mFindRepeatsPanel.getMatchStringText(), maxDistanceFromStart));
+         mFindRepeatsPanel.setDisplay("Running...");
+         Thread thread = new Thread(new ExactStringMatchRunner(
+               maxDistanceFromStart));
+         thread.start();
       } else {
          String minRepeatLengthText = mFindRepeatsPanel.getMinimumLengthText();
          int minRepeatLength = 0;
@@ -325,8 +363,9 @@ public class View extends JDialog {
             }
          }
          // Find all indices of repeats that meat filter criteria.
-         mFindRepeatsPanel.setDisplay(controller.getRepeats(minRepeatLength,
-               maxDistanceFromStart));
+         mFindRepeatsPanel.setDisplay("Running...");
+         Thread thread = new Thread(new FilterRepeatRunner(minRepeatLength, maxDistanceFromStart));
+         thread.start();
       }
    }
 
