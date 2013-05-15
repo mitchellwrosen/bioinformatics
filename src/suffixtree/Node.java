@@ -3,6 +3,8 @@
  */
 package suffixtree;
 
+import java.util.List;
+
 /**
  * @author Erik Sandberg &lt;esandber@calpoly.edu&gt;
  * 
@@ -26,12 +28,16 @@ public abstract class Node {
       this.end = end;
    }
 
+   public abstract boolean isLeaf();
+
    public boolean isLeftDiverse() {
       return getLeftChar() == null;
    }
 
    /** If leftChar == null, then node is left diverse. */
    public abstract Character getLeftChar();
+
+   public abstract List<Node> getLeftDiverseNodes();
 
    public int length() {
       return end - begin;

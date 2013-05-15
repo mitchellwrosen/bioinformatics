@@ -1,11 +1,21 @@
 package suffixtree;
 
+import java.util.List;
+
 public class LeafNode extends Node {
    protected int start;
 
    public LeafNode(String string, int start, int end) {
       super(string, start, end);
       this.start = start;
+   }
+
+   public boolean isLeftDiverse() {
+      return false;
+   }
+
+   public boolean isLeaf() {
+      return true;
    }
 
    public int getStart() {
@@ -61,5 +71,10 @@ public class LeafNode extends Node {
          sb.append(string.substring(begin, end)).append(" * ").append("\n");
       }
       return sb.toString();
+   }
+
+   @Override
+   public List<Node> getLeftDiverseNodes() {
+      return null;
    }
 }
