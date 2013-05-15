@@ -25,8 +25,12 @@ public class SuffixTreeUtils {
    private double gContent;
    private double unknownContent;
 
-   // List of positions of mRNA strands.
+   // List of positions of mRNA strands. Includes EOF as a start.
    private Integer[] mRNAStartsPositive;
+   /*
+    * List of positions of mRNA strands on reverse strand. Includes EOF as
+    * a start.
+    */
    private Integer[] mRNAStartsNegative;
    
    public SuffixTreeUtils(Sequence sequence, List<Gene> genes) {
@@ -48,6 +52,9 @@ public class SuffixTreeUtils {
             }
          }
       }
+      // Add the beginning and end of the file as start and end positions.
+      negativeStarts.add(0);
+      positiveStarts.add(sequence.size() - 1);
       this.mRNAStartsNegative = negativeStarts.toArray(new Integer[]{});
       this.mRNAStartsPositive = positiveStarts.toArray(new Integer[]{});
 
@@ -157,7 +164,7 @@ public class SuffixTreeUtils {
             reverseComplementString += Nucleotide.THYMINE.complement().toChar();
          } else {
             // Directly just copy the current character if we do not know a
-            // reverse complement.
+            // reverse complement for this character.
             reverseComplementString += nextChar;
          }
       }
