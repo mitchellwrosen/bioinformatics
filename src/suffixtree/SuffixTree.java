@@ -1,19 +1,27 @@
 package suffixtree;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 public class SuffixTree {
-   private Node               root;
-   private Collection<String> strings;
-   private List<LeafNode>     leaves;
+   private InternalNode   root;
+   private List<String>   strings;
+   private List<LeafNode> leaves;
 
    public class RepeatEntry {
-      private String        string;
+      private SuffixTree    tree;
+      private int           stringIndex;
       private List<Integer> starts;
       private int           length;
+
+      public RepeatEntry(SuffixTree tree, int stringIndex,
+            List<Integer> starts, int length) {
+         this.tree = tree;
+         this.stringIndex = stringIndex;
+         this.starts = starts;
+         this.length = length;
+      }
 
       public List<Integer> getStarts() {
          return starts;
@@ -24,14 +32,17 @@ public class SuffixTree {
       }
 
       public String toString() {
-         return string.substring(starts.get(0), length);
+         return tree.strings.get(stringIndex).substring(starts.get(0), length);
       }
    }
 
    protected SuffixTree(List<String> strings) {
-      root = new Node();
-      leaves = new LinkedList<LeafNode>();
-      this.strings = strings;
+      this.root = new InternalNode();
+      this.leaves = new LinkedList<LeafNode>();
+      this.strings = new ArrayList<String>(strings.size());
+      for (String s : strings) {
+         this.strings.add(s + "$");
+      }
    }
 
    /**
@@ -64,7 +75,8 @@ public class SuffixTree {
       }
 
       for (LeafNode leaf : leaves) {
-         Node node = leaf.parent;
+         InternalNode node = leaf.parent;
+         // Add all leaves to internal nodes
          while (node != null) {
             node.addLeaf(leaf);
             node = node.parent;
@@ -85,9 +97,14 @@ public class SuffixTree {
 
       for (int i = 0; i < string.length(); ++i, ++nodeCharIndex) {
          if (nodeCharIndex >= node.length()) {
-            node = node.getChild(string.charAt(i));
-            if (node == null)
+            if (node instanceof InternalNode) {
+               node = ((InternalNode) node).getChild(string.charAt(i));
+            } else {
+               node = null;
+            }
+            if (node == null) {
                return null;
+            }
 
             nodeCharIndex = 0;
          }
@@ -96,10 +113,22 @@ public class SuffixTree {
             return null;
       }
 
-      List<LeafNode> leaves = node.getLeaves();
-      List<Integer> retval = new ArrayList<Integer>(leaves.size());
-      for (LeafNode leaf : leaves) {
-         retval.add(leaf.getStart());
+      List<Integer> retval = null;
+
+      if (node instanceof LeafNode) {
+         // This is a leaf so there is only one occurrence.
+         retval = new ArrayList<Integer>(1);
+         retval.add(((LeafNode) node).getStart());
+      } else if (node instanceof InternalNode) {
+         // This is an internal node so there are multiple occurrences.
+         List<LeafNode> leaves = ((InternalNode) node).getLeaves();
+         retval = new ArrayList<Integer>(leaves.size());
+         for (LeafNode leaf : leaves) {
+            retval.add(leaf.getStart());
+         }
+      } else {
+         // This shouldn't happen
+         throw new RuntimeException();
       }
 
       return retval;
