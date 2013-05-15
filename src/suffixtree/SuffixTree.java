@@ -1,6 +1,7 @@
 package suffixtree;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -48,8 +49,6 @@ public class SuffixTree {
    /**
     * Creates a suffix tree from the given string.
     * 
-    * @param string
-    *           Must end with a terminal character (i.e. '$')
     * @return
     */
    public static SuffixTree create(String string) {
@@ -135,8 +134,21 @@ public class SuffixTree {
    }
 
    public List<RepeatEntry> findRepeats(int length) {
-      // TODO implement
-      return null;
+      List<Node> leftDiverseNodes = root.getLeftDiverseNodes();
+      List<RepeatEntry> repeats = new ArrayList<RepeatEntry>(
+            leftDiverseNodes.size());
+      for (Node node : leftDiverseNodes) {
+         if (node.toString().length() >= length) {
+            Collection<LeafNode> leaves = ((InternalNode) node).getLeaves();
+            List<Integer> starts = new ArrayList<Integer>(leaves.size());
+            for (LeafNode leaf : leaves) {
+               starts.add(leaf.start);
+            }
+            repeats.add(new RepeatEntry(this, 0, starts, node.toString()
+                  .length()));
+         }
+      }
+      return repeats;
    }
 
    public String debugString() {

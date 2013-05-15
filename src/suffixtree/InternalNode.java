@@ -1,9 +1,11 @@
 package suffixtree;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class InternalNode extends Node {
    protected Map<Character, Node> children    = new HashMap<Character, Node>();
@@ -17,6 +19,10 @@ public class InternalNode extends Node {
 
    public InternalNode() {
       super();
+   }
+
+   public boolean isLeaf() {
+      return false;
    }
 
    public void insertNode(LeafNode node) {
@@ -73,21 +79,22 @@ public class InternalNode extends Node {
    @Override
    public Character getLeftChar() {
       if (!leftCharSet) {
-         for (Node child : children.values()) {
-            if (!leftCharSet) {
-               leftChar = child.getLeftChar();
-               leftCharSet = true;
-            } else if (child.getLeftChar() != leftChar) {
-               leftChar = null;
-            }
-
-         }
+         setLeftChar();
       }
       return leftChar;
    }
 
-   public void setLeftChar(Character c) {
-      this.leftChar = c;
+   private void setLeftChar() {
+      Set<Character> lefts = new HashSet<Character>();
+      for (Node child : children.values()) {
+         lefts.add(child.getLeftChar());
+      }
+      if (lefts.size() == 1) {
+         leftChar = lefts.iterator().next();
+      } else {
+         leftChar = null;
+      }
+      leftCharSet = true;
    }
 
    public String debugString() {
@@ -110,5 +117,21 @@ public class InternalNode extends Node {
                .append(children.get(key).debugString());
       }
       return sb.toString();
+   }
+
+   @Override
+   public List<Node> getLeftDiverseNodes() {
+      List<Node> leftDiverseNodes = new LinkedList<Node>();
+      if (isLeftDiverse()) {
+         leftDiverseNodes.add(this);
+         // If a child is left diverse, then all it's parents are left diverse
+         for (Node child : this.children.values()) {
+            List<Node> childsLeftDiverseNodes = child.getLeftDiverseNodes();
+            if (childsLeftDiverseNodes != null) {
+               leftDiverseNodes.addAll(childsLeftDiverseNodes);
+            }
+         }
+      }
+      return leftDiverseNodes;
    }
 }
