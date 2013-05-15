@@ -309,8 +309,8 @@ public class View extends JDialog {
       }
       if (mFindRepeatsPanel.isMatchExactString()) {
          // Find incidences of exact string match
-         controller.matchString(mFindRepeatsPanel.getMatchStringText(),
-               maxDistanceFromStart);
+         mFindRepeatsPanel.setDisplay(controller.matchString(
+               mFindRepeatsPanel.getMatchStringText(), maxDistanceFromStart));
       } else {
          String minRepeatLengthText = mFindRepeatsPanel.getMinimumLengthText();
          int minRepeatLength = 0;
@@ -342,6 +342,9 @@ public class View extends JDialog {
          case PROTEINS_TAB:
             saveProteins();
             break;
+         case FIND_REPEATS_TAB:
+            saveRepeats();
+            break;
          default:
             assert false;
          }
@@ -372,6 +375,9 @@ public class View extends JDialog {
 
    protected void saveProteins() {
       saveString(mProteinsPanel.getDisplay());
+   }
+   protected void saveRepeats() {
+      saveString(mFindRepeatsPanel.getDisplay());
    }
 
    protected void saveString(String data) {

@@ -167,7 +167,6 @@ public class Controller {
             sb.append(geneName + ", ");
             sb.append(iso.getTranscriptId() + ", ");
             if (iso.isReverse()) {
-               System.out.println("Reverse detected!");
                sb.append(iso.getSequence().reverseComplement()
                      .toProteinString()
                      + "\n");
