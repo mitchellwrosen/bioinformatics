@@ -37,9 +37,12 @@ public class SuffixTree {
    }
 
    protected SuffixTree(List<String> strings) {
-      root = new InternalNode();
-      leaves = new LinkedList<LeafNode>();
-      this.strings = strings;
+      this.root = new InternalNode();
+      this.leaves = new LinkedList<LeafNode>();
+      this.strings = new ArrayList<String>(strings.size());
+      for (String s : strings) {
+         this.strings.add(s + "$");
+      }
    }
 
    /**
