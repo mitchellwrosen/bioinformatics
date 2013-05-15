@@ -93,7 +93,7 @@ public class SuffixTree {
 
       Node node = root.getChild(string.charAt(0));
       if (node == null)
-         return null;
+         return new ArrayList<Integer>(0);
 
       for (int i = 0; i < string.length(); ++i, ++nodeCharIndex) {
          if (nodeCharIndex >= node.length()) {
@@ -103,14 +103,14 @@ public class SuffixTree {
                node = null;
             }
             if (node == null) {
-               return null;
+               return new ArrayList<Integer>(0);
             }
 
             nodeCharIndex = 0;
          }
 
          if (string.charAt(i) != node.charAt(nodeCharIndex))
-            return null;
+            return new ArrayList<Integer>(0);
       }
 
       List<Integer> retval = null;
