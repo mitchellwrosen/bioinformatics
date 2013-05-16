@@ -58,11 +58,15 @@ public class SuffixTree {
       return create(strings);
    }
 
-   // TOOD Make SuffixTree generic then this can be public
+   // TODO Make SuffixTree generic then this can be public
    protected static SuffixTree create(List<String> strings) {
       SuffixTree tree = new SuffixTree(strings);
       tree.fill();
       return tree;
+   }
+
+   public String getString(int stringIndex) {
+      return strings.get(stringIndex);
    }
 
    protected void fill() {

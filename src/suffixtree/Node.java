@@ -5,27 +5,17 @@ package suffixtree;
 
 import java.util.List;
 
+import suffixtree.LeafNode.NodeInfo;
+
 /**
  * @author Erik Sandberg &lt;esandber@calpoly.edu&gt;
  * 
  */
 public abstract class Node {
-   protected String       string;
-   protected int          begin;
-   protected int          end;
    protected int          labelSize = -1;
    protected InternalNode parent    = null;
 
    public Node() {
-      this.string = "";
-      this.begin = 0;
-      this.end = 0;
-   }
-
-   public Node(String string, int begin, int end) {
-      this.string = string;
-      this.begin = begin;
-      this.end = end;
    }
 
    public abstract boolean isLeaf();
@@ -39,13 +29,13 @@ public abstract class Node {
 
    public abstract List<Node> getLeftDiverseNodes();
 
+   public abstract void shiftBegin(int shift);
+
    public int length() {
       return end - begin;
    }
 
-   public char charAt(int n) {
-      return string.charAt(begin + n);
-   }
+   public abstract char charAt(int n);
 
    public int getLevel() {
       if (parent == null) {
@@ -55,11 +45,13 @@ public abstract class Node {
       }
    }
 
+   public abstract String getLabel();
+
    public String toString() {
       if (parent != null) {
-         return parent.toString() + string.substring(begin, end);
+         return parent.toString() + getLabel();
       } else {
-         return string.substring(begin, end);
+         return getLabel();
       }
    }
 
@@ -72,5 +64,5 @@ public abstract class Node {
 
    public abstract String debugString();
 
-   public abstract void insertNode(LeafNode node);
+   public abstract void insertNode(int stringIndex, NodeInfo info);
 }

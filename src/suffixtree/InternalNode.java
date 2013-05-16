@@ -7,14 +7,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import suffixtree.LeafNode.NodeInfo;
+
 public class InternalNode extends Node {
+   protected String               string      = "";
+   protected int                  begin       = 0;
+   protected int                  end         = 0;
    protected Map<Character, Node> children    = new HashMap<Character, Node>();
    protected List<LeafNode>       leaves      = new LinkedList<LeafNode>();
    protected Character            leftChar    = null;
    private boolean                leftCharSet = false;
 
    public InternalNode(String string, int begin, int end) {
-      super(string, begin, end);
+      this.string = string;
+      this.begin = begin;
+      this.end = end;
    }
 
    public InternalNode() {
@@ -25,13 +32,14 @@ public class InternalNode extends Node {
       return false;
    }
 
-   public void insertNode(LeafNode node) {
+   public void insertNode(int stringIndex, NodeInfo info) {
       int i = 0;
-      while (i < length() && node.charAt(i) == charAt(i))
+      while (i < length() && info.charAt(i) == this.charAt(i))
          i++;
 
-      node.begin += i;
+      info.labelBegin += i;
       if (i < length()) {
+         // Split - create an internal node
          InternalNode newNode = new InternalNode(this.string, this.begin,
                this.begin + i);
          this.begin += i;
@@ -42,18 +50,25 @@ public class InternalNode extends Node {
          newNode.addChild(this);
          this.parent = newNode;
 
+         LeafNode node = new LeafNode(stringIndex, info);
          newNode.addChild(node);
          node.parent = newNode;
       } else {
-         Node child = this.getChild(node.charAt(0));
+         // Find the next child node
+         Node child = this.getChild(info.charAt(0));
 
          if (child == null) {
+            LeafNode node = new LeafNode(stringIndex, info);
             this.addChild(node);
             node.parent = this;
          } else {
-            child.insertNode(node);
+            child.insertNode(stringIndex, info);
          }
       }
+   }
+
+   public char charAt(int n) {
+      return string.charAt(begin + n);
    }
 
    void addChild(Node child) {
@@ -133,5 +148,15 @@ public class InternalNode extends Node {
          }
       }
       return leftDiverseNodes;
+   }
+
+   @Override
+   public void shiftBegin(int shift) {
+      this.begin += shift;
+   }
+
+   @Override
+   public String getLabel() {
+      return string.substring(begin, end);
    }
 }
