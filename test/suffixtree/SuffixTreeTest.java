@@ -2,29 +2,39 @@ package suffixtree;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
 
 import suffixtree.SuffixTree.RepeatEntry;
+import suffixtree.SuffixTree.StartEntry;
 
 public class SuffixTreeTest {
 
+   private static void printOccurrences(List<StartEntry> o) {
+      System.out.print("{");
+      for (StartEntry start : o) {
+         System.out.print(" [" + start.stringIndex + ", " + start.start + "]");
+      }
+      System.out.println(" }");
+   }
+
    @Test
    public void testAdd() {
-      String string = "ABCDABABC";
-      SuffixTree tree = SuffixTree.create(string);
+      String[] strings = { "CBABADCBA", "ABCABC", "ABCDABABC", "CBACBA" };
+      SuffixTree tree = SuffixTree.create(Arrays.asList(strings));
       System.out.println(tree.getLeaves());
       System.out.println(tree.debugString());
-      List<Integer> o = tree.getOccurrences("B");
-      System.out.println(o);
+      List<StartEntry> o = tree.getOccurrences("B");
+      printOccurrences(o);
       o = tree.getOccurrences("AB");
-      System.out.println(o);
+      printOccurrences(o);
       List<RepeatEntry> repeats = tree.findRepeats(2);
-      assertEquals(2, repeats.size());
       System.out.println("Repeats:");
       for (RepeatEntry r : repeats) {
          System.out.println(r.toString());
       }
+      assertEquals(2, repeats.size());
    }
 }

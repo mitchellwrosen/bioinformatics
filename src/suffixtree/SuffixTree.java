@@ -10,21 +10,29 @@ public class SuffixTree {
    private List<String>   strings;
    private List<LeafNode> leaves;
 
-   public class RepeatEntry {
-      private SuffixTree    tree;
-      private int           stringIndex;
-      private List<Integer> starts;
-      private int           length;
+   public class StartEntry {
+      public int stringIndex;
+      public int start;
 
-      public RepeatEntry(SuffixTree tree, int stringIndex,
-            List<Integer> starts, int length) {
-         this.tree = tree;
+      public StartEntry(int stringIndex, int start) {
          this.stringIndex = stringIndex;
+         this.start = start;
+      }
+   }
+
+   public class RepeatEntry {
+      private SuffixTree             tree;
+      private Collection<StartEntry> starts;
+      private int                    length;
+
+      public RepeatEntry(SuffixTree tree, Collection<StartEntry> starts,
+            int length) {
+         this.tree = tree;
          this.starts = starts;
          this.length = length;
       }
 
-      public List<Integer> getStarts() {
+      public Collection<StartEntry> getStarts() {
          return starts;
       }
 
@@ -32,9 +40,11 @@ public class SuffixTree {
          return length;
       }
 
+      @Override
       public String toString() {
-         int start = starts.get(0);
-         return tree.strings.get(stringIndex).substring(start, start + length);
+         StartEntry start = starts.iterator().next();
+         return "[ " + start.stringIndex + ", " + tree.strings.get(start.stringIndex).substring(start.start,
+               start.start + length) + "]";
       }
    }
 
@@ -58,8 +68,7 @@ public class SuffixTree {
       return create(strings);
    }
 
-   // TODO Make SuffixTree generic then this can be public
-   protected static SuffixTree create(List<String> strings) {
+   public static SuffixTree create(List<String> strings) {
       SuffixTree tree = new SuffixTree(strings);
       tree.fill();
       return tree;
@@ -70,20 +79,22 @@ public class SuffixTree {
    }
 
    protected void fill() {
-      for (String string : strings) {
+
+      for (int stringIndex = 0; stringIndex < strings.size(); stringIndex++) {
+         String string = strings.get(stringIndex);
          for (int i = 0; i < string.length(); ++i) {
-            LeafNode leaf = new LeafNode(string, i, string.length());
-            root.insertNode(leaf);
+            NodeInfo info = new NodeInfo(string, i, i, string.length());
+            LeafNode leaf = root.insertNode(stringIndex, info);
             leaves.add(leaf);
          }
       }
 
       for (LeafNode leaf : leaves) {
-         InternalNode node = leaf.parent;
+         InternalNode node = leaf.getParent();
          // Add all leaves to internal nodes
          while (node != null) {
             node.addLeaf(leaf);
-            node = node.parent;
+            node = node.getParent();
          }
       }
    }
@@ -92,43 +103,53 @@ public class SuffixTree {
       return leaves;
    }
 
-   public List<Integer> getOccurrences(String string) {
+   public List<StartEntry> getOccurrences(String string) {
       int nodeCharIndex = 0;
 
       Node node = root.getChild(string.charAt(0));
       if (node == null)
-         return new ArrayList<Integer>(0);
+         return new ArrayList<StartEntry>(0);
 
       for (int i = 0; i < string.length(); ++i, ++nodeCharIndex) {
-         if (nodeCharIndex >= node.length()) {
+         if (nodeCharIndex >= node.getLabelLength()) {
             if (node instanceof InternalNode) {
                node = ((InternalNode) node).getChild(string.charAt(i));
             } else {
                node = null;
             }
             if (node == null) {
-               return new ArrayList<Integer>(0);
+               return new ArrayList<StartEntry>(0);
             }
 
             nodeCharIndex = 0;
          }
 
          if (string.charAt(i) != node.charAt(nodeCharIndex))
-            return new ArrayList<Integer>(0);
+            return new ArrayList<StartEntry>(0);
       }
 
-      List<Integer> retval = null;
+      List<StartEntry> retval = null;
 
       if (node instanceof LeafNode) {
          // This is a leaf so there is only one occurrence.
-         retval = new ArrayList<Integer>(1);
-         retval.add(((LeafNode) node).getStart());
+         retval = new ArrayList<StartEntry>(1);
+         for (int stringIndex = 0; stringIndex < strings.size(); stringIndex++) {
+            Integer start = ((LeafNode) node).getStringBegin(stringIndex);
+            if (start != null) {
+               retval.add(new StartEntry(stringIndex, start));
+            }
+         }
       } else if (node instanceof InternalNode) {
          // This is an internal node so there are multiple occurrences.
          List<LeafNode> leaves = ((InternalNode) node).getLeaves();
-         retval = new ArrayList<Integer>(leaves.size());
+         retval = new ArrayList<StartEntry>();
          for (LeafNode leaf : leaves) {
-            retval.add(leaf.getStart());
+            for (int stringIndex = 0; stringIndex < strings.size(); stringIndex++) {
+               Integer start = leaf.getStringBegin(stringIndex);
+               if (start != null) {
+                  retval.add(new StartEntry(stringIndex, start));
+               }
+            }
          }
       } else {
          // This shouldn't happen
@@ -139,18 +160,23 @@ public class SuffixTree {
    }
 
    public List<RepeatEntry> findRepeats(int length) {
-      List<Node> leftDiverseNodes = root.getLeftDiverseNodes();
-      List<RepeatEntry> repeats = new ArrayList<RepeatEntry>(
-            leftDiverseNodes.size());
-      for (Node node : leftDiverseNodes) {
-         if (node.toString().length() >= length) {
-            Collection<LeafNode> leaves = ((InternalNode) node).getLeaves();
-            List<Integer> starts = new ArrayList<Integer>(leaves.size());
-            for (LeafNode leaf : leaves) {
-               starts.add(leaf.start);
+      List<RepeatEntry> repeats = new ArrayList<RepeatEntry>();
+      for (int stringIndex = 0; stringIndex < strings.size(); stringIndex++) {
+         List<Node> leftDiverseNodes = root.getLeftDiverseNodes(stringIndex);
+         for (Node node : leftDiverseNodes) {
+            if (node.getStringLength() >= length) {
+               Collection<LeafNode> leaves = ((InternalNode) node).getLeaves();
+               List<StartEntry> starts = new ArrayList<StartEntry>(
+                     leaves.size());
+               for (LeafNode leaf : leaves) {
+                  Integer start = leaf.getStringBegin(stringIndex);
+                  if (start != null) {
+                     starts.add(new StartEntry(stringIndex, start));
+                  }
+               }
+               repeats
+                     .add(new RepeatEntry(this, starts, node.getStringLength()));
             }
-            repeats.add(new RepeatEntry(this, 0, starts, node.toString()
-                  .length()));
          }
       }
       return repeats;
