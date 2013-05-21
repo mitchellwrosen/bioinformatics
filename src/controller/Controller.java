@@ -299,4 +299,8 @@ public class Controller {
       }
       return matchInfo.toString();
    }
+
+   public String findMRNA() {
+      return "<Placeholder!>";
+   }
 }
