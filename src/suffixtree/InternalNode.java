@@ -7,14 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 public class InternalNode extends Node {
-   protected int                     begin       = 0;
-   protected Map<Character, Node>    children    = new HashMap<Character, Node>();
-   protected int                     end         = 0;
-   protected List<LeafNode>          leaves      = new LinkedList<LeafNode>();
-   protected Map<Integer, Character> leftChar    = new HashMap<Integer, Character>();
-   protected String                  string      = "";
+   protected int                     begin    = 0;
+   protected Map<Character, Node>    children = new HashMap<Character, Node>();
+   protected int                     end      = 0;
+   protected List<LeafNode>          leaves   = new LinkedList<LeafNode>();
+   protected Map<Integer, Character> leftChar = new HashMap<Integer, Character>();
+   protected String                  string   = "";
 
    public InternalNode() {
       super();
@@ -51,7 +50,8 @@ public class InternalNode extends Node {
       sb = new StringBuilder();
       sb.append("{");
       for (Integer i : stringIndicesSeen) {
-         sb.append(" (").append(i).append(", ").append(getLeftChar(i)).append(")");
+         sb.append(" (").append(i).append(", ").append(getLeftChar(i))
+               .append(")");
       }
       sb.append(" } ");
       if (string.equals("")) {
@@ -97,20 +97,47 @@ public class InternalNode extends Node {
       return leftChar.get(stringIndex);
    }
 
-   @Override
-   public List<Node> getLeftDiverseNodes(int stringIndex) {
-      List<Node> leftDiverseNodes = new LinkedList<Node>();
-      if (stringIndicesSeen.contains(stringIndex) && isLeftDiverse(stringIndex)) {
-         leftDiverseNodes.add(this);
-         // If a child is left diverse, then all it's parents are left diverse
-         for (Node child : this.children.values()) {
-            List<Node> childsLeftDiverseNodes = child.getLeftDiverseNodes(stringIndex);
-            if (childsLeftDiverseNodes != null) {
-               leftDiverseNodes.addAll(childsLeftDiverseNodes);
+   public boolean isRightDiverse(int stringIndex) {
+      // This node is right diverse only if two or more children have seen
+      // the stringIndex.
+      int childrenThatHaveSeenStringIndex = 0;
+      for (Node child : children.values()) {
+         if (childrenThatHaveSeenStringIndex < 2
+               && child.stringIndicesSeen.contains(stringIndex)) {
+            childrenThatHaveSeenStringIndex++;
+            if (childrenThatHaveSeenStringIndex == 2) {
+               // At least two children have seen this stringIndex so this is
+               // right diverse.
+               return true;
             }
          }
       }
-      return leftDiverseNodes;
+      return false;
+   }
+
+   @Override
+   public List<Node> getFullyDiverseNodes(int stringIndex) {
+      List<Node> fullyDiverseNodes = new LinkedList<Node>();
+
+      if (stringIndicesSeen.contains(stringIndex) && isLeftDiverse(stringIndex)) {
+         // Check for right diversity.
+         // In a gereralized suffix tree, some internal node may not be right
+         // diverse.
+         if (isRightDiverse(stringIndex)) {
+            fullyDiverseNodes.add(this);
+         }
+
+         // Since this is left diverse, some of the children may be as well.
+         for (Node child : this.children.values()) {
+            List<Node> childsFullyDiverseNodes = child
+                  .getFullyDiverseNodes(stringIndex);
+            if (childsFullyDiverseNodes != null) {
+               fullyDiverseNodes.addAll(childsFullyDiverseNodes);
+            }
+         }
+      }
+
+      return fullyDiverseNodes;
    }
 
    @Override
@@ -121,7 +148,7 @@ public class InternalNode extends Node {
    @Override
    public LeafNode insertNode(int stringIndex, NodeInfo info) {
       LeafNode leaf;
-      
+
       int i = 0;
       while (i < getLabelLength() && info.charAt(i) == this.charAt(i))
          i++;
@@ -186,7 +213,7 @@ public class InternalNode extends Node {
       super.setParent(parent);
       this.stringLength = getParent().stringLength + (end - begin);
    }
-   
+
    @Override
    public void shiftBegin(int shift) {
       this.begin += shift;

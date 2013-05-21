@@ -74,7 +74,7 @@ public class LeafNode extends Node {
    }
 
    @Override
-   public List<Node> getLeftDiverseNodes(int stringIndex) {
+   public List<Node> getFullyDiverseNodes(int stringIndex) {
       return null;
    }
 

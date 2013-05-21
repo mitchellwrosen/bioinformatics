@@ -12,9 +12,9 @@ import java.util.Set;
  * 
  */
 public abstract class Node {
-   protected int        labelSize    = -1;
-   private InternalNode parent       = null;
-   protected int        stringLength = 0;
+   protected int          labelSize         = -1;
+   private InternalNode   parent            = null;
+   protected int          stringLength      = 0;
    protected Set<Integer> stringIndicesSeen = new HashSet<Integer>();
 
    public Node() {
@@ -38,7 +38,7 @@ public abstract class Node {
    /** If leftChar == null, then node is left diverse. */
    public abstract Character getLeftChar(int stringIndex);
 
-   public abstract List<Node> getLeftDiverseNodes(int stringIndex);
+   public abstract List<Node> getFullyDiverseNodes(int stringIndex);
 
    public int getLevel() {
       if (getParent() == null) {
