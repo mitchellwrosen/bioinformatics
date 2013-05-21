@@ -180,7 +180,7 @@ public class Controller {
    }
 
    /**
-    * Find all repeats. Currently a TODO.
+    * Find all repeats.
     * 
     * @param minimumRepeatLength
     *           The minimum length of a repeat.
@@ -288,7 +288,8 @@ public class Controller {
             + relativeFoldExpression + "," + averageDistance + ","
             + averageDistanceNegative);
       for (StartEntry occurance : occurences) {
-         matchInfo.append("," + occurance.start);
+         // Represent as 1-indexed for ease of bio students.
+         matchInfo.append("," + (occurance.start + 1));
       }
 
       matchInfo.append("\n" + reverseSearchString + ","
