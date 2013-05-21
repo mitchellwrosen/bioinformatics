@@ -21,18 +21,17 @@ public class SuffixTree {
    }
 
    public class RepeatEntry {
-      private SuffixTree             tree;
-      private Collection<StartEntry> starts;
-      private int                    length;
+      private SuffixTree       tree;
+      private List<StartEntry> starts;
+      private int              length;
 
-      public RepeatEntry(SuffixTree tree, Collection<StartEntry> starts,
-            int length) {
+      public RepeatEntry(SuffixTree tree, List<StartEntry> starts, int length) {
          this.tree = tree;
          this.starts = starts;
          this.length = length;
       }
 
-      public Collection<StartEntry> getStarts() {
+      public List<StartEntry> getStarts() {
          return starts;
       }
 
@@ -42,9 +41,12 @@ public class SuffixTree {
 
       @Override
       public String toString() {
-         StartEntry start = starts.iterator().next();
-         return "[ " + start.stringIndex + ", " + tree.strings.get(start.stringIndex).substring(start.start,
-               start.start + length) + "]";
+         StartEntry start = starts.get(0);
+         return "[ "
+               + start.stringIndex
+               + ", "
+               + tree.strings.get(start.stringIndex).substring(start.start,
+                     start.start + length) + "]";
       }
    }
 
