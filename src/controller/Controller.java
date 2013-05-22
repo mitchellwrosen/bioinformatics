@@ -325,7 +325,7 @@ public class Controller {
 
       // Minimum needs to be quite low. maximum = sizeof(entire pri mrna)
       List<PalindromeEntry> entries = SuffixTreeUtils.findPalindromes(strings,
-            3, 64);
+            3, 65);
 
       StringBuilder returnVal = new StringBuilder(
             "start, stop, miRNA length, sequence\n");
@@ -342,9 +342,11 @@ public class Controller {
          sequence += "]";
          sequence += strings.get(0).substring(stop - 1 + palindrome.getGap(),
                stop - 1 + palindrome.getGap() + palindrome.getRadius());
-
-         returnVal.append(start + "," + stop + "," + length + "," + sequence
-               + "\n");
+         
+         if (length >= 21 && length <= 23) {
+            returnVal.append(start + "," + stop + "," + length + "," + sequence
+                  + "\n");
+         }
       }
       return returnVal.toString();
    }
