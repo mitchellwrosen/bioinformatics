@@ -79,6 +79,7 @@ public class View extends JDialog {
       mPane.add(mTabbedPane);
       mPane.add(controlsBox);
       mPane.validate();
+      this.setSize(600, 600);
    }
 
    protected void initializeSequenceBox() {

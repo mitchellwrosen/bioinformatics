@@ -215,11 +215,11 @@ public class Controller {
          matchInfo.append(treeUtil.averageDistanceToNextPositiveMRNA(repeat
                .getStarts()) + ",");
          matchInfo.append(treeUtil.averageDistanceToNextNegativeMRNA(repeat
-               .getStarts()));
+               .getStarts()) + ",");
 
          for (StartEntry occurence : occurences) {
             // Represent as 1-indexed for ease of bio students.
-            matchInfo.append("," + (occurence.start + 1));
+            matchInfo.append(" " + (occurence.start + 1));
          }
          matchInfo.append("\n");
       }
@@ -286,19 +286,19 @@ public class Controller {
 
       matchInfo.append(searchString + "," + absoluteFrequency + ","
             + relativeFoldExpression + "," + averageDistance + ","
-            + averageDistanceNegative);
+            + averageDistanceNegative + ",");
       for (StartEntry occurance : occurences) {
          // Represent as 1-indexed for ease of bio students.
-         matchInfo.append("," + (occurance.start + 1));
+         matchInfo.append(" " + (occurance.start + 1));
       }
 
       matchInfo.append("\n" + reverseSearchString + ","
             + reverseAbsoluteFrequency + "," + reverseRelativeFoldExpression
             + "," + reverseAverageDistance + ","
-            + reverseAverageDistanceNegative);
+            + reverseAverageDistanceNegative + ",");
       for (StartEntry occurance : revOccurences) {
          // Represent as 1-indexed for ease of bio students.
-         matchInfo.append("," + (occurance.start + 1));
+         matchInfo.append(" " + (occurance.start + 1));
       }
       return matchInfo.toString();
    }
