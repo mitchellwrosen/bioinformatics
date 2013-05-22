@@ -74,20 +74,38 @@ public class SuffixTree {
       }
    }
 
-   public class PalendromeEntry {
+   public class PalindromeEntry {
       private SuffixTree tree;
       private StartEntry forwardStart;
       private StartEntry reverseStart;
-      private int        length;
+      private int        radius;
       private int        gap;
+      private StartEntry start;
+      private int        length;
 
-      public PalendromeEntry(SuffixTree tree, StartEntry forward,
-            StartEntry reverse, int length, int gap) {
+      public PalindromeEntry(SuffixTree tree, StartEntry forward,
+            StartEntry reverse, int radius, int gap) {
          this.tree = tree;
          this.forwardStart = forward;
          this.reverseStart = reverse;
-         this.length = length;
+         this.radius = radius;
          this.gap = gap;
+         this.start = new StartEntry(forwardStart.stringIndex,
+               forwardStart.start - gap - radius);
+         this.length = radius + radius + gap;
+      }
+
+      public String toString() {
+         return tree.strings.get(forwardStart.stringIndex).substring(
+               this.start.start, forwardStart.start + radius);
+      }
+
+      public StartEntry getStart() {
+         return start;
+      }
+
+      public int getLength() {
+         return length;
       }
 
       /**
@@ -114,8 +132,8 @@ public class SuffixTree {
       /**
        * @return the length
        */
-      public int getLength() {
-         return length;
+      public int getRadius() {
+         return radius;
       }
 
       /**
@@ -259,47 +277,51 @@ public class SuffixTree {
       return repeats;
    }
 
-   private String leastCommonExtension(StartEntry forwardStart,
+   private int longestCommonExtension(StartEntry forwardStart,
          StartEntry reverseStart) {
       InternalNode forwardNode = null;
 
       // Find the leaf of the forward start
       for (LeafNode leaf : leaves) {
-         if (leaf.nodeInfo.containsKey(forwardStart.stringIndex)
-               && leaf.nodeInfo.get(forwardStart.stringIndex).stringBegin == forwardStart.start) {
+         NodeInfo info = leaf.nodeInfo.get(forwardStart.stringIndex);
+         if (info != null && info.stringBegin == forwardStart.start) {
             forwardNode = leaf.getParent();
             break;
          }
       }
 
+      if (forwardNode == null) {
+         throw new IllegalArgumentException();
+      }
+
       // Find the lowest common ancestor. It is the lowest parent of the
       // forwardNode that is also a parent of the reverse start.
-      while (forwardNode != null) {
+      while (forwardNode != root) {
          for (LeafNode leaf : forwardNode.leaves) {
-            if (leaf.nodeInfo.containsKey(reverseStart.stringIndex)
-                  && leaf.nodeInfo.get(reverseStart.stringIndex).stringBegin == reverseStart.start) {
-               return forwardNode.toString();
+            NodeInfo info = leaf.nodeInfo.get(reverseStart.stringIndex);
+            if (info != null && info.stringBegin == reverseStart.start) {
+               return forwardNode.getStringLength();
             }
          }
 
          forwardNode = forwardNode.getParent();
       }
 
-      return "";
+      return 0;
    }
 
    /**
     * Assumes that the string at index 1 is the reverse of the string at index
     * 0.
     * 
-    * @param length
-    *           Minimum length of the palendrome to find.
+    * @param radius
+    *           Minimum radius of the palendrome to find.
     * @param gap
     *           Largest allowable gap.
     * @return
     */
-   public List<PalendromeEntry> findPalendromes(int length, int gap) {
-      List<PalendromeEntry> entries = new ArrayList<PalendromeEntry>();
+   public List<PalindromeEntry> findPalindromes(int radius, int gap) {
+      List<PalindromeEntry> entries = new ArrayList<PalindromeEntry>();
       int forwardIdx = 0;
       int reverseIdx = 1;
       String forward = this.strings.get(forwardIdx);
@@ -312,13 +334,15 @@ public class SuffixTree {
       }
 
       for (int g = 0; g <= gap; g++) {
-         for (int q = g; q < forward.length() - 1; q++) {
+         // Go until q < length - 2 because of $
+         for (int q = g; q < forward.length() - 2; q++) {
             StartEntry forwardStart = new StartEntry(forwardIdx, q + 1);
-            StartEntry reverseStart = new StartEntry(reverseIdx, n - q + 1 - g);
-            String lce = leastCommonExtension(forwardStart, reverseStart);
-            if (lce.length() >= length) {
-               entries.add(new PalendromeEntry(this, forwardStart,
-                     reverseStart, lce.length(), g));
+            // length - q - 1 - 1(for $) + gap
+            StartEntry reverseStart = new StartEntry(reverseIdx, n - q - 2 + g);
+            int lce = longestCommonExtension(forwardStart, reverseStart);
+            if (lce >= radius) {
+               entries.add(new PalindromeEntry(this, forwardStart,
+                     reverseStart, lce, g));
             }
          }
       }
