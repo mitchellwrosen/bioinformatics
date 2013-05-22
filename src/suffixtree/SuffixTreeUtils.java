@@ -8,6 +8,7 @@ import model.Gene;
 import model.GeneIsoform;
 import model.Nucleotide;
 import model.Sequence;
+import suffixtree.SuffixTree.PalindromeEntry;
 import suffixtree.SuffixTree.StartEntry;
 
 /**
@@ -219,5 +220,35 @@ public class SuffixTreeUtils {
       }
       // Remove indices
       startEntries.removeAll(toRemove);
+   }
+
+   public static List<PalindromeEntry> findPalindromes(String string,
+         int minRadius, int maxGap) {
+      List<String> strings = new ArrayList<String>(2);
+      strings.add(string);
+      strings.add(new StringBuilder(string).reverse().toString());
+      return findPalindromes(strings, minRadius, maxGap);
+   }
+
+   /**
+    * 
+    * @param strings
+    *           Exactly two strings which are reverse of eachother.
+    * @param minRadius
+    * @param maxGap
+    * @return
+    */
+   public static List<PalindromeEntry> findPalindromes(List<String> strings,
+         int minRadius, int maxGap) {
+      if (strings.size() != 2) {
+         throw new IllegalArgumentException("Must give exactly two strings");
+      }
+      if (strings.get(0).length() != strings.get(1).length()) {
+         throw new IllegalArgumentException(
+               "Both strings must be the same length");
+      }
+
+      SuffixTree tree = SuffixTree.create(strings);
+      return tree.findPalindromes(minRadius, maxGap);
    }
 }

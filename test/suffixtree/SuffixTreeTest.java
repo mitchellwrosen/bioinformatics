@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import suffixtree.SuffixTree.PalendromeEntry;
+import suffixtree.SuffixTree.PalindromeEntry;
 import suffixtree.SuffixTree.RepeatEntry;
 import suffixtree.SuffixTree.StartEntry;
 
@@ -51,13 +51,21 @@ public class SuffixTreeTest {
 
    @Test
    public void testPalendromes() {
-      // String[] strings = { "ABCABCDCBAABC", "CBAABCDCBACBA" };
       String string = "ABCABCDCBAABC";
+      List<PalindromeEntry> palindromes = SuffixTreeUtils.findPalindromes(
+            string, 2, 1);
+      for (int i = 0; i < palindromes.size(); i++) {
+         System.out.println(palindromes.get(i).toString());
+      }
+      assertEquals(2, palindromes.size());
+
       List<String> strings = new ArrayList<String>(2);
-      strings.add(string);
-      strings.add(new StringBuilder(string).reverse().toString());
-      SuffixTree tree = SuffixTree.create(strings);
-      List<PalendromeEntry> palendromes = tree.findPalendromes(2, 1);
-      assertEquals(2, palendromes.size());
+      strings.add("CATTGATCAACGA");
+      strings.add("TCGTTGATCAATG");
+      palindromes = SuffixTreeUtils.findPalindromes(strings, 3, 1);
+      for (int i = 0; i < palindromes.size(); i++) {
+         System.out.println(palindromes.get(i).toString());
+      }
+      assertEquals(1, palindromes.size());
    }
 }
