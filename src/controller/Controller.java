@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import model.GCContentInfo;
@@ -11,6 +12,7 @@ import model.GeneIsoform;
 import model.GeneUtils;
 import model.Sequence;
 import suffixtree.SuffixTree;
+import suffixtree.SuffixTree.PalindromeEntry;
 import suffixtree.SuffixTree.RepeatEntry;
 import suffixtree.SuffixTree.StartEntry;
 import suffixtree.SuffixTreeUtils;
@@ -304,14 +306,46 @@ public class Controller {
    }
 
    /**
-    * Converts the DNA String to microRNA, then finds palindromes and returns them.
+    * Converts the DNA String to microRNA, then finds palindromes and returns
+    * them.
     * 
     * @param nucleotideGap
     *           The maximum distance between and external and internal
     *           palindrome when including imperfect plaindromes.
-    * @return A formatted string representing microRNA strands within the current FASTA file.
+    * @return A formatted string representing microRNA strands within the
+    *         current FASTA file.
     */
    public String findMRNA(int nucleotideGap) {
-      return "start, stop, miRNA length, sequence\n";
+      List<String> strings = new ArrayList<String>();
+      strings.add(SuffixTreeUtils.toMRNAString(mSequence.toString()));
+      strings.add(SuffixTreeUtils.reverseComplementMRNAString(SuffixTreeUtils
+            .toMRNAString(mSequence.toString())));
+      System.out.println(strings.get(0));
+      System.out.println(strings.get(1));
+
+      // Minimum needs to be quite low. maximum = sizeof(entire pri mrna)
+      List<PalindromeEntry> entries = SuffixTreeUtils.findPalindromes(strings,
+            3, 64);
+
+      StringBuilder returnVal = new StringBuilder(
+            "start, stop, miRNA length, sequence\n");
+
+      for (PalindromeEntry palindrome : entries) {
+         int start = palindrome.getStart().start + 1;
+         int length = palindrome.getRadius();
+         int stop = start + length;
+
+         String sequence = strings.get(0).substring(start - 1, stop - 1);
+         sequence += "[";
+         sequence += strings.get(0).substring(stop - 1,
+               stop - 1 + palindrome.getGap());
+         sequence += "]";
+         sequence += strings.get(0).substring(stop - 1 + palindrome.getGap(),
+               stop - 1 + palindrome.getGap() + palindrome.getRadius());
+
+         returnVal.append(start + "," + stop + "," + length + "," + sequence
+               + "\n");
+      }
+      return returnVal.toString();
    }
 }

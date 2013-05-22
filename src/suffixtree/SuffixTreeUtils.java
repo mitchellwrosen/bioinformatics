@@ -180,6 +180,64 @@ public class SuffixTreeUtils {
    }
 
    /**
+    * Complements a String, and replaces T's with U's.
+    * 
+    * @param forwardStrand
+    *           The DNA to convert.
+    * @return The MRNA produced by this DNA strand
+    */
+   public static String toMRNAString(String forwardStrand) {
+      String mRNA = "";
+      for (int i = 0; i < forwardStrand.length(); i++) {
+         char nextChar = forwardStrand.charAt(i);
+         if (nextChar == Nucleotide.ADENINE.toChar()) {
+            mRNA += 'U';
+         } else if (nextChar == Nucleotide.CYTOSINE.toChar()) {
+            mRNA += Nucleotide.CYTOSINE.complement()
+                  .toChar();
+         } else if (nextChar == Nucleotide.GUANINE.toChar()) {
+            mRNA += Nucleotide.GUANINE.complement().toChar();
+         } else if (nextChar == Nucleotide.THYMINE.toChar()) {
+            mRNA += Nucleotide.THYMINE.complement().toChar();
+         } else {
+            // Directly just copy the current character if we do not know a
+            // reverse complement for this character.
+            mRNA += nextChar;
+         }
+      }
+      return mRNA;
+   }
+
+   /**
+    * reverseComplements an mrna
+    * 
+    * @param forwardStrand
+    *           The mRNA to convert.
+    * @return The MRNA reverse complement, for palindrome detection.
+    */
+   public static String reverseComplementMRNAString(String forwardStrand) {
+      String mRNA = "";
+      for (int i = forwardStrand.length() - 1; i >= 0; i--) {
+         char nextChar = forwardStrand.charAt(i);
+         if (nextChar == Nucleotide.ADENINE.toChar()) {
+            mRNA += 'U';
+         } else if (nextChar == Nucleotide.CYTOSINE.toChar()) {
+            mRNA += Nucleotide.CYTOSINE.complement()
+                  .toChar();
+         } else if (nextChar == Nucleotide.GUANINE.toChar()) {
+            mRNA += Nucleotide.GUANINE.complement().toChar();
+         } else if (nextChar == 'U') {
+            mRNA += Nucleotide.THYMINE.complement().toChar();
+         } else {
+            // Directly just copy the current character if we do not know a
+            // reverse complement for this character.
+            mRNA += nextChar;
+         }
+      }
+      return mRNA;
+   }
+   
+   /**
     * Removes all indices that are outside of the acceptable maxDistance from an
     * mRNA start. If an index is within maxDistance from a positive start, or
     * maxDistance + the string's length from a negative mRNA start, it is kept.

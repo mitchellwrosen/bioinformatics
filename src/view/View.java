@@ -276,16 +276,18 @@ public class View extends JDialog {
    protected void runFindMRNA() {
       String nucleotideGapString = mFindMRNAPanel.getNucleotideGap();
       int nucleotideGap = -1;
-      try{
+      try {
          nucleotideGap = Integer.parseInt(nucleotideGapString);
-      } catch(NumberFormatException e) {
+      } catch (NumberFormatException e) {
          JOptionPane.showMessageDialog(null,
                "Nucleotide gap must be a number.", "Error",
                JOptionPane.ERROR_MESSAGE);
          return;
       }
-      
-      mFindMRNAPanel.setDisplay(controller.findMRNA(nucleotideGap));
+      // Find all indices of repeats that meat filter criteria.
+      mFindMRNAPanel.setDisplay("Running...");
+      Thread thread = new Thread(new FindMRNARunner(nucleotideGap));
+      thread.start();
    }
 
    protected void runGCContent() {
@@ -312,6 +314,22 @@ public class View extends JDialog {
 
    protected void runProteins() {
       mProteinsPanel.setDisplay(controller.getProteins());
+   }
+
+   /**
+    * Hacky inner class for running the micro-RNA finder in another thread.
+    */
+   private class FindMRNARunner implements Runnable {
+      int nucleotideGap;
+
+      public FindMRNARunner(int nucleotideGap) {
+         this.nucleotideGap = nucleotideGap;
+      }
+
+      public void run() {
+         String output = controller.findMRNA(nucleotideGap);
+         mFindMRNAPanel.setDisplay(output);
+      }
    }
 
    /**
