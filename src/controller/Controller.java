@@ -320,12 +320,10 @@ public class Controller {
       strings.add(SuffixTreeUtils.toMRNAString(mSequence.toString()));
       strings.add(SuffixTreeUtils.reverseComplementMRNAString(SuffixTreeUtils
             .toMRNAString(mSequence.toString())));
-      System.out.println(strings.get(0));
-      System.out.println(strings.get(1));
 
       // Minimum needs to be quite low. maximum = sizeof(entire pri mrna)
       List<PalindromeEntry> entries = SuffixTreeUtils.findPalindromes(strings,
-            3, 65);
+            2, 130);
 
       StringBuilder returnVal = new StringBuilder(
             "start, stop, miRNA length, sequence\n");
@@ -342,10 +340,61 @@ public class Controller {
          sequence += "]";
          sequence += strings.get(0).substring(stop - 1 + palindrome.getGap(),
                stop - 1 + palindrome.getGap() + palindrome.getRadius());
-         
+
          if (length >= 21 && length <= 23) {
             returnVal.append(start + "," + stop + "," + length + "," + sequence
                   + "\n");
+         } else if (length < 21) {
+            for (PalindromeEntry secondPalindrome : entries) {
+               int secondStart = secondPalindrome.getStart().start + 1;
+               int secondLength = secondPalindrome.getRadius();
+               int secondStop = secondStart + secondLength;
+
+               /*
+                * If new palindrome is inside the first palindrome AND the
+                * second start is exactly nucleotidesGap from the first stop AND
+                * the sum of the palindrome lengths is between 21 and 23, add
+                * it.
+                * 
+                * This code is largely untested. I created a local test, but was
+                * unable to run it because the CORRECT string was not recognized
+                * as a real palindrome.
+                */
+               if (secondStart > stop
+                     && secondStop + 2 * secondLength
+                           + secondPalindrome.getGap() < start + length
+                           + palindrome.getGap()
+                     && secondStart - stop == nucleotideGap
+                     && (secondLength + length >= 21 && secondLength + length <= 23)) {
+                  String updatedSequence = strings.get(0).substring(start - 1,
+                        stop - 1);
+                  updatedSequence += "[";
+                  updatedSequence += strings.get(0).substring(stop - 1,
+                        secondStart - 1);
+                  updatedSequence += "]";
+                  updatedSequence += strings.get(0).substring(secondStart - 1,
+                        secondStop);
+                  updatedSequence += "[";
+                  updatedSequence += strings.get(0).substring(secondStop,
+                        secondStop + secondPalindrome.getGap());
+                  updatedSequence += "]";
+                  updatedSequence += strings.get(0).substring(
+                        secondStop + secondPalindrome.getGap(),
+                        secondStop + secondPalindrome.getGap() + secondLength);
+                  updatedSequence += "[";
+                  updatedSequence += strings.get(0).substring(
+                        secondStop + secondPalindrome.getGap() + secondLength,
+                        stop - 1 + palindrome.getGap());
+                  updatedSequence += "]";
+                  sequence += strings.get(0)
+                        .substring(
+                              stop - 1 + palindrome.getGap(),
+                              stop - 1 + palindrome.getGap()
+                                    + palindrome.getRadius());
+                  returnVal.append(start + "," + stop + "," + length + ","
+                        + updatedSequence);
+               }
+            }
          }
       }
       return returnVal.toString();
