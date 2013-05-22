@@ -303,7 +303,15 @@ public class Controller {
       return matchInfo.toString();
    }
 
-   public String findMRNA() {
-      return "<Placeholder!>";
+   /**
+    * Converts the DNA String to microRNA, then finds palindromes and returns them.
+    * 
+    * @param nucleotideGap
+    *           The maximum distance between and external and internal
+    *           palindrome when including imperfect plaindromes.
+    * @return A formatted string representing microRNA strands within the current FASTA file.
+    */
+   public String findMRNA(int nucleotideGap) {
+      return "start, stop, miRNA length, sequence\n";
    }
 }

@@ -274,7 +274,18 @@ public class View extends JDialog {
    };
 
    protected void runFindMRNA() {
-      mFindMRNAPanel.setDisplay(controller.findMRNA());
+      String nucleotideGapString = mFindMRNAPanel.getNucleotideGap();
+      int nucleotideGap = -1;
+      try{
+         nucleotideGap = Integer.parseInt(nucleotideGapString);
+      } catch(NumberFormatException e) {
+         JOptionPane.showMessageDialog(null,
+               "Nucleotide gap must be a number.", "Error",
+               JOptionPane.ERROR_MESSAGE);
+         return;
+      }
+      
+      mFindMRNAPanel.setDisplay(controller.findMRNA(nucleotideGap));
    }
 
    protected void runGCContent() {
