@@ -2,13 +2,16 @@ package suffixtree;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class SuffixTree {
-   private InternalNode   root;
-   private List<String>   strings;
-   private List<LeafNode> leaves;
+   private InternalNode              root;
+   private List<String>              strings;
+   private Map<StartEntry, LeafNode> leaves;
 
    /**
     * Represents any position in any string.
@@ -36,6 +39,21 @@ public class SuffixTree {
       public StartEntry(int stringIndex, int start) {
          this.stringIndex = stringIndex;
          this.start = start;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+         if (!(o instanceof StartEntry)) {
+            return false;
+         } else {
+            StartEntry e = (StartEntry) o;
+            return this.start == e.start && this.stringIndex == e.stringIndex;
+         }
+      }
+
+      @Override
+      public int hashCode() {
+         return start + 4000000 * stringIndex;
       }
    }
 
@@ -95,6 +113,7 @@ public class SuffixTree {
          this.length = radius + radius + gap;
       }
 
+      @Override
       public String toString() {
          return tree.strings.get(forwardStart.stringIndex).substring(
                this.start.start, forwardStart.start + radius);
@@ -146,7 +165,7 @@ public class SuffixTree {
 
    protected SuffixTree(List<String> strings) {
       this.root = new InternalNode();
-      this.leaves = new LinkedList<LeafNode>();
+      this.leaves = new HashMap<StartEntry, LeafNode>();
       this.strings = new ArrayList<String>(strings.size());
       for (String s : strings) {
          this.strings.add(s + "$");
@@ -180,11 +199,11 @@ public class SuffixTree {
          for (int i = 0; i < string.length(); ++i) {
             NodeInfo info = new NodeInfo(string, i, i, string.length());
             LeafNode leaf = root.insertNode(stringIndex, info);
-            leaves.add(leaf);
+            leaves.put(new StartEntry(stringIndex, i), leaf);
          }
       }
 
-      for (LeafNode leaf : leaves) {
+      for (LeafNode leaf : leaves.values()) {
          InternalNode node = leaf.getParent();
          // Add all leaves to internal nodes
          while (node != null) {
@@ -194,16 +213,13 @@ public class SuffixTree {
       }
    }
 
-   public List<LeafNode> getLeaves() {
-      return leaves;
-   }
-
    public List<StartEntry> getOccurrences(String string) {
       int nodeCharIndex = 0;
 
       Node node = root.getChild(string.charAt(0));
-      if (node == null)
+      if (node == null) {
          return new ArrayList<StartEntry>(0);
+      }
 
       for (int i = 0; i < string.length(); ++i, ++nodeCharIndex) {
          if (nodeCharIndex >= node.getLabelLength()) {
@@ -219,8 +235,9 @@ public class SuffixTree {
             nodeCharIndex = 0;
          }
 
-         if (string.charAt(i) != node.charAt(nodeCharIndex))
+         if (string.charAt(i) != node.charAt(nodeCharIndex)) {
             return new ArrayList<StartEntry>(0);
+         }
       }
 
       List<StartEntry> retval = null;
@@ -280,34 +297,44 @@ public class SuffixTree {
    private int longestCommonExtension(StartEntry forwardStart,
          StartEntry reverseStart) {
       InternalNode forwardNode = null;
+      InternalNode reverseNode = null;
+      Set<InternalNode> forwardParents = new HashSet<InternalNode>();
 
-      // Find the leaf of the forward start
-      for (LeafNode leaf : leaves) {
-         NodeInfo info = leaf.nodeInfo.get(forwardStart.stringIndex);
-         if (info != null && info.stringBegin == forwardStart.start) {
-            forwardNode = leaf.getParent();
-            break;
-         }
-      }
+      forwardNode = loop1(forwardStart);
+      reverseNode = loop1(reverseStart);
 
-      if (forwardNode == null) {
+      if (forwardNode == null || reverseNode == null) {
          throw new IllegalArgumentException();
       }
 
-      // Find the lowest common ancestor. It is the lowest parent of the
-      // forwardNode that is also a parent of the reverse start.
-      while (forwardNode != root) {
-         for (LeafNode leaf : forwardNode.leaves) {
-            NodeInfo info = leaf.nodeInfo.get(reverseStart.stringIndex);
-            if (info != null && info.stringBegin == reverseStart.start) {
-               return forwardNode.getStringLength();
-            }
-         }
+      forwardNode = loop2(forwardNode, forwardParents);
 
+      reverseNode = loop3(reverseNode, forwardParents);
+
+      return reverseNode.getStringLength();
+   }
+
+   private InternalNode loop3(InternalNode reverseNode,
+         Set<InternalNode> forwardParents) {
+      while (!forwardParents.contains(reverseNode)) {
+         reverseNode = reverseNode.getParent();
+      }
+      return reverseNode;
+   }
+
+   private InternalNode loop2(InternalNode forwardNode,
+         Set<InternalNode> forwardParents) {
+      // Add all the parents of forward node to a set.
+      while (forwardNode != null) {
+         forwardParents.add(forwardNode);
          forwardNode = forwardNode.getParent();
       }
+      return forwardNode;
+   }
 
-      return 0;
+   private InternalNode loop1(StartEntry forwardStart) {
+      // Find the leaf of the forward start
+      return leaves.get(forwardStart).getParent();
    }
 
    /**
