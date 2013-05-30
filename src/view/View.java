@@ -28,7 +28,7 @@ public class View extends JDialog {
    protected final int DIALOG_HEIGHT = 400, DIALOG_WIDTH = 500;
 
    // Selected tab "enum"
-   protected final int GC_CONTENT_TAB = 0, CALCULATIONS_TAB = 1, PROTEINS_TAB = 2, FIND_REPEATS_TAB = 3, FIND_MRNA_TAB = 4;
+   protected final int GC_CONTENT_TAB = 0, CALCULATIONS_TAB = 1, PROTEINS_TAB = 2, FIND_REPEATS_TAB = 3, FIND_MRNA_TAB = 4, SUPER_FILES_TAB = 5;
 
    protected Controller controller;
 
@@ -50,6 +50,7 @@ public class View extends JDialog {
    protected ProteinsPanel mProteinsPanel;
    protected volatile FindRepeatsPanel mFindRepeatsPanel;
    protected FindMRNAPanel mFindMRNAPanel;
+   protected SuperFilesPanel mSuperFilesPanel;
 
    protected JButton mRunButton, mSaveButton, mQuitButton;
 
@@ -117,11 +118,15 @@ public class View extends JDialog {
       mProteinsPanel = new ProteinsPanel();
       mFindRepeatsPanel = new FindRepeatsPanel();
       mFindMRNAPanel = new FindMRNAPanel();
+      mSuperFilesPanel = new SuperFilesPanel();
+
       mTabbedPane = new JTabbedPane();
+
       mTabbedPane.addChangeListener(new ChangeListener() {
          public void stateChanged(ChangeEvent e) {
             updateRunButton();
-
+            sequenceStateUpdate();
+            gffStateUpdate();
             switch (mTabbedPane.getSelectedIndex()) {
             case GC_CONTENT_TAB:
             case FIND_MRNA_TAB:
@@ -131,6 +136,7 @@ public class View extends JDialog {
             case FIND_REPEATS_TAB:
             case CALCULATIONS_TAB:
             case PROTEINS_TAB:
+            case SUPER_FILES_TAB:
                mSequenceFileBox.setVisible(true);
                mGffFileBox.setVisible(true);
                break;
@@ -145,6 +151,7 @@ public class View extends JDialog {
       mTabbedPane.addTab("Proteins", mProteinsPanel);
       mTabbedPane.addTab("Find Repeats", mFindRepeatsPanel);
       mTabbedPane.addTab("Find miRNA", mFindMRNAPanel);
+      mTabbedPane.addTab("Multiple Files", mSuperFilesPanel);
    }
 
    protected Box initializeControlsBox() {
@@ -181,10 +188,58 @@ public class View extends JDialog {
       case FIND_REPEATS_TAB:
       case CALCULATIONS_TAB:
       case PROTEINS_TAB:
+      case SUPER_FILES_TAB:
          mRunButton.setEnabled(mValidSequenceFile && mValidGffFile);
          break;
       default:
          assert false;
+      }
+   }
+
+   protected void sequenceStateUpdate() {
+      if (mTabbedPane.getSelectedIndex() == SUPER_FILES_TAB) {
+         // TODO: Logic for handling loading in a sequence ZIP file.
+         mValidSequenceFile = true;
+         updateRunButton();
+      } else {
+         try {
+            controller.useSequenceFile(mSequenceFile.getText());
+            mValidSequenceFile = true;
+            updateRunButton();
+         } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, ex.toString(), "Error",
+                  JOptionPane.ERROR_MESSAGE);
+            mValidSequenceFile = false;
+            updateRunButton();
+            return;
+         }
+      }
+   }
+
+   protected void gffStateUpdate() {
+      if (mTabbedPane.getSelectedIndex() == SUPER_FILES_TAB) {
+         // TODO: Logic for handling loading in a GFF ZIP file.
+         mValidGffFile = true;
+         updateRunButton();
+      } else {
+         try {
+            controller.useGffFile(mGffFile.getText());
+            mValidGffFile = true;
+            updateRunButton();
+         } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, ex.toString(), "Error",
+                  JOptionPane.ERROR_MESSAGE);
+            mValidGffFile = false;
+            updateRunButton();
+            return;
+         } catch (ParseException ex) {
+            JOptionPane.showMessageDialog(null, ex.toString(), "Error",
+                  JOptionPane.ERROR_MESSAGE);
+            mValidGffFile = false;
+            updateRunButton();
+            return;
+         }
       }
    }
 
@@ -197,19 +252,7 @@ public class View extends JDialog {
          if (returnVal == JFileChooser.APPROVE_OPTION) {
             String filename = chooser.getSelectedFile().getAbsolutePath();
             mSequenceFile.setText(filename);
-
-            try {
-               controller.useSequenceFile(mSequenceFile.getText());
-               mValidSequenceFile = true;
-               updateRunButton();
-            } catch (Exception ex) {
-               ex.printStackTrace();
-               JOptionPane.showMessageDialog(null, ex.toString(), "Error",
-                     JOptionPane.ERROR_MESSAGE);
-               mValidSequenceFile = false;
-               updateRunButton();
-               return;
-            }
+            sequenceStateUpdate();
          }
       }
    };
@@ -221,24 +264,7 @@ public class View extends JDialog {
          if (returnVal == JFileChooser.APPROVE_OPTION) {
             String filename = chooser.getSelectedFile().getAbsolutePath();
             mGffFile.setText(filename);
-
-            try {
-               controller.useGffFile(mGffFile.getText());
-               mValidGffFile = true;
-               updateRunButton();
-            } catch (IOException ex) {
-               JOptionPane.showMessageDialog(null, ex.toString(), "Error",
-                     JOptionPane.ERROR_MESSAGE);
-               mValidGffFile = false;
-               updateRunButton();
-               return;
-            } catch (ParseException ex) {
-               JOptionPane.showMessageDialog(null, ex.toString(), "Error",
-                     JOptionPane.ERROR_MESSAGE);
-               mValidGffFile = false;
-               updateRunButton();
-               return;
-            }
+            gffStateUpdate();
          }
       }
    };
@@ -266,6 +292,9 @@ public class View extends JDialog {
             break;
          case FIND_REPEATS_TAB:
             runFindRepeats();
+            break;
+         case SUPER_FILES_TAB:
+            runSuperFiles();
             break;
          default:
             assert false;
@@ -410,6 +439,10 @@ public class View extends JDialog {
       }
    }
 
+   protected void runSuperFiles() {
+      mSuperFilesPanel.setSuperContig("Super Contig Placeholder");
+      mSuperFilesPanel.setSuperGFF("Super GFF Placeholder");
+   }
    protected ActionListener saveButtonActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
          switch (mTabbedPane.getSelectedIndex()) {
@@ -428,6 +461,9 @@ public class View extends JDialog {
          case FIND_REPEATS_TAB:
             saveRepeats();
             break;
+         case SUPER_FILES_TAB:
+            saveSuperFiles();
+            break;
          default:
             assert false;
          }
@@ -435,11 +471,11 @@ public class View extends JDialog {
    };
 
    protected void saveGcContent() {
-      saveString(mGcContentInfoPanel.getDisplay());
+      saveString(mGcContentInfoPanel.getDisplay(), "Save GC Content");
    }
 
    protected void saveMRNA() {
-      saveString(mFindMRNAPanel.getDisplay());
+      saveString(mFindMRNAPanel.getDisplay(), "Save MRNA");
    }
 
    protected void saveCalculations() {
@@ -457,17 +493,21 @@ public class View extends JDialog {
       }
       sb.append("\n");
       
-      saveString(sb.toString());
+      saveString(sb.toString(), "Save Calculations");
    }
 
    protected void saveProteins() {
-      saveString(mProteinsPanel.getDisplay());
+      saveString(mProteinsPanel.getDisplay(), "Save Proteins");
    }
    protected void saveRepeats() {
-      saveString(mFindRepeatsPanel.getDisplay());
+      saveString(mFindRepeatsPanel.getDisplay(), "Save Repeats");
    }
 
-   protected void saveString(String data) {
+   protected void saveSuperFiles() {
+      saveString(mSuperFilesPanel.getSuperContig(), "Save Super Contig");
+      saveString(mSuperFilesPanel.getSuperGFF(), "Save Super GFF");
+   }
+   protected void saveString(String data, String title) {
       if (data.equals("")) {
          JOptionPane.showMessageDialog(null, "No output to save", "Empty output",
                JOptionPane.ERROR_MESSAGE);
@@ -475,6 +515,7 @@ public class View extends JDialog {
       }
 
       JFileChooser chooser = new JFileChooser();
+      chooser.setDialogTitle(title);
       int ret = chooser.showSaveDialog(mPane);
 
       if (ret == JFileChooser.APPROVE_OPTION) {
