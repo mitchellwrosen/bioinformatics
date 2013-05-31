@@ -3,65 +3,30 @@
  */
 package suffixtree;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Erik Sandberg &lt;esandber@calpoly.edu&gt;
  * 
  */
 public abstract class Node {
-   protected String       string;
-   protected int          begin;
-   protected int          end;
-   protected int          labelSize = -1;
-   protected InternalNode parent    = null;
+   protected int          labelSize         = -1;
+   private InternalNode   parent            = null;
+   protected int          stringLength      = 0;
+   protected Set<Integer> stringIndicesSeen = new HashSet<Integer>();
 
    public Node() {
-      this.string = "";
-      this.begin = 0;
-      this.end = 0;
    }
 
-   public Node(String string, int begin, int end) {
-      this.string = string;
-      this.begin = begin;
-      this.end = end;
-   }
+   public abstract Character charAt(int n);
 
-   public abstract boolean isLeaf();
+   public abstract String debugString();
 
-   public boolean isLeftDiverse() {
-      return getLeftChar() == null;
-   }
+   public abstract String getLabel();
 
-   /** If leftChar == null, then node is left diverse. */
-   public abstract Character getLeftChar();
-
-   public abstract List<Node> getLeftDiverseNodes();
-
-   public int length() {
-      return end - begin;
-   }
-
-   public char charAt(int n) {
-      return string.charAt(begin + n);
-   }
-
-   public int getLevel() {
-      if (parent == null) {
-         return 0;
-      } else {
-         return 1 + parent.getLevel();
-      }
-   }
-
-   public String toString() {
-      if (parent != null) {
-         return parent.toString() + string.substring(begin, end);
-      } else {
-         return string.substring(begin, end);
-      }
-   }
+   public abstract int getLabelLength();
 
    public int getLabelSize() {
       if (labelSize == -1) {
@@ -70,7 +35,50 @@ public abstract class Node {
       return labelSize;
    }
 
-   public abstract String debugString();
+   /** If leftChar == null, then node is left diverse. */
+   public abstract Character getLeftChar(int stringIndex);
 
-   public abstract void insertNode(LeafNode node);
+   public abstract List<Node> getFullyDiverseNodes(int stringIndex);
+
+   public int getLevel() {
+      if (getParent() == null) {
+         return 0;
+      } else {
+         return 1 + getParent().getLevel();
+      }
+   }
+
+   /**
+    * @return the parent
+    */
+   protected InternalNode getParent() {
+      return parent;
+   }
+
+   public abstract int getStringLength();
+
+   public abstract LeafNode insertNode(int stringIndex, NodeInfo info);
+
+   public abstract boolean isLeaf();
+
+   public abstract boolean isLeftDiverse(int stringIndex);
+
+   /**
+    * @param parent
+    *           the parent to set
+    */
+   protected void setParent(InternalNode parent) {
+      this.parent = parent;
+   }
+
+   public abstract void shiftBegin(int shift);
+
+   @Override
+   public String toString() {
+      if (getParent() != null) {
+         return getParent().toString() + getLabel();
+      } else {
+         return getLabel();
+      }
+   }
 }

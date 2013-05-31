@@ -4,18 +4,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import suffixtree.SuffixTree;
-import suffixtree.SuffixTree.RepeatEntry;
-import suffixtree.SuffixTreeUtils;
-
 import model.GCContentInfo;
 import model.GFFParser;
 import model.GFFParser.ParseException;
 import model.Gene;
 import model.GeneIsoform;
 import model.GeneUtils;
-import model.Nucleotide;
 import model.Sequence;
+import suffixtree.SuffixTree;
+import suffixtree.SuffixTree.PalindromeEntry;
+import suffixtree.SuffixTree.RepeatEntry;
+import suffixtree.SuffixTree.StartEntry;
+import suffixtree.SuffixTreeUtils;
 
 /**
  * The Controller
@@ -24,18 +24,19 @@ import model.Sequence;
  * @version 21-Apr-2013
  */
 public class Controller {
-   protected String mSequenceFile;
-   protected String mGffFile;
+   protected String     mSequenceFile;
+   protected String     mGffFile;
 
-   protected Sequence mSequence;
+   protected Sequence   mSequence;
    protected List<Gene> mGenes;
-   
+
    public Controller() {
       mSequenceFile = new String();
       mGffFile = new String();
    }
 
-   public void useSequenceFile(String filename) throws IOException, IllegalArgumentException {
+   public void useSequenceFile(String filename) throws IOException,
+         IllegalArgumentException {
       if (!mSequenceFile.equals(filename)) {
          mSequenceFile = filename;
          mSequence = new Sequence(mSequenceFile);
@@ -50,7 +51,7 @@ public class Controller {
    public void useGffFile(String filename) throws IOException, ParseException {
       if (!mGffFile.equals(filename)) {
          mGffFile = filename;
-         
+
          GFFParser parser = new GFFParser(filename);
          mGenes = parser.parse();
          if (mSequence != null) {
@@ -58,7 +59,7 @@ public class Controller {
                gene.setSequence(mSequence);
          }
       }
-      
+
    }
 
    /**
@@ -82,8 +83,8 @@ public class Controller {
     *         an appropriate error message detailing why one could not be
     *         provided.
     */
-   public String getGcContent(String startPos, String endPos, boolean useSlidingWindow,
-         String winSize, String shiftIncr) {
+   public String getGcContent(String startPos, String endPos,
+         boolean useSlidingWindow, String winSize, String shiftIncr) {
       StringBuilder sb = new StringBuilder();
       sb.append("Start, stop, min %, max %\n");
 
@@ -93,31 +94,32 @@ public class Controller {
       if (endPos.isEmpty())
          endPos = Integer.toString(mSequence.size());
 
-      mSequence = mSequence.slice(Integer.parseInt(startPos) - 1, Integer.parseInt(endPos));
+      mSequence = mSequence.slice(Integer.parseInt(startPos) - 1,
+            Integer.parseInt(endPos));
 
       if (useSlidingWindow) {
-         GCContentInfo[] gcs = mSequence.gcContentHistogram(Integer.parseInt(winSize),
-               Integer.parseInt(shiftIncr));
+         GCContentInfo[] gcs = mSequence.gcContentHistogram(
+               Integer.parseInt(winSize), Integer.parseInt(shiftIncr));
 
          for (GCContentInfo gc : gcs)
             sb.append(gc + "\n");
       } else {
-         sb.append(String.format("%5d, %5d, %5.2f%%, %5.2f%%", Integer.parseInt(startPos),
-               Integer.parseInt(endPos), mSequence.gcContentMin() * 100,
-               mSequence.gcContentMax() * 100));
+         sb.append(String.format("%5d, %5d, %5.2f%%, %5.2f%%",
+               Integer.parseInt(startPos), Integer.parseInt(endPos),
+               mSequence.gcContentMin() * 100, mSequence.gcContentMax() * 100));
       }
 
       return sb.toString();
    }
-   
+
    public String getNucleotides() {
       return String.format("%d", mSequence.size());
    }
-   
+
    public String getGenes() {
       return String.format("%d", mGenes.size());
    }
-   
+
    public String getIsoforms() {
       return String.format("%d", GeneUtils.numIsoforms(mGenes));
    }
@@ -141,7 +143,7 @@ public class Controller {
    public String avgIntergenicRegionSize() {
       return String.format("%.2f", GeneUtils.avgIntergenicRegionSize(mGenes));
    }
-   
+
    public String geneDensity() {
       return String.format("%.2f", GeneUtils.geneDensity(mGenes));
    }
@@ -180,7 +182,7 @@ public class Controller {
    }
 
    /**
-    * Find all repeats. Currently a TODO.
+    * Find all repeats.
     * 
     * @param minimumRepeatLength
     *           The minimum length of a repeat.
@@ -195,14 +197,14 @@ public class Controller {
          int maxDistanceFromMRNAStart) {
       StringBuilder matchInfo = new StringBuilder();
       SuffixTreeUtils treeUtil = new SuffixTreeUtils(mSequence, mGenes);
-      
+
       SuffixTree tree = SuffixTree.create(mSequence.toString());
       List<RepeatEntry> repeats = tree.findRepeats(minimumRepeatLength);
       matchInfo.append("Repeated sequence,Frequency,Fold Expression,Average"
             + " Distance From (+) mRNA Start,Average Distance From (-)"
             + " mRNA Start,Coordinates\n");
-      for(RepeatEntry repeat : repeats) {
-         List<Integer> occurences = repeat.getStarts();
+      for (RepeatEntry repeat : repeats) {
+         List<StartEntry> occurences = repeat.getStarts();
          if (maxDistanceFromMRNAStart >= 0) {
             treeUtil.stripStartsOutsideRange(maxDistanceFromMRNAStart,
                   occurences, repeat.toString().length());
@@ -212,12 +214,14 @@ public class Controller {
          matchInfo.append(repeat.getStarts().size() + ",");
          matchInfo.append(repeat.getStarts().size()
                / treeUtil.findExpectedFoldExpression(repeat.toString()) + ",");
-         matchInfo.append(treeUtil.averageDistanceToNextPositiveMRNA(repeat.getStarts()) + ",");
-         matchInfo.append(treeUtil.averageDistanceToNextNegativeMRNA(repeat.getStarts()));
-         
-         for(Integer occurence : occurences) {
+         matchInfo.append(treeUtil.averageDistanceToNextPositiveMRNA(repeat
+               .getStarts()) + ",");
+         matchInfo.append(treeUtil.averageDistanceToNextNegativeMRNA(repeat
+               .getStarts()) + ",");
+
+         for (StartEntry occurence : occurences) {
             // Represent as 1-indexed for ease of bio students.
-            matchInfo.append("," + (occurence + 1));
+            matchInfo.append(" " + (occurence.start + 1));
          }
          matchInfo.append("\n");
       }
@@ -244,14 +248,14 @@ public class Controller {
 
       SuffixTree tree = SuffixTree.create(mSequence.toString());
 
-      List<Integer> occurences = tree.getOccurrences(searchString);
-      List<Integer> revOccurences = tree.getOccurrences(reverseSearchString);
+      List<StartEntry> occurences = tree.getOccurrences(searchString);
+      List<StartEntry> revOccurences = tree.getOccurrences(reverseSearchString);
 
       if (maxDistanceFromMRNAStart >= 0) {
          treeUtil.stripStartsOutsideRange(maxDistanceFromMRNAStart, occurences,
                searchString.length());
-         treeUtil.stripStartsOutsideRange(maxDistanceFromMRNAStart, revOccurences,
-               searchString.length());
+         treeUtil.stripStartsOutsideRange(maxDistanceFromMRNAStart,
+               revOccurences, searchString.length());
       }
 
       StringBuilder matchInfo = new StringBuilder();
@@ -284,19 +288,114 @@ public class Controller {
 
       matchInfo.append(searchString + "," + absoluteFrequency + ","
             + relativeFoldExpression + "," + averageDistance + ","
-            + averageDistanceNegative);
-      for (Integer occurance : occurences) {
-         matchInfo.append("," + occurance);
+            + averageDistanceNegative + ",");
+      for (StartEntry occurance : occurences) {
+         // Represent as 1-indexed for ease of bio students.
+         matchInfo.append(" " + (occurance.start + 1));
       }
 
       matchInfo.append("\n" + reverseSearchString + ","
             + reverseAbsoluteFrequency + "," + reverseRelativeFoldExpression
             + "," + reverseAverageDistance + ","
-            + reverseAverageDistanceNegative);
-      for (Integer occurance : revOccurences) {
+            + reverseAverageDistanceNegative + ",");
+      for (StartEntry occurance : revOccurences) {
          // Represent as 1-indexed for ease of bio students.
-         matchInfo.append("," + (occurance + 1));
+         matchInfo.append(" " + (occurance.start + 1));
       }
       return matchInfo.toString();
+   }
+
+   /**
+    * Converts the DNA String to microRNA, then finds palindromes and returns
+    * them.
+    * 
+    * @param nucleotideGap
+    *           The maximum distance between and external and internal
+    *           palindrome when including imperfect plaindromes.
+    * @return A formatted string representing microRNA strands within the
+    *         current FASTA file.
+    */
+   public String findMRNA(int nucleotideGap) {
+      List<String> strings = new ArrayList<String>();
+      strings.add(SuffixTreeUtils.toMRNAString(mSequence.toString()));
+      strings.add(SuffixTreeUtils.reverseComplementMRNAString(SuffixTreeUtils
+            .toMRNAString(mSequence.toString())));
+
+      // Minimum needs to be quite low. maximum = sizeof(entire pri mrna)
+      List<PalindromeEntry> entries = SuffixTreeUtils.findPalindromes(strings,
+            2, 20);
+
+      StringBuilder returnVal = new StringBuilder(
+            "start, stop, miRNA length, sequence\n");
+
+      for (PalindromeEntry palindrome : entries) {
+         int start = palindrome.getStart().start + 1;
+         int length = palindrome.getRadius();
+         int stop = start + length;
+
+         String sequence = strings.get(0).substring(start - 1, stop - 1);
+         sequence += "[";
+         sequence += strings.get(0).substring(stop - 1,
+               stop - 1 + palindrome.getGap());
+         sequence += "]";
+         sequence += strings.get(0).substring(stop - 1 + palindrome.getGap(),
+               stop - 1 + palindrome.getGap() + palindrome.getRadius());
+         if (length >= 21 && length <= 23) {
+            returnVal.append(start + "," + stop + "," + length + "," + sequence
+                  + "\n");
+         } else if (length < 21) {
+            for (PalindromeEntry secondPalindrome : entries) {
+               int secondStart = secondPalindrome.getStart().start + 1;
+               int secondLength = secondPalindrome.getRadius();
+               int secondStop = secondStart + secondLength;
+
+               /*
+                * If new palindrome is inside the first palindrome AND the
+                * second start is exactly nucleotidesGap from the first stop AND
+                * the sum of the palindrome lengths is between 21 and 23, add
+                * it.
+                * 
+                * This code is largely untested. I created a local test, but was
+                * unable to run it because the CORRECT string was not recognized
+                * as a real palindrome.
+                */
+               if (secondStart > stop
+                     && secondStop + 2 * secondLength
+                           + secondPalindrome.getGap() < start + length
+                           + palindrome.getGap()
+                     && secondStart - stop == nucleotideGap
+                     && (secondLength + length >= 21 && secondLength + length <= 23)) {
+                  String updatedSequence = strings.get(0).substring(start - 1,
+                        stop - 1);
+                  updatedSequence += "[";
+                  updatedSequence += strings.get(0).substring(stop - 1,
+                        secondStart - 1);
+                  updatedSequence += "]";
+                  updatedSequence += strings.get(0).substring(secondStart - 1,
+                        secondStop);
+                  updatedSequence += "[";
+                  updatedSequence += strings.get(0).substring(secondStop,
+                        secondStop + secondPalindrome.getGap());
+                  updatedSequence += "]";
+                  updatedSequence += strings.get(0).substring(
+                        secondStop + secondPalindrome.getGap(),
+                        secondStop + secondPalindrome.getGap() + secondLength);
+                  updatedSequence += "[";
+                  updatedSequence += strings.get(0).substring(
+                        secondStop + secondPalindrome.getGap() + secondLength,
+                        stop - 1 + palindrome.getGap());
+                  updatedSequence += "]";
+                  sequence += strings.get(0)
+                        .substring(
+                              stop - 1 + palindrome.getGap(),
+                              stop - 1 + palindrome.getGap()
+                                    + palindrome.getRadius());
+                  returnVal.append(start + "," + stop + "," + length + ","
+                        + updatedSequence);
+               }
+            }
+         }
+      }
+      return returnVal.toString();
    }
 }
