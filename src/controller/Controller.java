@@ -24,10 +24,10 @@ import suffixtree.SuffixTreeUtils;
  * @version 21-Apr-2013
  */
 public class Controller {
-   protected String     mSequenceFile;
-   protected String     mGffFile;
+   protected String mSequenceFile;
+   protected String mGffFile;
 
-   protected Sequence   mSequence;
+   protected Sequence mSequence;
    protected List<Gene> mGenes;
 
    public Controller() {
@@ -55,8 +55,9 @@ public class Controller {
          GFFParser parser = new GFFParser(filename);
          mGenes = parser.parse();
          if (mSequence != null) {
-            for (Gene gene : mGenes)
+            for (Gene gene : mGenes) {
                gene.setSequence(mSequence);
+            }
          }
       }
 
@@ -88,21 +89,26 @@ public class Controller {
       StringBuilder sb = new StringBuilder();
       sb.append("Start, stop, min %, max %\n");
 
-      if (startPos.isEmpty())
+      if (startPos.isEmpty()) {
          startPos = "1";
+      }
 
-      if (endPos.isEmpty())
+      if (endPos.isEmpty()) {
          endPos = Integer.toString(mSequence.size());
+      }
 
-      mSequence = mSequence.slice(Integer.parseInt(startPos) - 1,
-            Integer.parseInt(endPos));
+      mSequence =
+            mSequence.slice(Integer.parseInt(startPos) - 1,
+                  Integer.parseInt(endPos));
 
       if (useSlidingWindow) {
-         GCContentInfo[] gcs = mSequence.gcContentHistogram(
-               Integer.parseInt(winSize), Integer.parseInt(shiftIncr));
+         GCContentInfo[] gcs =
+               mSequence.gcContentHistogram(Integer.parseInt(winSize),
+                     Integer.parseInt(shiftIncr));
 
-         for (GCContentInfo gc : gcs)
+         for (GCContentInfo gc : gcs) {
             sb.append(gc + "\n");
+         }
       } else {
          sb.append(String.format("%5d, %5d, %5.2f%%, %5.2f%%",
                Integer.parseInt(startPos), Integer.parseInt(endPos),
@@ -161,7 +167,8 @@ public class Controller {
    }
 
    public String getProteins() {
-      StringBuilder sb = new StringBuilder("gene name, isoform name, protein\n");
+      StringBuilder sb =
+            new StringBuilder("gene name, isoform name, protein\n");
 
       for (Gene g : mGenes) {
          String geneName = g.getId();
@@ -243,8 +250,8 @@ public class Controller {
    public String matchString(String searchString, int maxDistanceFromMRNAStart) {
       SuffixTreeUtils treeUtil = new SuffixTreeUtils(mSequence, mGenes);
 
-      String reverseSearchString = SuffixTreeUtils
-            .reverseComplement(searchString);
+      String reverseSearchString =
+            SuffixTreeUtils.reverseComplement(searchString);
 
       SuffixTree tree = SuffixTree.create(mSequence.toString());
 
@@ -263,25 +270,25 @@ public class Controller {
       int absoluteFrequency = occurences.size();
       int reverseAbsoluteFrequency = revOccurences.size();
 
-      double averageDistance = treeUtil
-            .averageDistanceToNextPositiveMRNA(occurences);
-      double averageDistanceNegative = treeUtil
-            .averageDistanceToNextNegativeMRNA(occurences);
+      double averageDistance =
+            treeUtil.averageDistanceToNextPositiveMRNA(occurences);
+      double averageDistanceNegative =
+            treeUtil.averageDistanceToNextNegativeMRNA(occurences);
 
-      double reverseAverageDistance = treeUtil
-            .averageDistanceToNextPositiveMRNA(revOccurences);
-      double reverseAverageDistanceNegative = treeUtil
-            .averageDistanceToNextNegativeMRNA(revOccurences);
+      double reverseAverageDistance =
+            treeUtil.averageDistanceToNextPositiveMRNA(revOccurences);
+      double reverseAverageDistanceNegative =
+            treeUtil.averageDistanceToNextNegativeMRNA(revOccurences);
 
-      double expectedFoldExpression = treeUtil
-            .findExpectedFoldExpression(searchString);
-      double reverseExpectedFoldExpression = treeUtil
-            .findExpectedFoldExpression(reverseSearchString);
+      double expectedFoldExpression =
+            treeUtil.findExpectedFoldExpression(searchString);
+      double reverseExpectedFoldExpression =
+            treeUtil.findExpectedFoldExpression(reverseSearchString);
 
-      double relativeFoldExpression = absoluteFrequency
-            / expectedFoldExpression;
-      double reverseRelativeFoldExpression = reverseAbsoluteFrequency
-            / reverseExpectedFoldExpression;
+      double relativeFoldExpression =
+            absoluteFrequency / expectedFoldExpression;
+      double reverseRelativeFoldExpression =
+            reverseAbsoluteFrequency / reverseExpectedFoldExpression;
       matchInfo.append("Repeated sequence,Frequency,Fold Expression,Average"
             + " Distance From (+) mRNA Start,Average Distance From (-)"
             + " mRNA Start,Coordinates\n");
@@ -316,17 +323,21 @@ public class Controller {
     *         current FASTA file.
     */
    public String findMRNA(int nucleotideGap) {
+      return findMRNA(nucleotideGap, mSequence);
+   }
+
+   public static String findMRNA(int nucleotideGap, Sequence inputSequence) {
       List<String> strings = new ArrayList<String>();
-      strings.add(SuffixTreeUtils.toMRNAString(mSequence.toString()));
+      strings.add(SuffixTreeUtils.toMRNAString(inputSequence.toString()));
       strings.add(SuffixTreeUtils.reverseComplementMRNAString(SuffixTreeUtils
-            .toMRNAString(mSequence.toString())));
+            .toMRNAString(inputSequence.toString())));
 
       // Minimum needs to be quite low. maximum = sizeof(entire pri mrna)
-      List<PalindromeEntry> entries = SuffixTreeUtils.findPalindromes(strings,
-            2, 20);
+      List<PalindromeEntry> entries =
+            SuffixTreeUtils.findPalindromes(strings, 2, 0, 20);
 
-      StringBuilder returnVal = new StringBuilder(
-            "start, stop, miRNA length, sequence\n");
+      StringBuilder returnVal =
+            new StringBuilder("start, stop, miRNA length, sequence\n");
 
       for (PalindromeEntry palindrome : entries) {
          int start = palindrome.getStart().start + 1;
@@ -335,11 +346,13 @@ public class Controller {
 
          String sequence = strings.get(0).substring(start - 1, stop - 1);
          sequence += "[";
-         sequence += strings.get(0).substring(stop - 1,
-               stop - 1 + palindrome.getGap());
+         sequence +=
+               strings.get(0).substring(stop - 1,
+                     stop - 1 + palindrome.getGap());
          sequence += "]";
-         sequence += strings.get(0).substring(stop - 1 + palindrome.getGap(),
-               stop - 1 + palindrome.getGap() + palindrome.getRadius());
+         sequence +=
+               strings.get(0).substring(stop - 1 + palindrome.getGap(),
+                     stop - 1 + palindrome.getGap() + palindrome.getRadius());
          if (length >= 21 && length <= 23) {
             returnVal.append(start + "," + stop + "," + length + "," + sequence
                   + "\n");
@@ -365,28 +378,33 @@ public class Controller {
                            + palindrome.getGap()
                      && secondStart - stop == nucleotideGap
                      && (secondLength + length >= 21 && secondLength + length <= 23)) {
-                  String updatedSequence = strings.get(0).substring(start - 1,
-                        stop - 1);
+                  String updatedSequence =
+                        strings.get(0).substring(start - 1, stop - 1);
                   updatedSequence += "[";
-                  updatedSequence += strings.get(0).substring(stop - 1,
-                        secondStart - 1);
+                  updatedSequence +=
+                        strings.get(0).substring(stop - 1, secondStart - 1);
                   updatedSequence += "]";
-                  updatedSequence += strings.get(0).substring(secondStart - 1,
-                        secondStop);
+                  updatedSequence +=
+                        strings.get(0).substring(secondStart - 1, secondStop);
                   updatedSequence += "[";
-                  updatedSequence += strings.get(0).substring(secondStop,
-                        secondStop + secondPalindrome.getGap());
+                  updatedSequence +=
+                        strings.get(0).substring(secondStop,
+                              secondStop + secondPalindrome.getGap());
                   updatedSequence += "]";
-                  updatedSequence += strings.get(0).substring(
-                        secondStop + secondPalindrome.getGap(),
-                        secondStop + secondPalindrome.getGap() + secondLength);
+                  updatedSequence +=
+                        strings.get(0).substring(
+                              secondStop + secondPalindrome.getGap(),
+                              secondStop + secondPalindrome.getGap()
+                                    + secondLength);
                   updatedSequence += "[";
-                  updatedSequence += strings.get(0).substring(
-                        secondStop + secondPalindrome.getGap() + secondLength,
-                        stop - 1 + palindrome.getGap());
+                  updatedSequence +=
+                        strings.get(0).substring(
+                              secondStop + secondPalindrome.getGap()
+                                    + secondLength,
+                              stop - 1 + palindrome.getGap());
                   updatedSequence += "]";
-                  sequence += strings.get(0)
-                        .substring(
+                  sequence +=
+                        strings.get(0).substring(
                               stop - 1 + palindrome.getGap(),
                               stop - 1 + palindrome.getGap()
                                     + palindrome.getRadius());
@@ -397,5 +415,14 @@ public class Controller {
          }
       }
       return returnVal.toString();
+   }
+
+   public static List<Integer> mergeFasta(List<String> fastaFileNames) {
+      return null;
+   }
+
+   public static void convertAndMergeGFF(List<Integer> offsets,
+         List<String> gffFileNames) {
+
    }
 }

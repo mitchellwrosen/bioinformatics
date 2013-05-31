@@ -20,7 +20,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import model.GFFParser.ParseException;
-
 import controller.Controller;
 
 @SuppressWarnings("serial")
@@ -28,7 +27,8 @@ public class View extends JDialog {
    protected final int DIALOG_HEIGHT = 400, DIALOG_WIDTH = 500;
 
    // Selected tab "enum"
-   protected final int GC_CONTENT_TAB = 0, CALCULATIONS_TAB = 1, PROTEINS_TAB = 2, FIND_REPEATS_TAB = 3, FIND_MRNA_TAB = 4;
+   protected final int GC_CONTENT_TAB = 0, CALCULATIONS_TAB = 1,
+         PROTEINS_TAB = 2, FIND_REPEATS_TAB = 3, FIND_MRNA_TAB = 4;
 
    protected Controller controller;
 
@@ -88,7 +88,8 @@ public class View extends JDialog {
       mValidSequenceFile = false;
 
       mBrowseSequenceButton = new JButton("Browse");
-      mBrowseSequenceButton.addActionListener(browseSequenceButtonActionListener);
+      mBrowseSequenceButton
+            .addActionListener(browseSequenceButtonActionListener);
 
       mSequenceFileBox = Box.createHorizontalBox();
       mSequenceFileBox.add(new JLabel("Sequence File:"));
@@ -119,6 +120,7 @@ public class View extends JDialog {
       mFindMRNAPanel = new FindMRNAPanel();
       mTabbedPane = new JTabbedPane();
       mTabbedPane.addChangeListener(new ChangeListener() {
+         @Override
          public void stateChanged(ChangeEvent e) {
             updateRunButton();
 
@@ -167,10 +169,9 @@ public class View extends JDialog {
    }
 
    /**
-    * The Run button is enabled conditionally on valid Sequence/GFF files. 
-    * GC Content: Requires valid sequence file
-    * Calculations: Requires valid GFF file
-    * Proteins: Requires both
+    * The Run button is enabled conditionally on valid Sequence/GFF files. GC
+    * Content: Requires valid sequence file Calculations: Requires valid GFF
+    * file Proteins: Requires both
     */
    protected void updateRunButton() {
       switch (mTabbedPane.getSelectedIndex()) {
@@ -190,64 +191,69 @@ public class View extends JDialog {
 
    // Action listeners ////////////////////////////////////////////////////////
 
-   protected ActionListener browseSequenceButtonActionListener = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-         JFileChooser chooser = new JFileChooser();
-         int returnVal = chooser.showOpenDialog(chooser);
-         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            String filename = chooser.getSelectedFile().getAbsolutePath();
-            mSequenceFile.setText(filename);
+   protected ActionListener browseSequenceButtonActionListener =
+         new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               JFileChooser chooser = new JFileChooser();
+               int returnVal = chooser.showOpenDialog(chooser);
+               if (returnVal == JFileChooser.APPROVE_OPTION) {
+                  String filename = chooser.getSelectedFile().getAbsolutePath();
+                  mSequenceFile.setText(filename);
 
-            try {
-               controller.useSequenceFile(mSequenceFile.getText());
-               mValidSequenceFile = true;
-               updateRunButton();
-            } catch (Exception ex) {
-               ex.printStackTrace();
-               JOptionPane.showMessageDialog(null, ex.toString(), "Error",
-                     JOptionPane.ERROR_MESSAGE);
-               mValidSequenceFile = false;
-               updateRunButton();
-               return;
+                  try {
+                     controller.useSequenceFile(mSequenceFile.getText());
+                     mValidSequenceFile = true;
+                     updateRunButton();
+                  } catch (Exception ex) {
+                     ex.printStackTrace();
+                     JOptionPane.showMessageDialog(null, ex.toString(),
+                           "Error", JOptionPane.ERROR_MESSAGE);
+                     mValidSequenceFile = false;
+                     updateRunButton();
+                     return;
+                  }
+               }
             }
-         }
-      }
-   };
+         };
 
-   protected ActionListener browseGffButtonActionListener = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-         JFileChooser chooser = new JFileChooser();
-         int returnVal = chooser.showOpenDialog(chooser);
-         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            String filename = chooser.getSelectedFile().getAbsolutePath();
-            mGffFile.setText(filename);
+   protected ActionListener browseGffButtonActionListener =
+         new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               JFileChooser chooser = new JFileChooser();
+               int returnVal = chooser.showOpenDialog(chooser);
+               if (returnVal == JFileChooser.APPROVE_OPTION) {
+                  String filename = chooser.getSelectedFile().getAbsolutePath();
+                  mGffFile.setText(filename);
 
-            try {
-               controller.useGffFile(mGffFile.getText());
-               mValidGffFile = true;
-               updateRunButton();
-            } catch (IOException ex) {
-               JOptionPane.showMessageDialog(null, ex.toString(), "Error",
-                     JOptionPane.ERROR_MESSAGE);
-               mValidGffFile = false;
-               updateRunButton();
-               return;
-            } catch (ParseException ex) {
-               JOptionPane.showMessageDialog(null, ex.toString(), "Error",
-                     JOptionPane.ERROR_MESSAGE);
-               mValidGffFile = false;
-               updateRunButton();
-               return;
+                  try {
+                     controller.useGffFile(mGffFile.getText());
+                     mValidGffFile = true;
+                     updateRunButton();
+                  } catch (IOException ex) {
+                     JOptionPane.showMessageDialog(null, ex.toString(),
+                           "Error", JOptionPane.ERROR_MESSAGE);
+                     mValidGffFile = false;
+                     updateRunButton();
+                     return;
+                  } catch (ParseException ex) {
+                     JOptionPane.showMessageDialog(null, ex.toString(),
+                           "Error", JOptionPane.ERROR_MESSAGE);
+                     mValidGffFile = false;
+                     updateRunButton();
+                     return;
+                  }
+               }
             }
-         }
-      }
-   };
+         };
 
    protected ActionListener runButtonActionListener = new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
          if (mSequenceFile.getText().equals("")) {
-            JOptionPane.showMessageDialog(null, "No FASTA file was selected", "Invalid File",
-                  JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "No FASTA file was selected",
+                  "Invalid File", JOptionPane.ERROR_MESSAGE);
             return;
          }
 
@@ -291,9 +297,11 @@ public class View extends JDialog {
    }
 
    protected void runGCContent() {
-      mGcContentInfoPanel.setDisplay(controller.getGcContent(mGcContentInfoPanel.getStartPos(),
-            mGcContentInfoPanel.getEndPos(), mGcContentInfoPanel.getUseSlidingWindow(),
-            mGcContentInfoPanel.getWinSize(), mGcContentInfoPanel.getShiftIncr()));
+      mGcContentInfoPanel.setDisplay(controller.getGcContent(
+            mGcContentInfoPanel.getStartPos(), mGcContentInfoPanel.getEndPos(),
+            mGcContentInfoPanel.getUseSlidingWindow(),
+            mGcContentInfoPanel.getWinSize(),
+            mGcContentInfoPanel.getShiftIncr()));
 
    }
 
@@ -326,6 +334,7 @@ public class View extends JDialog {
          this.nucleotideGap = nucleotideGap;
       }
 
+      @Override
       public void run() {
          String output = controller.findMRNA(nucleotideGap);
          mFindMRNAPanel.setDisplay(output);
@@ -342,9 +351,11 @@ public class View extends JDialog {
          this.maxDistanceFromStart = maxDistanceFromStart;
       }
 
+      @Override
       public void run() {
-         String output = controller.matchString(
-               mFindRepeatsPanel.getMatchStringText(), maxDistanceFromStart);
+         String output =
+               controller.matchString(mFindRepeatsPanel.getMatchStringText(),
+                     maxDistanceFromStart);
          mFindRepeatsPanel.setDisplay(output);
       }
    }
@@ -361,16 +372,17 @@ public class View extends JDialog {
          this.minRepeatLength = minRepeatLength;
       }
 
+      @Override
       public void run() {
-         String output = controller.getRepeats(minRepeatLength,
-               maxDistanceFromStart);
+         String output =
+               controller.getRepeats(minRepeatLength, maxDistanceFromStart);
          mFindRepeatsPanel.setDisplay(output);
       }
    }
 
    protected void runFindRepeats() {
-      String maxDistanceFromStartText = mFindRepeatsPanel
-            .getMaximumDistanceToStartText();
+      String maxDistanceFromStartText =
+            mFindRepeatsPanel.getMaximumDistanceToStartText();
       int maxDistanceFromStart = 0;
       if (maxDistanceFromStartText.isEmpty()) {
          maxDistanceFromStart = -1;
@@ -387,8 +399,8 @@ public class View extends JDialog {
       if (mFindRepeatsPanel.isMatchExactString()) {
          // Find incidences of exact string match
          mFindRepeatsPanel.setDisplay("Running...");
-         Thread thread = new Thread(new ExactStringMatchRunner(
-               maxDistanceFromStart));
+         Thread thread =
+               new Thread(new ExactStringMatchRunner(maxDistanceFromStart));
          thread.start();
       } else {
          String minRepeatLengthText = mFindRepeatsPanel.getMinimumLengthText();
@@ -405,12 +417,15 @@ public class View extends JDialog {
          }
          // Find all indices of repeats that meat filter criteria.
          mFindRepeatsPanel.setDisplay("Running...");
-         Thread thread = new Thread(new FilterRepeatRunner(minRepeatLength, maxDistanceFromStart));
+         Thread thread =
+               new Thread(new FilterRepeatRunner(minRepeatLength,
+                     maxDistanceFromStart));
          thread.start();
       }
    }
 
    protected ActionListener saveButtonActionListener = new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
          switch (mTabbedPane.getSelectedIndex()) {
          case FIND_MRNA_TAB:
@@ -444,7 +459,7 @@ public class View extends JDialog {
 
    protected void saveCalculations() {
       StringBuilder sb = new StringBuilder();
-      
+
       for (String key : mCalculationsPanel.getKeys()) {
          sb.append(key);
          sb.append(",");
@@ -456,21 +471,22 @@ public class View extends JDialog {
          sb.append(",");
       }
       sb.append("\n");
-      
+
       saveString(sb.toString());
    }
 
    protected void saveProteins() {
       saveString(mProteinsPanel.getDisplay());
    }
+
    protected void saveRepeats() {
       saveString(mFindRepeatsPanel.getDisplay());
    }
 
    protected void saveString(String data) {
       if (data.equals("")) {
-         JOptionPane.showMessageDialog(null, "No output to save", "Empty output",
-               JOptionPane.ERROR_MESSAGE);
+         JOptionPane.showMessageDialog(null, "No output to save",
+               "Empty output", JOptionPane.ERROR_MESSAGE);
          return;
       }
 
@@ -483,18 +499,24 @@ public class View extends JDialog {
             writer.write(data);
             writer.close();
          } catch (java.io.IOException ioErr) {
-            JOptionPane.showMessageDialog(null, "Encountered unknown error when saving output",
+            JOptionPane.showMessageDialog(null,
+                  "Encountered unknown error when saving output",
                   "Unable to save output", JOptionPane.ERROR_MESSAGE);
          }
       } else if (ret == JFileChooser.ERROR_OPTION) {
-         JOptionPane.showMessageDialog(null, "Encountered unknown error when saving output",
+         JOptionPane.showMessageDialog(null,
+               "Encountered unknown error when saving output",
                "Unable to save output", JOptionPane.ERROR_MESSAGE);
       }
    }
 
    protected ActionListener quitButtonActionListener = new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
-         dispose(); // closes the dialog window
+         dispose(); // closes
+                    // the
+                    // dialog
+                    // window
          return;
       }
    };
