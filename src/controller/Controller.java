@@ -2,6 +2,9 @@ package controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 import model.GCContentInfo;
@@ -52,8 +55,8 @@ public class Controller {
       if (!mGffFile.equals(filename)) {
          mGffFile = filename;
 
-         GFFParser parser = new GFFParser(filename);
-         mGenes = parser.parse();
+         GFFParser parser = new GFFParser();
+         mGenes = parser.parse(filename);
          if (mSequence != null) {
             for (Gene gene : mGenes) {
                gene.setSequence(mSequence);
@@ -421,8 +424,36 @@ public class Controller {
       return null;
    }
 
-   public static void convertAndMergeGFF(List<Integer> offsets,
-         List<String> gffFileNames) {
-
+   public static List<Gene> convertAndMergeGFF(List<Integer> offsets,
+         List<String> gffFilenames) throws IOException, ParseException {
+      GFFParser parser = new GFFParser();
+      
+      List<Gene> genes = new LinkedList<Gene>();
+      for (String filename : gffFilenames)
+         genes.addAll(parser.parse(filename));
+      
+      Collections.sort(genes, new Comparator<Gene>() {
+         public int compare(Gene g1, Gene g2) {
+            return g1.getStart() - g2.getStart();
+         }
+      });
+      
+      // Report overlapping genes and mark duplicate genes (to remove on a second pass).
+      List<Gene> genesToRemove = new ArrayList<Gene>();
+      for (int i = 0; i < genes.size()-1; ++i) {
+         Gene thisGene = genes.get(i);
+         Gene nextGene = genes.get(i+1); 
+         if (thisGene.getStop() > nextGene.getStart()) {
+            ; // report overlap
+         } else if (thisGene.getStart() == nextGene.getStart() &&
+                  thisGene.getStop() == nextGene.getStop()) {
+            genesToRemove.add(thisGene);
+         }
+      }
+      
+      for (Gene gene : genesToRemove)
+         genes.remove(gene); // Ignoring return value, perhaps bad style.
+      
+      return genes;
    }
 }
