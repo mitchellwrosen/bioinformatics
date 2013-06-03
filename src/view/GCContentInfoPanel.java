@@ -73,7 +73,8 @@ public class GCContentInfoPanel extends JPanel {
    
    protected JScrollPane prepareDisplayArea() {
       JScrollPane scrollDisplay = new JScrollPane(mDisplay);
-      scrollDisplay.setPreferredSize(new Dimension(200, 300));
+      // Very big, to avoid weird packing stuff.
+      scrollDisplay.setPreferredSize(new Dimension(5000, 5000));
       return scrollDisplay;
    }
    
