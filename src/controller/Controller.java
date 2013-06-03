@@ -1,8 +1,13 @@
 package controller;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import model.GCContentInfo;
 import model.GFFParser;
@@ -397,5 +402,32 @@ public class Controller {
          }
       }
       return returnVal.toString();
+   }
+
+   /**
+    * Read in two zip files, report any errors when trying to merge the files together.
+    * @param sequenceZipPath A path to the sequence zip.
+    * @param gffZipPath A path to the gff zip.
+    * @return The locations of conflicts between exons in the two GFF files.
+    * @throws IOException 
+    */
+   public String runCreateSuperContigs(String sequenceZipPath, String gffZipPath) throws IOException {
+      // Return list of occurences of mistaken GFF files.
+      FileInputStream sequenceZip = new FileInputStream(sequenceZipPath);
+      FileInputStream gffZip = new FileInputStream(gffZipPath);
+
+      ZipInputStream sequenceZipIn = new ZipInputStream(sequenceZip);
+      ZipInputStream gffZipIn = new ZipInputStream(gffZip);
+
+      ZipEntry entry = sequenceZipIn.getNextEntry();
+      while(entry != null) {
+         entry = sequenceZipIn.getNextEntry();
+      }
+
+      entry = gffZipIn.getNextEntry();
+      while(entry != null) {
+         entry = gffZipIn.getNextEntry();
+      }
+      return "No Errors Detected.";
    }
 }

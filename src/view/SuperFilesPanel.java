@@ -8,16 +8,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class SuperFilesPanel extends JPanel {
-   protected JTextArea mSuperContig;
-   protected JTextArea mSuperGFF;
+   protected JTextArea mErrors;
    
    public SuperFilesPanel() {
-      mSuperContig = new JTextArea();
-      mSuperGFF = new JTextArea();
-      
+      mErrors = new JTextArea();
       setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-      add(prepareDisplayArea(mSuperContig));
-      add(prepareDisplayArea(mSuperGFF));
+      this.add(prepareDisplayArea(mErrors));
    }
    
    protected JScrollPane prepareDisplayArea(JTextArea textArea) {
@@ -26,11 +22,7 @@ public class SuperFilesPanel extends JPanel {
       return scrollDisplay;
    }
    
-   public String getSuperContig() { return mSuperContig.getText(); }
+   public String getErrors() { return mErrors.getText(); }
    
-   public void setSuperContig(String text) { mSuperContig.setText(text); }
-
-   public String getSuperGFF() { return mSuperGFF.getText(); }
-   
-   public void setSuperGFF(String text) { mSuperGFF.setText(text); }
+   public void setErrors(String text) { mErrors.setText(text); }
 }
