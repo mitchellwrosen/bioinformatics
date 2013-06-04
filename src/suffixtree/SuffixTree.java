@@ -377,6 +377,34 @@ public class SuffixTree {
       return entries;
    }
 
+   public Integer findLongestMatchingSuffix(String pattern) {
+      return findLongestMatchingSuffix(0, pattern);
+   }
+
+   public Integer findLongestMatchingSuffix(int stringIndex, String pattern) {
+      Node currentNode = this.root;
+      int labelIndex = 0;
+      for (char c : pattern.toCharArray()) {
+         if (labelIndex >= currentNode.getLabelLength()) {
+            labelIndex = 0;
+            if (currentNode.isLeaf()) {
+               return ((LeafNode) currentNode).getStringBegin(stringIndex);
+            } else {
+               currentNode = ((InternalNode) currentNode).getChild(c);
+            }
+         }
+         if (currentNode.charAt(labelIndex) != c) {
+            if (currentNode.isLeaf()
+                  && currentNode.getLabelLength() == labelIndex + 1) {
+               return ((LeafNode) currentNode).getStringBegin(stringIndex);
+            }
+            return null;
+         }
+         labelIndex++;
+      }
+      return null;
+   }
+
    public String debugString() {
       return root.debugString();
    }

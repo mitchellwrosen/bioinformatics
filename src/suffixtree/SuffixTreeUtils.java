@@ -314,4 +314,9 @@ public class SuffixTreeUtils {
       }
       return pals;
    }
+
+   public static Integer findOverlap(String first, String second) {
+      SuffixTree tree = SuffixTree.create(first);
+      return tree.findLongestMatchingSuffix(second);
+   }
 }

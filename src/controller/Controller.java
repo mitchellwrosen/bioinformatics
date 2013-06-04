@@ -420,40 +420,66 @@ public class Controller {
       return returnVal.toString();
    }
 
-   public static List<Integer> mergeFasta(List<String> fastaFileNames) {
-      return null;
+   /**
+    * Merges the given fasta files and returns a list of the offset for each file in a parallel list.
+    * @param sb An empty StringBuilder that will be filled with the merged fasta
+    * @param fastaFileNames
+    * @return
+    * @throws IllegalArgumentException
+    * @throws IOException
+    */
+   public static List<Integer> mergeFasta(StringBuilder sb,
+         List<String> fastaFileNames) throws IllegalArgumentException,
+         IOException {
+      String prev = null;
+      Integer prevOffset = 0;
+      List<Integer> offsets = new ArrayList<Integer>(fastaFileNames.size());
+      for (String filename : fastaFileNames) {
+         String seq = new Sequence(filename).toString();
+         Integer offset = 0;
+         if (prev != null) {
+            offset = SuffixTreeUtils.findOverlap(prev, seq);
+         }
+         prev = seq;
+         sb.append(seq);
+         offsets.add(prevOffset += offset);
+      }
+      return offsets;
    }
 
    public static List<Gene> convertAndMergeGFF(List<Integer> offsets,
          List<String> gffFilenames) throws IOException, ParseException {
       GFFParser parser = new GFFParser();
-      
+
       List<Gene> genes = new LinkedList<Gene>();
-      for (String filename : gffFilenames)
+      for (String filename : gffFilenames) {
          genes.addAll(parser.parse(filename));
-      
+      }
+
       Collections.sort(genes, new Comparator<Gene>() {
+         @Override
          public int compare(Gene g1, Gene g2) {
             return g1.getStart() - g2.getStart();
          }
       });
-      
+
       // Report overlapping genes and mark duplicate genes (to remove on a second pass).
       List<Gene> genesToRemove = new ArrayList<Gene>();
-      for (int i = 0; i < genes.size()-1; ++i) {
+      for (int i = 0; i < genes.size() - 1; ++i) {
          Gene thisGene = genes.get(i);
-         Gene nextGene = genes.get(i+1); 
+         Gene nextGene = genes.get(i + 1);
          if (thisGene.getStop() > nextGene.getStart()) {
             ; // report overlap
-         } else if (thisGene.getStart() == nextGene.getStart() &&
-                  thisGene.getStop() == nextGene.getStop()) {
+         } else if (thisGene.getStart() == nextGene.getStart()
+               && thisGene.getStop() == nextGene.getStop()) {
             genesToRemove.add(thisGene);
          }
       }
-      
-      for (Gene gene : genesToRemove)
+
+      for (Gene gene : genesToRemove) {
          genes.remove(gene); // Ignoring return value, perhaps bad style.
-      
+      }
+
       return genes;
    }
 }
