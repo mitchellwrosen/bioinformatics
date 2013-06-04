@@ -1,61 +1,34 @@
 package suffixtree;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LeafNode extends Node {
-   protected int start;
+   protected Map<Integer, NodeInfo> nodeInfo = new HashMap<Integer, NodeInfo>();
 
-   public LeafNode(String string, int start, int end) {
-      super(string, start, end);
-      this.start = start;
+   public LeafNode(int stringIndex, NodeInfo info) {
+      this.stringLength = info.getStringLength();
+      this.addNodeInfo(stringIndex, info);
    }
 
-   public boolean isLeftDiverse() {
-      return false;
+   public LeafNode(int stringIndex, String string, int stringBegin, int end) {
+      this.stringLength = end - stringBegin;
+      this.addNodeInfo(stringIndex, new NodeInfo(string, stringBegin,
+            stringBegin, end));
    }
 
-   public boolean isLeaf() {
-      return true;
-   }
-
-   public int getStart() {
-      return start;
-   }
-
-   public Character getLeftChar() {
-      if (start == 0) {
+   @Override
+   public Character charAt(int n) {
+      NodeInfo info = nodeInfo.values().iterator().next();
+      if (info != null) {
+         return info.charAt(n);
+      } else {
          return null;
-      } else {
-         return string.charAt(start - 1);
       }
    }
 
-   public void insertNode(LeafNode node) {
-      int i = 0;
-      while (i < length() && node.charAt(i) == charAt(i))
-         i++;
-
-      node.begin += i;
-      if (i < length()) {
-         InternalNode newNode = new InternalNode(this.string, this.begin,
-               this.begin + i);
-         this.begin += i;
-
-         parent.addChild(newNode);
-         newNode.parent = this.parent;
-
-         newNode.addChild(this);
-         this.parent = newNode;
-
-         newNode.addChild(node);
-         node.parent = newNode;
-      } else {
-         // This shouldn't happen.
-         // TODO: This might happen when we make this generalized.
-         throw new RuntimeException();
-      }
-   }
-
+   @Override
    public String debugString() {
       StringBuilder sb = new StringBuilder();
       int level = getLevel();
@@ -64,17 +37,121 @@ public class LeafNode extends Node {
       }
       // String tabs = sb.toString();
       sb = new StringBuilder();
-      sb.append("{").append(getLeftChar()).append("} ");
-      if (string.equals("")) {
+      sb.append("{");
+      for (Integer i : nodeInfo.keySet()) {
+         sb.append(" (").append(i).append(", ").append(getLeftChar(i)).append(")");
+      }
+      sb.append(" } ");
+      if (getParent() == null) {
          sb.append("<root>\n");
       } else {
-         sb.append(string.substring(begin, end)).append(" * ").append("\n");
+         for (NodeInfo info : nodeInfo.values()) {
+            sb.append(info.toString()).append(" * ");
+         }
+         sb.append("\n");
       }
       return sb.toString();
    }
 
    @Override
-   public List<Node> getLeftDiverseNodes() {
+   public String getLabel() {
+      NodeInfo info = nodeInfo.values().iterator().next();
+      if (info != null) {
+         return info.toString();
+      } else {
+         return null;
+      }
+   }
+
+   @Override
+   public Character getLeftChar(int stringIndex) {
+      NodeInfo info = nodeInfo.get(stringIndex);
+      if (info == null) {
+         return null;
+      } else {
+         return info.getLeftChar();
+      }
+   }
+
+   @Override
+   public List<Node> getFullyDiverseNodes(int stringIndex) {
       return null;
+   }
+
+   public Integer getStringBegin(int stringIndex) {
+      NodeInfo info = nodeInfo.get(stringIndex);
+      if (info == null) {
+         return null;
+      } else {
+         return info.stringBegin;
+      }
+   }
+
+   @Override
+   public LeafNode insertNode(int stringIndex, NodeInfo info) {
+      LeafNode leaf;
+      
+      int i = 0;
+      while (i < getLabelLength() && info.charAt(i) == this.charAt(i))
+         i++;
+
+      if (i < getLabelLength()) {
+         // Split - create an internal node
+         InternalNode newNode = new InternalNode(info.getString(), info.labelBegin,
+               info.labelBegin + i);
+         this.shiftBegin(i);
+         info.labelBegin += i;
+
+         getParent().addChild(newNode);
+         newNode.setParent(this.getParent());
+
+         newNode.addChild(this);
+         this.setParent(newNode);
+
+         leaf = new LeafNode(stringIndex, info);
+         newNode.addChild(leaf);
+         leaf.setParent(newNode);
+      } else {
+         this.addNodeInfo(stringIndex, info);
+         leaf = this;
+      }
+      return leaf;
+   }
+   
+   protected void addNodeInfo(int stringIndex, NodeInfo info) {
+      this.nodeInfo.put(stringIndex, info);
+      this.stringIndicesSeen.add(stringIndex);
+   }
+
+   @Override
+   public boolean isLeaf() {
+      return true;
+   }
+
+   @Override
+   public boolean isLeftDiverse(int stringIndex) {
+      return false;
+   }
+
+   @Override
+   public int getLabelLength() {
+      NodeInfo info = nodeInfo.values().iterator().next();
+      if (info != null) {
+         return info.getLabelLength();
+      } else {
+         return 0;
+      }
+   }
+
+   @Override
+   public void shiftBegin(int shift) {
+      for (NodeInfo info : nodeInfo.values()) {
+         info.labelBegin += shift;
+      }
+   }
+
+   @Override
+   public int getStringLength() {
+      return stringLength;
    }
 }

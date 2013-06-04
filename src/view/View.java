@@ -28,7 +28,7 @@ public class View extends JDialog {
    protected final int DIALOG_HEIGHT = 400, DIALOG_WIDTH = 500;
 
    // Selected tab "enum"
-   protected final int GC_CONTENT_TAB = 0, CALCULATIONS_TAB = 1, PROTEINS_TAB = 2, FIND_REPEATS_TAB = 3;
+   protected final int GC_CONTENT_TAB = 0, CALCULATIONS_TAB = 1, PROTEINS_TAB = 2, FIND_REPEATS_TAB = 3, FIND_MRNA_TAB = 4;
 
    protected Controller controller;
 
@@ -48,7 +48,8 @@ public class View extends JDialog {
    protected GCContentInfoPanel mGcContentInfoPanel;
    protected CalculationsPanel mCalculationsPanel;
    protected ProteinsPanel mProteinsPanel;
-   protected FindRepeatsPanel mFindRepeatsPanel;
+   protected volatile FindRepeatsPanel mFindRepeatsPanel;
+   protected FindMRNAPanel mFindMRNAPanel;
 
    protected JButton mRunButton, mSaveButton, mQuitButton;
 
@@ -78,6 +79,7 @@ public class View extends JDialog {
       mPane.add(mTabbedPane);
       mPane.add(controlsBox);
       mPane.validate();
+      this.setSize(600, 600);
    }
 
    protected void initializeSequenceBox() {
@@ -114,7 +116,7 @@ public class View extends JDialog {
       mCalculationsPanel = new CalculationsPanel();
       mProteinsPanel = new ProteinsPanel();
       mFindRepeatsPanel = new FindRepeatsPanel();
-
+      mFindMRNAPanel = new FindMRNAPanel();
       mTabbedPane = new JTabbedPane();
       mTabbedPane.addChangeListener(new ChangeListener() {
          public void stateChanged(ChangeEvent e) {
@@ -122,6 +124,7 @@ public class View extends JDialog {
 
             switch (mTabbedPane.getSelectedIndex()) {
             case GC_CONTENT_TAB:
+            case FIND_MRNA_TAB:
                mSequenceFileBox.setVisible(true);
                mGffFileBox.setVisible(false);
                break;
@@ -141,6 +144,7 @@ public class View extends JDialog {
       mTabbedPane.addTab("Calculations", mCalculationsPanel);
       mTabbedPane.addTab("Proteins", mProteinsPanel);
       mTabbedPane.addTab("Find Repeats", mFindRepeatsPanel);
+      mTabbedPane.addTab("Find miRNA", mFindMRNAPanel);
    }
 
    protected Box initializeControlsBox() {
@@ -171,6 +175,7 @@ public class View extends JDialog {
    protected void updateRunButton() {
       switch (mTabbedPane.getSelectedIndex()) {
       case GC_CONTENT_TAB:
+      case FIND_MRNA_TAB:
          mRunButton.setEnabled(mValidSequenceFile);
          break;
       case FIND_REPEATS_TAB:
@@ -247,6 +252,9 @@ public class View extends JDialog {
          }
 
          switch (mTabbedPane.getSelectedIndex()) {
+         case FIND_MRNA_TAB:
+            runFindMRNA();
+            break;
          case GC_CONTENT_TAB:
             runGCContent();
             break;
@@ -264,6 +272,23 @@ public class View extends JDialog {
          }
       }
    };
+
+   protected void runFindMRNA() {
+      String nucleotideGapString = mFindMRNAPanel.getNucleotideGap();
+      int nucleotideGap = -1;
+      try {
+         nucleotideGap = Integer.parseInt(nucleotideGapString);
+      } catch (NumberFormatException e) {
+         JOptionPane.showMessageDialog(null,
+               "Nucleotide gap must be a number.", "Error",
+               JOptionPane.ERROR_MESSAGE);
+         return;
+      }
+      // Find all indices of repeats that meat filter criteria.
+      mFindMRNAPanel.setDisplay("Running...");
+      Thread thread = new Thread(new FindMRNARunner(nucleotideGap));
+      thread.start();
+   }
 
    protected void runGCContent() {
       mGcContentInfoPanel.setDisplay(controller.getGcContent(mGcContentInfoPanel.getStartPos(),
@@ -291,6 +316,58 @@ public class View extends JDialog {
       mProteinsPanel.setDisplay(controller.getProteins());
    }
 
+   /**
+    * Hacky inner class for running the micro-RNA finder in another thread.
+    */
+   private class FindMRNARunner implements Runnable {
+      int nucleotideGap;
+
+      public FindMRNARunner(int nucleotideGap) {
+         this.nucleotideGap = nucleotideGap;
+      }
+
+      public void run() {
+         String output = controller.findMRNA(nucleotideGap);
+         mFindMRNAPanel.setDisplay(output);
+      }
+   }
+
+   /**
+    * Hacky inner class for running string matching in a separate thread.
+    */
+   private class ExactStringMatchRunner implements Runnable {
+      int maxDistanceFromStart;
+
+      public ExactStringMatchRunner(int maxDistanceFromStart) {
+         this.maxDistanceFromStart = maxDistanceFromStart;
+      }
+
+      public void run() {
+         String output = controller.matchString(
+               mFindRepeatsPanel.getMatchStringText(), maxDistanceFromStart);
+         mFindRepeatsPanel.setDisplay(output);
+      }
+   }
+
+   /**
+    * Hacky inner class for running find repeats in a seperate thread.
+    */
+   private class FilterRepeatRunner implements Runnable {
+      int maxDistanceFromStart;
+      int minRepeatLength;
+
+      public FilterRepeatRunner(int minRepeatLength, int maxDistanceFromStart) {
+         this.maxDistanceFromStart = maxDistanceFromStart;
+         this.minRepeatLength = minRepeatLength;
+      }
+
+      public void run() {
+         String output = controller.getRepeats(minRepeatLength,
+               maxDistanceFromStart);
+         mFindRepeatsPanel.setDisplay(output);
+      }
+   }
+
    protected void runFindRepeats() {
       String maxDistanceFromStartText = mFindRepeatsPanel
             .getMaximumDistanceToStartText();
@@ -309,8 +386,10 @@ public class View extends JDialog {
       }
       if (mFindRepeatsPanel.isMatchExactString()) {
          // Find incidences of exact string match
-         mFindRepeatsPanel.setDisplay(controller.matchString(
-               mFindRepeatsPanel.getMatchStringText(), maxDistanceFromStart));
+         mFindRepeatsPanel.setDisplay("Running...");
+         Thread thread = new Thread(new ExactStringMatchRunner(
+               maxDistanceFromStart));
+         thread.start();
       } else {
          String minRepeatLengthText = mFindRepeatsPanel.getMinimumLengthText();
          int minRepeatLength = 0;
@@ -325,14 +404,18 @@ public class View extends JDialog {
             }
          }
          // Find all indices of repeats that meat filter criteria.
-         mFindRepeatsPanel.setDisplay(controller.getRepeats(minRepeatLength,
-               maxDistanceFromStart));
+         mFindRepeatsPanel.setDisplay("Running...");
+         Thread thread = new Thread(new FilterRepeatRunner(minRepeatLength, maxDistanceFromStart));
+         thread.start();
       }
    }
 
    protected ActionListener saveButtonActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
          switch (mTabbedPane.getSelectedIndex()) {
+         case FIND_MRNA_TAB:
+            saveMRNA();
+            break;
          case GC_CONTENT_TAB:
             saveGcContent();
             break;
@@ -353,6 +436,10 @@ public class View extends JDialog {
 
    protected void saveGcContent() {
       saveString(mGcContentInfoPanel.getDisplay());
+   }
+
+   protected void saveMRNA() {
+      saveString(mFindMRNAPanel.getDisplay());
    }
 
    protected void saveCalculations() {
