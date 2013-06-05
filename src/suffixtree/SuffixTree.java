@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class SuffixTree {
-   private InternalNode              root;
-   private List<String>              strings;
+   private InternalNode root;
+   private List<String> strings;
    private Map<StartEntry, LeafNode> leaves;
 
    /**
@@ -63,9 +63,9 @@ public class SuffixTree {
     * @author Erik Sandberg &lt;esandber@calpoly.edu&gt;
     */
    public class RepeatEntry {
-      private SuffixTree       tree;
+      private SuffixTree tree;
       private List<StartEntry> starts;
-      private int              length;
+      private int length;
 
       public RepeatEntry(SuffixTree tree, List<StartEntry> starts, int length) {
          this.tree = tree;
@@ -96,10 +96,10 @@ public class SuffixTree {
       private SuffixTree tree;
       private StartEntry forwardStart;
       private StartEntry reverseStart;
-      private int        radius;
-      private int        gap;
+      private int radius;
+      private int gap;
       private StartEntry start;
-      private int        length;
+      private int length;
 
       public PalindromeEntry(SuffixTree tree, StartEntry forward,
             StartEntry reverse, int radius, int gap) {
@@ -108,8 +108,9 @@ public class SuffixTree {
          this.reverseStart = reverse;
          this.radius = radius;
          this.gap = gap;
-         this.start = new StartEntry(forwardStart.stringIndex,
-               forwardStart.start - gap - radius);
+         this.start =
+               new StartEntry(forwardStart.stringIndex, forwardStart.start
+                     - gap - radius);
          this.length = radius + radius + gap;
       }
 
@@ -278,8 +279,8 @@ public class SuffixTree {
          for (Node node : leftDiverseNodes) {
             if (node.getStringLength() >= length) {
                Collection<LeafNode> leaves = ((InternalNode) node).getLeaves();
-               List<StartEntry> starts = new ArrayList<StartEntry>(
-                     leaves.size());
+               List<StartEntry> starts =
+                     new ArrayList<StartEntry>(leaves.size());
                for (LeafNode leaf : leaves) {
                   Integer start = leaf.getStringBegin(stringIndex);
                   if (start != null) {
@@ -338,16 +339,16 @@ public class SuffixTree {
    }
 
    /**
-    * Assumes that the string at index 1 is the reverse of the string at index
-    * 0.
+    * Find palindromes of given radius or longer and exact gap size. Assumes
+    * that the string at index 1 is the reverse of the string at index 0.
     * 
     * @param radius
-    *           Minimum radius of the palendrome to find.
-    * @param gap
-    *           Largest allowable gap.
+    *           Minimum radius of the palindrome to find.
+    * @param exactGap
+    *           Exact gap size.
     * @return
     */
-   public List<PalindromeEntry> findPalindromes(int radius, int gap) {
+   public List<PalindromeEntry> findPalindromes(int radius, int exactGap) {
       List<PalindromeEntry> entries = new ArrayList<PalindromeEntry>();
       int forwardIdx = 0;
       int reverseIdx = 1;
@@ -360,21 +361,48 @@ public class SuffixTree {
                "Forward and reverse strings are of different lengths");
       }
 
-      for (int g = 0; g <= gap; g++) {
-         // Go until q < length - 2 because of $
-         for (int q = g; q < forward.length() - 2; q++) {
-            StartEntry forwardStart = new StartEntry(forwardIdx, q + 1);
-            // length - q - 1 - 1(for $) + gap
-            StartEntry reverseStart = new StartEntry(reverseIdx, n - q - 2 + g);
-            int lce = longestCommonExtension(forwardStart, reverseStart);
-            if (lce >= radius) {
-               entries.add(new PalindromeEntry(this, forwardStart,
-                     reverseStart, lce, g));
-            }
+      // Go until q < length - 2 because of $
+      for (int q = exactGap; q < forward.length() - 2; q++) {
+         StartEntry forwardStart = new StartEntry(forwardIdx, q + 1);
+         // length - q - 1 - 1(for $) + gap
+         StartEntry reverseStart =
+               new StartEntry(reverseIdx, n - q - 2 + exactGap);
+         int lce = longestCommonExtension(forwardStart, reverseStart);
+         if (lce >= radius) {
+            entries.add(new PalindromeEntry(this, forwardStart, reverseStart,
+                  lce, exactGap));
          }
       }
 
       return entries;
+   }
+
+   public Integer findLongestMatchingSuffix(String pattern) {
+      return findLongestMatchingSuffix(0, pattern);
+   }
+
+   public Integer findLongestMatchingSuffix(int stringIndex, String pattern) {
+      Node currentNode = this.root;
+      int labelIndex = 0;
+      for (char c : pattern.toCharArray()) {
+         if (labelIndex >= currentNode.getLabelLength()) {
+            labelIndex = 0;
+            if (currentNode.isLeaf()) {
+               return ((LeafNode) currentNode).getStringBegin(stringIndex);
+            } else {
+               currentNode = ((InternalNode) currentNode).getChild(c);
+            }
+         }
+         if (currentNode.charAt(labelIndex) != c) {
+            if (currentNode.isLeaf()
+                  && currentNode.getLabelLength() == labelIndex + 1) {
+               return ((LeafNode) currentNode).getStringBegin(stringIndex);
+            }
+            return null;
+         }
+         labelIndex++;
+      }
+      return null;
    }
 
    public String debugString() {

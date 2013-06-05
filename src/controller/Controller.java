@@ -4,6 +4,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -57,12 +59,13 @@ public class Controller {
       if (!mGffFile.equals(filename)) {
          mGffFile = filename;
 
-         GFFParser parser = new GFFParser(filename);
-         mGenes = parser.parse();
+         GFFParser parser = new GFFParser();
+         mGenes = parser.parse(filename);
          if (mSequence != null) {
-            for (Gene gene : mGenes)
+            for (Gene gene : mGenes) {
                gene.setSequence(mSequence);
          }
+      }
       }
 
    }
@@ -93,11 +96,13 @@ public class Controller {
       StringBuilder sb = new StringBuilder();
       sb.append("Start, stop, min %, max %\n");
 
-      if (startPos.isEmpty())
+      if (startPos.isEmpty()) {
          startPos = "1";
+      }
 
-      if (endPos.isEmpty())
+      if (endPos.isEmpty()) {
          endPos = Integer.toString(mSequence.size());
+      }
 
       mSequence = mSequence.slice(Integer.parseInt(startPos) - 1,
             Integer.parseInt(endPos));
@@ -106,8 +111,9 @@ public class Controller {
          GCContentInfo[] gcs = mSequence.gcContentHistogram(
                Integer.parseInt(winSize), Integer.parseInt(shiftIncr));
 
-         for (GCContentInfo gc : gcs)
+         for (GCContentInfo gc : gcs) {
             sb.append(gc + "\n");
+         }
       } else {
          sb.append(String.format("%5d, %5d, %5.2f%%, %5.2f%%",
                Integer.parseInt(startPos), Integer.parseInt(endPos),
@@ -248,8 +254,8 @@ public class Controller {
    public String matchString(String searchString, int maxDistanceFromMRNAStart) {
       SuffixTreeUtils treeUtil = new SuffixTreeUtils(mSequence, mGenes);
 
-      String reverseSearchString = SuffixTreeUtils
-            .reverseComplement(searchString);
+      String reverseSearchString =
+            SuffixTreeUtils.reverseComplement(searchString);
 
       SuffixTree tree = SuffixTree.create(mSequence.toString());
 
@@ -268,25 +274,25 @@ public class Controller {
       int absoluteFrequency = occurences.size();
       int reverseAbsoluteFrequency = revOccurences.size();
 
-      double averageDistance = treeUtil
-            .averageDistanceToNextPositiveMRNA(occurences);
-      double averageDistanceNegative = treeUtil
-            .averageDistanceToNextNegativeMRNA(occurences);
+      double averageDistance =
+            treeUtil.averageDistanceToNextPositiveMRNA(occurences);
+      double averageDistanceNegative =
+            treeUtil.averageDistanceToNextNegativeMRNA(occurences);
 
-      double reverseAverageDistance = treeUtil
-            .averageDistanceToNextPositiveMRNA(revOccurences);
-      double reverseAverageDistanceNegative = treeUtil
-            .averageDistanceToNextNegativeMRNA(revOccurences);
+      double reverseAverageDistance =
+            treeUtil.averageDistanceToNextPositiveMRNA(revOccurences);
+      double reverseAverageDistanceNegative =
+            treeUtil.averageDistanceToNextNegativeMRNA(revOccurences);
 
-      double expectedFoldExpression = treeUtil
-            .findExpectedFoldExpression(searchString);
-      double reverseExpectedFoldExpression = treeUtil
-            .findExpectedFoldExpression(reverseSearchString);
+      double expectedFoldExpression =
+            treeUtil.findExpectedFoldExpression(searchString);
+      double reverseExpectedFoldExpression =
+            treeUtil.findExpectedFoldExpression(reverseSearchString);
 
-      double relativeFoldExpression = absoluteFrequency
-            / expectedFoldExpression;
-      double reverseRelativeFoldExpression = reverseAbsoluteFrequency
-            / reverseExpectedFoldExpression;
+      double relativeFoldExpression =
+            absoluteFrequency / expectedFoldExpression;
+      double reverseRelativeFoldExpression =
+            reverseAbsoluteFrequency / reverseExpectedFoldExpression;
       matchInfo.append("Repeated sequence,Frequency,Fold Expression,Average"
             + " Distance From (+) mRNA Start,Average Distance From (-)"
             + " mRNA Start,Coordinates\n");
@@ -321,14 +327,18 @@ public class Controller {
     *         current FASTA file.
     */
    public String findMRNA(int nucleotideGap) {
+      return findMRNA(nucleotideGap, mSequence);
+   }
+
+   public static String findMRNA(int nucleotideGap, Sequence inputSequence) {
       List<String> strings = new ArrayList<String>();
-      strings.add(SuffixTreeUtils.toMRNAString(mSequence.toString()));
+      strings.add(SuffixTreeUtils.toMRNAString(inputSequence.toString()));
       strings.add(SuffixTreeUtils.reverseComplementMRNAString(SuffixTreeUtils
-            .toMRNAString(mSequence.toString())));
+            .toMRNAString(inputSequence.toString())));
 
       // Minimum needs to be quite low. maximum = sizeof(entire pri mrna)
-      List<PalindromeEntry> entries = SuffixTreeUtils.findPalindromes(strings,
-            2, 20);
+      List<PalindromeEntry> entries =
+            SuffixTreeUtils.findPalindromes(strings, 2, 0, 20);
 
       StringBuilder returnVal = new StringBuilder(
             "start, stop, miRNA length, sequence\n");
@@ -402,6 +412,69 @@ public class Controller {
          }
       }
       return returnVal.toString();
+   }
+
+   /**
+    * Merges the given fasta files and returns a list of the offset for each file in a parallel list.
+    * @param sb An empty StringBuilder that will be filled with the merged fasta
+    * @param fastaFileNames
+    * @return
+    * @throws IllegalArgumentException
+    * @throws IOException
+    */
+   public static List<Integer> mergeFasta(StringBuilder sb,
+         List<String> fastaFileNames) throws IllegalArgumentException,
+         IOException {
+      String prev = null;
+      Integer prevOffset = 0;
+      List<Integer> offsets = new ArrayList<Integer>(fastaFileNames.size());
+      for (String filename : fastaFileNames) {
+         String seq = new Sequence(filename).toString();
+         Integer offset = 0;
+         if (prev != null) {
+            offset = SuffixTreeUtils.findOverlap(prev, seq);
+         }
+         prev = seq;
+         sb.append(seq);
+         offsets.add(prevOffset += offset);
+      }
+      return offsets;
+   }
+
+   public static List<Gene> convertAndMergeGFF(List<Integer> offsets,
+         List<String> gffFilenames) throws IOException, ParseException {
+      GFFParser parser = new GFFParser();
+
+      List<Gene> genes = new LinkedList<Gene>();
+      for (String filename : gffFilenames) {
+         genes.addAll(parser.parse(filename));
+      }
+
+      Collections.sort(genes, new Comparator<Gene>() {
+         @Override
+         public int compare(Gene g1, Gene g2) {
+            return g1.getStart() - g2.getStart();
+         }
+      });
+
+      // Report overlapping genes and mark duplicate genes (to remove on a second pass).
+      List<Gene> genesToRemove = new ArrayList<Gene>();
+      for (int i = 0; i < genes.size() - 1; ++i) {
+         Gene thisGene = genes.get(i);
+         Gene nextGene = genes.get(i + 1);
+         if (thisGene.getStop() > nextGene.getStart()) {
+            ; // report overlap
+         } else if (thisGene.getStart() == nextGene.getStart()
+               && thisGene.getStop() == nextGene.getStop()) {
+            genesToRemove.add(thisGene);
+         }
+      }
+
+      for (Gene gene : genesToRemove) {
+         genes.remove(gene); // Ignoring return value, perhaps bad style.
+      }
+
+      return genes;
    }
 
    /**
