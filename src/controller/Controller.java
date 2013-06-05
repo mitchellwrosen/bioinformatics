@@ -3,12 +3,8 @@ package controller;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import model.GCContentInfo;
@@ -31,10 +27,10 @@ import suffixtree.SuffixTreeUtils;
  * @version 21-Apr-2013
  */
 public class Controller {
-   protected String     mSequenceFile;
-   protected String     mGffFile;
+   protected String mSequenceFile;
+   protected String mGffFile;
 
-   protected Sequence   mSequence;
+   protected Sequence mSequence;
    protected List<Gene> mGenes;
 
    public Controller() {
@@ -64,8 +60,8 @@ public class Controller {
          if (mSequence != null) {
             for (Gene gene : mGenes) {
                gene.setSequence(mSequence);
+            }
          }
-      }
       }
 
    }
@@ -104,12 +100,14 @@ public class Controller {
          endPos = Integer.toString(mSequence.size());
       }
 
-      mSequence = mSequence.slice(Integer.parseInt(startPos) - 1,
-            Integer.parseInt(endPos));
+      mSequence =
+            mSequence.slice(Integer.parseInt(startPos) - 1,
+                  Integer.parseInt(endPos));
 
       if (useSlidingWindow) {
-         GCContentInfo[] gcs = mSequence.gcContentHistogram(
-               Integer.parseInt(winSize), Integer.parseInt(shiftIncr));
+         GCContentInfo[] gcs =
+               mSequence.gcContentHistogram(Integer.parseInt(winSize),
+                     Integer.parseInt(shiftIncr));
 
          for (GCContentInfo gc : gcs) {
             sb.append(gc + "\n");
@@ -172,7 +170,8 @@ public class Controller {
    }
 
    public String getProteins() {
-      StringBuilder sb = new StringBuilder("gene name, isoform name, protein\n");
+      StringBuilder sb =
+            new StringBuilder("gene name, isoform name, protein\n");
 
       for (Gene g : mGenes) {
          String geneName = g.getId();
@@ -340,8 +339,8 @@ public class Controller {
       List<PalindromeEntry> entries =
             SuffixTreeUtils.findPalindromes(strings, 2, 0, 20);
 
-      StringBuilder returnVal = new StringBuilder(
-            "start, stop, miRNA length, sequence\n");
+      StringBuilder returnVal =
+            new StringBuilder("start, stop, miRNA length, sequence\n");
 
       for (PalindromeEntry palindrome : entries) {
          int start = palindrome.getStart().start + 1;
@@ -350,11 +349,13 @@ public class Controller {
 
          String sequence = strings.get(0).substring(start - 1, stop - 1);
          sequence += "[";
-         sequence += strings.get(0).substring(stop - 1,
-               stop - 1 + palindrome.getGap());
+         sequence +=
+               strings.get(0).substring(stop - 1,
+                     stop - 1 + palindrome.getGap());
          sequence += "]";
-         sequence += strings.get(0).substring(stop - 1 + palindrome.getGap(),
-               stop - 1 + palindrome.getGap() + palindrome.getRadius());
+         sequence +=
+               strings.get(0).substring(stop - 1 + palindrome.getGap(),
+                     stop - 1 + palindrome.getGap() + palindrome.getRadius());
          if (length >= 21 && length <= 23) {
             returnVal.append(start + "," + stop + "," + length + "," + sequence
                   + "\n");
@@ -380,28 +381,33 @@ public class Controller {
                            + palindrome.getGap()
                      && secondStart - stop == nucleotideGap
                      && (secondLength + length >= 21 && secondLength + length <= 23)) {
-                  String updatedSequence = strings.get(0).substring(start - 1,
-                        stop - 1);
+                  String updatedSequence =
+                        strings.get(0).substring(start - 1, stop - 1);
                   updatedSequence += "[";
-                  updatedSequence += strings.get(0).substring(stop - 1,
-                        secondStart - 1);
+                  updatedSequence +=
+                        strings.get(0).substring(stop - 1, secondStart - 1);
                   updatedSequence += "]";
-                  updatedSequence += strings.get(0).substring(secondStart - 1,
-                        secondStop);
+                  updatedSequence +=
+                        strings.get(0).substring(secondStart - 1, secondStop);
                   updatedSequence += "[";
-                  updatedSequence += strings.get(0).substring(secondStop,
-                        secondStop + secondPalindrome.getGap());
+                  updatedSequence +=
+                        strings.get(0).substring(secondStop,
+                              secondStop + secondPalindrome.getGap());
                   updatedSequence += "]";
-                  updatedSequence += strings.get(0).substring(
-                        secondStop + secondPalindrome.getGap(),
-                        secondStop + secondPalindrome.getGap() + secondLength);
+                  updatedSequence +=
+                        strings.get(0).substring(
+                              secondStop + secondPalindrome.getGap(),
+                              secondStop + secondPalindrome.getGap()
+                                    + secondLength);
                   updatedSequence += "[";
-                  updatedSequence += strings.get(0).substring(
-                        secondStop + secondPalindrome.getGap() + secondLength,
-                        stop - 1 + palindrome.getGap());
+                  updatedSequence +=
+                        strings.get(0).substring(
+                              secondStop + secondPalindrome.getGap()
+                                    + secondLength,
+                              stop - 1 + palindrome.getGap());
                   updatedSequence += "]";
-                  sequence += strings.get(0)
-                        .substring(
+                  sequence +=
+                        strings.get(0).substring(
                               stop - 1 + palindrome.getGap(),
                               stop - 1 + palindrome.getGap()
                                     + palindrome.getRadius());
@@ -423,26 +429,26 @@ public class Controller {
     * @throws IOException
     */
    public static List<Integer> mergeFasta(StringBuilder sb,
-         List<String> fastaFileNames) throws IllegalArgumentException,
-         IOException {
+         List<Sequence> sequences) throws IllegalArgumentException, IOException {
       String prev = null;
       Integer prevOffset = 0;
-      List<Integer> offsets = new ArrayList<Integer>(fastaFileNames.size());
-      for (String filename : fastaFileNames) {
-         String seq = new Sequence(filename).toString();
+      List<Integer> offsets = new ArrayList<Integer>(sequences.size());
+      for (Sequence seq : sequences) {
+         String s = seq.toString();
          Integer offset = 0;
          if (prev != null) {
-            offset = SuffixTreeUtils.findOverlap(prev, seq);
+            offset = SuffixTreeUtils.findOverlap(prev, s);
          }
-         prev = seq;
-         sb.append(seq);
+         prev = s;
+         sb.append(s.substring(offset));
          offsets.add(prevOffset += offset);
       }
       return offsets;
    }
 
    public static List<Gene> convertAndMergeGFF(List<Integer> offsets,
-         List<String> gffFilenames) throws IOException, ParseException {
+         List<List<Gene>> geneLists) throws IOException, ParseException {
+      /* TODO
       GFFParser parser = new GFFParser();
 
       List<Gene> genes = new LinkedList<Gene>();
@@ -475,6 +481,8 @@ public class Controller {
       }
 
       return genes;
+      */
+      return null;
    }
 
    /**
@@ -484,7 +492,9 @@ public class Controller {
     * @return The locations of conflicts between exons in the two GFF files.
     * @throws IOException 
     */
-   public String runCreateSuperContigs(String sequenceZipPath, String gffZipPath) throws IOException {
+   public String
+         runCreateSuperContigs(String sequenceZipPath, String gffZipPath)
+               throws IOException {
       // Return list of occurences of mistaken GFF files.
       FileInputStream sequenceZip = new FileInputStream(sequenceZipPath);
       FileInputStream gffZip = new FileInputStream(gffZipPath);
@@ -493,12 +503,12 @@ public class Controller {
       ZipInputStream gffZipIn = new ZipInputStream(gffZip);
 
       ZipEntry entry = sequenceZipIn.getNextEntry();
-      while(entry != null) {
+      while (entry != null) {
          entry = sequenceZipIn.getNextEntry();
       }
 
       entry = gffZipIn.getNextEntry();
-      while(entry != null) {
+      while (entry != null) {
          entry = gffZipIn.getNextEntry();
       }
       return "No Errors Detected.";
