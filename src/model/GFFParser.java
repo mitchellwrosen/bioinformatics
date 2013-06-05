@@ -129,17 +129,15 @@ public class GFFParser {
    protected GeneIsoform iso;  // Current isoform
    protected Feature feature;  // Current line
    
-   public GFFParser(String filename) throws IOException {
-      r = new BufferedReader(new FileReader(filename));
-      genes = new ArrayList<Gene>();
-      feature = Feature.fromLine(r.readLine());
-   }
-   
    protected void next() throws IOException {
       feature = Feature.fromLine(r.readLine());
    }
    
-   public List<Gene> parse() throws IOException, ParseException {
+   public List<Gene> parse(String filename) throws IOException, ParseException {
+      r = new BufferedReader(new FileReader(filename));
+      genes = new ArrayList<Gene>();
+      feature = Feature.fromLine(r.readLine());
+      
       parseData();
       return genes;
    }

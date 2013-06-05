@@ -2,6 +2,7 @@ package suffixtree;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import model.Gene;
@@ -19,13 +20,13 @@ import suffixtree.SuffixTree.StartEntry;
  * 
  */
 public class SuffixTreeUtils {
-   private Sequence  sequence;
+   private Sequence sequence;
 
-   private double    aContent;
-   private double    tContent;
-   private double    cContent;
-   private double    gContent;
-   private double    unknownContent;
+   private double aContent;
+   private double tContent;
+   private double cContent;
+   private double gContent;
+   private double unknownContent;
 
    // List of positions of mRNA strands. Includes EOF as a start.
    private Integer[] mRNAStartsPositive;
@@ -131,7 +132,8 @@ public class SuffixTreeUtils {
     * @return Returns a single average for distances from each of the given
     *         indices to the next index in the list of (negative) mRNA starts.
     */
-   public double averageDistanceToNextNegativeMRNA(List<StartEntry> startEntries) {
+   public double
+         averageDistanceToNextNegativeMRNA(List<StartEntry> startEntries) {
       double average = 0;
       for (StartEntry entry : startEntries) {
          int distance = -1;
@@ -164,8 +166,8 @@ public class SuffixTreeUtils {
          if (nextChar == Nucleotide.ADENINE.toChar()) {
             reverseComplementString += Nucleotide.ADENINE.complement().toChar();
          } else if (nextChar == Nucleotide.CYTOSINE.toChar()) {
-            reverseComplementString += Nucleotide.CYTOSINE.complement()
-                  .toChar();
+            reverseComplementString +=
+                  Nucleotide.CYTOSINE.complement().toChar();
          } else if (nextChar == Nucleotide.GUANINE.toChar()) {
             reverseComplementString += Nucleotide.GUANINE.complement().toChar();
          } else if (nextChar == Nucleotide.THYMINE.toChar()) {
@@ -193,8 +195,7 @@ public class SuffixTreeUtils {
          if (nextChar == Nucleotide.ADENINE.toChar()) {
             mRNA += 'U';
          } else if (nextChar == Nucleotide.CYTOSINE.toChar()) {
-            mRNA += Nucleotide.CYTOSINE.complement()
-                  .toChar();
+            mRNA += Nucleotide.CYTOSINE.complement().toChar();
          } else if (nextChar == Nucleotide.GUANINE.toChar()) {
             mRNA += Nucleotide.GUANINE.complement().toChar();
          } else if (nextChar == Nucleotide.THYMINE.toChar()) {
@@ -222,8 +223,7 @@ public class SuffixTreeUtils {
          if (nextChar == Nucleotide.ADENINE.toChar()) {
             mRNA += 'U';
          } else if (nextChar == Nucleotide.CYTOSINE.toChar()) {
-            mRNA += Nucleotide.CYTOSINE.complement()
-                  .toChar();
+            mRNA += Nucleotide.CYTOSINE.complement().toChar();
          } else if (nextChar == Nucleotide.GUANINE.toChar()) {
             mRNA += Nucleotide.GUANINE.complement().toChar();
          } else if (nextChar == 'U') {
@@ -236,7 +236,7 @@ public class SuffixTreeUtils {
       }
       return mRNA;
    }
-   
+
    /**
     * Removes all indices that are outside of the acceptable maxDistance from an
     * mRNA start. If an index is within maxDistance from a positive start, or
@@ -285,7 +285,7 @@ public class SuffixTreeUtils {
       List<String> strings = new ArrayList<String>(2);
       strings.add(string);
       strings.add(new StringBuilder(string).reverse().toString());
-      return findPalindromes(strings, minRadius, maxGap);
+      return findPalindromes(strings, minRadius, 0, maxGap);
    }
 
    /**
@@ -293,11 +293,12 @@ public class SuffixTreeUtils {
     * @param strings
     *           Exactly two strings which are reverse of eachother.
     * @param minRadius
-    * @param maxGap
+    * @param minGap Smallest gap size to try (inclusive)
+    * @param maxGap Largest gap size to try (inclusive)
     * @return
     */
    public static List<PalindromeEntry> findPalindromes(List<String> strings,
-         int minRadius, int maxGap) {
+         int minRadius, int minGap, int maxGap) {
       if (strings.size() != 2) {
          throw new IllegalArgumentException("Must give exactly two strings");
       }
@@ -307,6 +308,15 @@ public class SuffixTreeUtils {
       }
 
       SuffixTree tree = SuffixTree.create(strings);
-      return tree.findPalindromes(minRadius, maxGap);
+      List<PalindromeEntry> pals = new LinkedList<PalindromeEntry>();
+      for (int g = minGap; g <= maxGap; g++) {
+         pals.addAll(tree.findPalindromes(minRadius, g));
+      }
+      return pals;
+   }
+
+   public static Integer findOverlap(String first, String second) {
+      SuffixTree tree = SuffixTree.create(first);
+      return tree.findLongestMatchingSuffix(second);
    }
 }
