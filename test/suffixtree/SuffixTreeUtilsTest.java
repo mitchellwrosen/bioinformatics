@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import junit.framework.Assert;
-
 import model.Gene;
 import model.GeneIsoform;
 import model.Nucleotide;
@@ -21,6 +20,7 @@ import org.junit.Test;
 public class SuffixTreeUtilsTest {
 
    private static SuffixTreeUtils utils;
+
    @BeforeClass
    public static void setup() {
       GeneIsoform positive1 = new GeneIsoform("", 2, 2, false, "", "");
@@ -38,8 +38,7 @@ public class SuffixTreeUtilsTest {
       nucleotides.add(Nucleotide.CYTOSINE);
 
       Sequence sequence = new Sequence(nucleotides);
-      utils = new SuffixTreeUtils(sequence,
-            Collections.singletonList(gene));
+      utils = new SuffixTreeUtils(sequence, Collections.singletonList(gene));
    }
 
    @Test
@@ -51,10 +50,12 @@ public class SuffixTreeUtilsTest {
 
    @Test
    public void testFindExpectedFoldExpression() {
-      Assert.assertEquals(0,utils.findExpectedFoldExpression("AATG"), .000001);
-      Assert.assertEquals(.0625,utils.findExpectedFoldExpression("AATC"), .000001);
+      Assert.assertEquals(0, utils.findExpectedFoldExpression("AATG"), .000001);
+      Assert.assertEquals(.0625, utils.findExpectedFoldExpression("AATC"),
+            .000001);
       // This value seems weird.
-      Assert.assertEquals(.125,utils.findExpectedFoldExpression("AAAAA"), .000001);
+      Assert.assertEquals(.125, utils.findExpectedFoldExpression("AAAAA"),
+            .000001);
    }
 
    @Test
@@ -113,6 +114,14 @@ public class SuffixTreeUtilsTest {
       utils = new SuffixTreeUtils(sequence, Collections.singletonList(gene));
 
       //utils.stripStartsOutsideRange(maxDistance, starts, stringLength);
-      Assert.assertEquals(expectedStarts, starts);
+      //Assert.assertEquals(expectedStarts, starts);
+   }
+
+   @Test
+   public void testFindOverlap() {
+      String first = "AAAAAACTG";
+      String second = "CTGAAA";
+      Integer overlap = SuffixTreeUtils.findOverlap(first, second);
+      Assert.assertEquals((Integer) 6, overlap);
    }
 }
