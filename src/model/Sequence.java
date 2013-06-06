@@ -3,6 +3,8 @@ package model;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -22,6 +24,25 @@ public class Sequence {
    
    public Sequence(List<Nucleotide> nucleotides) {
       this.nucleotides = nucleotides;
+   }
+
+   public Sequence(InputStream stream) throws IOException, IllegalArgumentException {
+      this.nucleotides = new ArrayList<Nucleotide>();
+
+      BufferedReader r = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+
+      // First line possibly begins with '>'
+      String line = r.readLine().trim();
+      if (line.startsWith(">"))
+         line = r.readLine().trim();
+
+      do {
+         line = line.trim();
+         for (int i = 0; i < line.length(); ++i)
+            nucleotides.add(Nucleotide.fromChar(line.charAt(i)));
+      } while ((line = r.readLine()) != null);
+
+      r.close();
    }
 
    public Sequence(String filename) throws IOException, IllegalArgumentException {

@@ -516,6 +516,11 @@ public class View extends JDialog {
                "Invalid zip file." + e, "Error",
                JOptionPane.ERROR_MESSAGE);
          return;
+      } catch (ParseException e) {
+         JOptionPane.showMessageDialog(null,
+               "Invalid gff file." + e, "Error",
+               JOptionPane.ERROR_MESSAGE);
+         return;
       }
    }
 
@@ -580,7 +585,24 @@ public class View extends JDialog {
    }
 
    protected void saveSuperFiles() {
-      // TODO: Complicated saving logic.
+      JFileChooser chooser = new JFileChooser();
+      chooser.setDialogTitle("Save super-contigs as zip file");
+      int ret = chooser.showSaveDialog(mPane);
+
+      if (ret == JFileChooser.APPROVE_OPTION) {
+         try {
+            controller.saveSuperFiles(chooser.getSelectedFile());
+         } catch (java.io.IOException ioErr) {
+            ioErr.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                  "Encountered unknown error when saving output" + ioErr,
+                  "Unable to save output", JOptionPane.ERROR_MESSAGE);
+         }
+      } else if (ret == JFileChooser.ERROR_OPTION) {
+         JOptionPane.showMessageDialog(null,
+               "Encountered unknown error when saving output",
+               "Unable to save output", JOptionPane.ERROR_MESSAGE);
+      }
    }
 
    protected void saveString(String data, String title) {
