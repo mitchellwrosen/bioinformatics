@@ -553,7 +553,7 @@ public class Controller {
       System.out.println(fastas.keySet());
       System.out.println(gffs.keySet());
       List<Sequence> sequences = new ArrayList<Sequence>();
-      //List<List<Gene>> genes = new ArrayList<List<Gene>>();
+      List<List<Gene>> genes = new ArrayList<List<Gene>>();
 
       mSuperFastaFiles = new ArrayList<StringBuilder>();
 
@@ -562,19 +562,19 @@ public class Controller {
             if (gffs.containsKey(i)) {
                lastMatched = true;
 
-               sequences.add(new Sequence());
-              // genes.add(parser.parse(sequenceZip.getInputStream(gffs.get(i))));
+               sequences.add(new Sequence(sequenceZip.getInputStream(fastas.get(i))));
+               genes.add(parser.parse(gffZip.getInputStream(gffs.get(i))));
             }
             count++;
          } else if (lastMatched) {
             mSuperFastaFiles.add(new StringBuilder());
             List<Integer> offsets = mergeFasta(
                   mSuperFastaFiles.get(mSuperFastaFiles.size() - 1), sequences);
-            //convertAndMergeGFF(offsets, genes);
+            convertAndMergeGFF(offsets, genes);
             lastMatched = false;
 
             sequences = new ArrayList<Sequence>();
-           // genes = new ArrayList<List<Gene>>();
+            genes = new ArrayList<List<Gene>>();
          }
          i++;
       }
@@ -583,7 +583,7 @@ public class Controller {
          mSuperFastaFiles.add(new StringBuilder());
          List<Integer> offsets = mergeFasta(
                mSuperFastaFiles.get(mSuperFastaFiles.size() - 1), sequences);
-         //convertAndMergeGFF(offsets, genes);
+         convertAndMergeGFF(offsets, genes);
       }
       System.out.println("done");
 
