@@ -1,11 +1,19 @@
 package controller;
 
-import java.io.FileInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import model.GCContentInfo;
 import model.GFFParser;
@@ -27,6 +35,13 @@ import suffixtree.SuffixTreeUtils;
  * @version 21-Apr-2013
  */
 public class Controller {
+   
+   private List<StringBuilder> mSuperFastaFiles = new ArrayList<StringBuilder>();
+   private static final Pattern mSequenceNumberPattern = Pattern
+         .compile("\\D+(\\d+)\\.\\d+\\.fna");
+   private static final Pattern mGffNumberPattern = Pattern
+         .compile("\\D+(\\d+)\\.\\d+\\.gff");
+
    protected String mSequenceFile;
    protected String mGffFile;
 
@@ -491,26 +506,110 @@ public class Controller {
     * @param gffZipPath A path to the gff zip.
     * @return The locations of conflicts between exons in the two GFF files.
     * @throws IOException 
+    * @throws ParseException 
     */
-   public String
-         runCreateSuperContigs(String sequenceZipPath, String gffZipPath)
-               throws IOException {
+   public String runCreateSuperContigs(String sequenceZipPath, String gffZipPath) throws IOException, ParseException {
+      GFFParser parser = new GFFParser();
       // Return list of occurences of mistaken GFF files.
-      FileInputStream sequenceZip = new FileInputStream(sequenceZipPath);
-      FileInputStream gffZip = new FileInputStream(gffZipPath);
+      ZipFile sequenceZip = new ZipFile(sequenceZipPath);
+      ZipFile gffZip = new ZipFile(gffZipPath);
 
-      ZipInputStream sequenceZipIn = new ZipInputStream(sequenceZip);
-      ZipInputStream gffZipIn = new ZipInputStream(gffZip);
+      Enumeration<? extends ZipEntry> sequenceFiles = sequenceZip.entries();
+      Enumeration<? extends ZipEntry> gffFiles = gffZip.entries();
 
-      ZipEntry entry = sequenceZipIn.getNextEntry();
-      while (entry != null) {
-         entry = sequenceZipIn.getNextEntry();
+
+      SortedMap<Integer, ZipEntry> fastas = new TreeMap<Integer, ZipEntry>();
+      SortedMap<Integer, ZipEntry> gffs = new TreeMap<Integer, ZipEntry>();
+
+      while (sequenceFiles.hasMoreElements()) {
+         ZipEntry sequenceFile = sequenceFiles.nextElement();
+         if (sequenceFile.getName().endsWith(".fna")) {
+            Matcher matcher = mSequenceNumberPattern.matcher(sequenceFile.getName());
+            if(matcher.find()) {
+               String version = matcher.group(1);
+               fastas.put(Integer.parseInt(version), sequenceFile);
+            }
+         }
       }
 
-      entry = gffZipIn.getNextEntry();
-      while (entry != null) {
-         entry = gffZipIn.getNextEntry();
+      while (gffFiles.hasMoreElements()) {
+         System.out.println("File.");
+         ZipEntry gffFile = gffFiles.nextElement();
+         if (gffFile.getName().endsWith(".gff")) {
+            System.out.println("...ends with gff");
+            Matcher matcher = mGffNumberPattern.matcher(gffFile.getName());
+            if(matcher.find()) {
+               System.out.println("......matched");
+               String version = matcher.group(1);
+               gffs.put(Integer.parseInt(version), gffFile);
+            }
+         }
       }
-      return "No Errors Detected.";
+      
+      int i = 0;
+      int count = 0;
+      boolean lastMatched = false;
+      
+      System.out.println(fastas.keySet());
+      System.out.println(gffs.keySet());
+      List<Sequence> sequences = new ArrayList<Sequence>();
+      //List<List<Gene>> genes = new ArrayList<List<Gene>>();
+
+      mSuperFastaFiles = new ArrayList<StringBuilder>();
+
+      while (count < fastas.size()) {
+         if (fastas.containsKey(i)) {
+            if (gffs.containsKey(i)) {
+               lastMatched = true;
+
+               sequences.add(new Sequence());
+              // genes.add(parser.parse(sequenceZip.getInputStream(gffs.get(i))));
+            }
+            count++;
+         } else if (lastMatched) {
+            mSuperFastaFiles.add(new StringBuilder());
+            List<Integer> offsets = mergeFasta(
+                  mSuperFastaFiles.get(mSuperFastaFiles.size() - 1), sequences);
+            //convertAndMergeGFF(offsets, genes);
+            lastMatched = false;
+
+            sequences = new ArrayList<Sequence>();
+           // genes = new ArrayList<List<Gene>>();
+         }
+         i++;
+      }
+
+      if(lastMatched) {
+         mSuperFastaFiles.add(new StringBuilder());
+         List<Integer> offsets = mergeFasta(
+               mSuperFastaFiles.get(mSuperFastaFiles.size() - 1), sequences);
+         //convertAndMergeGFF(offsets, genes);
+      }
+      System.out.println("done");
+
+      return "Currently not detecting errors.";
+   }
+
+   /**
+    * Save the instance variables representing the super fasta and super gff
+    * files generated by runCreateSuperContigs.
+    * 
+    * @throws IOException
+    */
+   public void saveSuperFiles(File out) throws IOException {
+      ZipOutputStream output = new ZipOutputStream(new FileOutputStream(out));
+
+      int count = 0;
+      for (StringBuilder fasta : mSuperFastaFiles) {
+         count++;
+         ZipEntry fastaEntry = new ZipEntry("superFasta" + count + ".0.fna");
+         output.putNextEntry(fastaEntry);
+         byte[] data = fasta.toString().getBytes();
+         output.write(data, 0, data.length);
+         output.closeEntry();
+      }
+      
+      System.out.println(count);
+      output.close();
    }
 }

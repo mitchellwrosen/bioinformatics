@@ -3,6 +3,8 @@ package model;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -132,7 +134,16 @@ public class GFFParser {
    protected void next() throws IOException {
       feature = Feature.fromLine(r.readLine());
    }
-   
+
+   public List<Gene> parse(InputStream stream) throws IOException, ParseException {
+      r = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+      genes = new ArrayList<Gene>();
+      feature = Feature.fromLine(r.readLine());
+      
+      parseData();
+      return genes;
+   }
+
    public List<Gene> parse(String filename) throws IOException, ParseException {
       r = new BufferedReader(new FileReader(filename));
       genes = new ArrayList<Gene>();
