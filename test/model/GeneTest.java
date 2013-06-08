@@ -12,10 +12,10 @@ public class GeneTest {
 
    @Test
    public void testDisjunctSize() {
-      GeneIsoform isoform1 = new GeneIsoform("", 1, 8, false, "", "");
-      GeneIsoform isoform2 = new GeneIsoform("", 3, 4, false, "", "");
-      GeneIsoform isoform3 = new GeneIsoform("", 8, 20, false, "", "");
-      GeneIsoform isoform4 = new GeneIsoform("", 243, 506, true, "", "");
+      GeneIsoform isoform1 = new GeneIsoform("", 1, 8, false, "", "", null);
+      GeneIsoform isoform2 = new GeneIsoform("", 3, 4, false, "", "", null);
+      GeneIsoform isoform3 = new GeneIsoform("", 8, 20, false, "", "", null);
+      GeneIsoform isoform4 = new GeneIsoform("", 243, 506, true, "", "", null);
       Gene testGene = new Gene();
       testGene.addIsoform(isoform1);
       testGene.addIsoform(isoform2);
@@ -27,9 +27,9 @@ public class GeneTest {
 
    @Test
    public void testNonDisjunctSize() {
-      GeneIsoform isoform1 = new GeneIsoform("", 1, 5, false, "", "");
-      GeneIsoform isoform2 = new GeneIsoform("", 4, 7, true, "", "");
-      GeneIsoform isoform3 = new GeneIsoform("", 4, 9, true, "", "");
+      GeneIsoform isoform1 = new GeneIsoform("", 1, 5, false, "", "", null);
+      GeneIsoform isoform2 = new GeneIsoform("", 4, 7, true, "", "", null);
+      GeneIsoform isoform3 = new GeneIsoform("", 4, 9, true, "", "", null);
       Gene testGene = new Gene();
       testGene.addIsoform(isoform1);
       testGene.addIsoform(isoform2);
@@ -41,7 +41,7 @@ public class GeneTest {
 
    @Test
    public void testSingleSize() {
-      GeneIsoform isoform = new GeneIsoform("", 1, 8, false, "", "");
+      GeneIsoform isoform = new GeneIsoform("", 1, 8, false, "", "", null);
       Gene testGene = new Gene();
       testGene.addIsoform(isoform);
 
