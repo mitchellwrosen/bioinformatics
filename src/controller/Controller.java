@@ -37,6 +37,8 @@ import suffixtree.SuffixTreeUtils;
 public class Controller {
    
    private List<StringBuilder> mSuperFastaFiles = new ArrayList<StringBuilder>();
+   private List<List<Gene>> mSuperGffFiles = new ArrayList<List<Gene>>();
+
    private static final Pattern mSequenceNumberPattern = Pattern
          .compile("\\D+(\\d+)\\.\\d+\\.fna");
    private static final Pattern mGffNumberPattern = Pattern
@@ -556,7 +558,7 @@ public class Controller {
       List<List<Gene>> genes = new ArrayList<List<Gene>>();
 
       mSuperFastaFiles = new ArrayList<StringBuilder>();
-
+      mSuperGffFiles = new ArrayList<List<Gene>>();
       while (count < fastas.size()) {
          if (fastas.containsKey(i)) {
             if (gffs.containsKey(i)) {
@@ -570,7 +572,7 @@ public class Controller {
             mSuperFastaFiles.add(new StringBuilder());
             List<Integer> offsets = mergeFasta(
                   mSuperFastaFiles.get(mSuperFastaFiles.size() - 1), sequences);
-            convertAndMergeGFF(offsets, genes);
+            mSuperGffFiles.add(convertAndMergeGFF(offsets, genes));
             lastMatched = false;
 
             sequences = new ArrayList<Sequence>();
@@ -583,7 +585,7 @@ public class Controller {
          mSuperFastaFiles.add(new StringBuilder());
          List<Integer> offsets = mergeFasta(
                mSuperFastaFiles.get(mSuperFastaFiles.size() - 1), sequences);
-         convertAndMergeGFF(offsets, genes);
+         mSuperGffFiles.add(convertAndMergeGFF(offsets, genes));
       }
       System.out.println("done");
 
@@ -608,8 +610,21 @@ public class Controller {
          output.write(data, 0, data.length);
          output.closeEntry();
       }
+      System.out.println("Num printed fasta files:" + count);
       
-      System.out.println(count);
+      count = 0;
+      for(List<Gene> gff : mSuperGffFiles) {
+         count++;
+         ZipEntry gffEntry = new ZipEntry("superGff" + count + ".0.gff");
+         output.putNextEntry(gffEntry);
+         StringBuilder sb = new StringBuilder();
+         for(Gene gene : gff) {
+            sb.append(gene.toGff());
+         }
+         byte[] data = sb.toString().getBytes();
+         output.write(data, 0, data.length);
+         output.closeEntry();
+      }
       output.close();
    }
 }

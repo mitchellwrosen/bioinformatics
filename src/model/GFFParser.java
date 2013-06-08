@@ -91,7 +91,7 @@ public class GFFParser {
             return null;
          String geneId = attributes.get("gene_id");
          String transcriptId = attributes.get("transcript_id");
-         return new GeneIsoform(chromosome, start, stop, reverse, geneId, transcriptId);
+         return new GeneIsoform(chromosome, start, stop, reverse, geneId, transcriptId, this);
       }
       
       /**
@@ -100,7 +100,8 @@ public class GFFParser {
       public Exon toExon() {
          if (!(feature.equals("CDS")))
             return null;
-         return new Exon(start, stop);
+         System.out.println(this);
+         return new Exon(start, stop, this);
       }
 
       @Override
@@ -120,6 +121,31 @@ public class GFFParser {
             sb.append(String.format("   %s: %s\n", entry.getKey(),
                   entry.getValue()));
          sb.append("}\n");
+         return sb.toString();
+      }
+
+      public String toGff() {
+         StringBuilder sb = new StringBuilder();
+         sb.append(String.format(chromosome));
+         sb.append(String.format("\t%s", source));
+         sb.append(String.format("\t%s", feature));
+         sb.append(String.format("\t%d", start + 1));
+         sb.append(String.format("\t%d", stop));
+         sb.append(String.format("\t%s", score));
+         if(reverse) {
+            sb.append("\t-");
+         } else {
+            sb.append("\t+");
+         }
+         sb.append(String.format("\t%s", frame));
+
+         sb.append("\t");
+         for (Map.Entry<String, String> entry : attributes.entrySet()) {
+            sb.append(String.format("%s \"%s\"; ", entry.getKey(),
+                  entry.getValue()));
+            
+         }
+         sb.append("\n");
          return sb.toString();
       }
    }

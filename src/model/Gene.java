@@ -15,6 +15,13 @@ public class Gene {
    protected List<GeneIsoform> isoforms;
    protected Sequence sequence;
 
+   public String toGff() {
+      StringBuilder sb = new StringBuilder();
+      for(GeneIsoform isoform : isoforms) {
+         sb.append(isoform.toGff());
+      }
+      return sb.toString();
+   }
    /**
     * Genes should be constructed with the create method.
     */
@@ -130,4 +137,6 @@ public class Gene {
          size += iso.intronSize();
       return size;
    }
+
+
 }
