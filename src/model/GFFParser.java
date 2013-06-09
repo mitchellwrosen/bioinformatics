@@ -100,7 +100,6 @@ public class GFFParser {
       public Exon toExon() {
          if (!(feature.equals("CDS")))
             return null;
-         System.out.println(this);
          return new Exon(start, stop, this);
       }
 

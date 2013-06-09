@@ -535,13 +535,10 @@ public class Controller {
       }
 
       while (gffFiles.hasMoreElements()) {
-         System.out.println("File.");
          ZipEntry gffFile = gffFiles.nextElement();
          if (gffFile.getName().endsWith(".gff")) {
-            System.out.println("...ends with gff");
             Matcher matcher = mGffNumberPattern.matcher(gffFile.getName());
             if(matcher.find()) {
-               System.out.println("......matched");
                String version = matcher.group(1);
                gffs.put(Integer.parseInt(version), gffFile);
             }
@@ -552,8 +549,6 @@ public class Controller {
       int count = 0;
       boolean lastMatched = false;
       
-      System.out.println(fastas.keySet());
-      System.out.println(gffs.keySet());
       List<Sequence> sequences = new ArrayList<Sequence>();
       List<List<Gene>> genes = new ArrayList<List<Gene>>();
 
@@ -587,7 +582,6 @@ public class Controller {
                mSuperFastaFiles.get(mSuperFastaFiles.size() - 1), sequences);
          mSuperGffFiles.add(convertAndMergeGFF(offsets, genes));
       }
-      System.out.println("done");
 
       return "Currently not detecting errors.";
    }
@@ -610,7 +604,6 @@ public class Controller {
          output.write(data, 0, data.length);
          output.closeEntry();
       }
-      System.out.println("Num printed fasta files:" + count);
       
       count = 0;
       for(List<Gene> gff : mSuperGffFiles) {
