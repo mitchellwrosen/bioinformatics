@@ -98,7 +98,10 @@ public class SuffixTreeTest {
          for (PalindromeEntry p : pals) {
             System.out.println(p.toString());
          }
-      } catch (IllegalArgumentException | IOException e) {
+      } catch (IllegalArgumentException e) {
+         e.printStackTrace();
+         Assert.fail();
+      } catch (IOException e) {
          e.printStackTrace();
          Assert.fail();
       }
@@ -119,7 +122,10 @@ public class SuffixTreeTest {
                   + ((double) timeMethodDuration / (double) 1000000000));
             System.out.println(mrna);
          }
-      } catch (IllegalArgumentException | IOException e) {
+      } catch (IllegalArgumentException e) {
+         Assert.fail();
+         e.printStackTrace();
+      } catch (IOException e) {
          Assert.fail();
          e.printStackTrace();
       }

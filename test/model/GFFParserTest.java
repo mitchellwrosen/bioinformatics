@@ -32,8 +32,8 @@ public class GFFParserTest {
       GeneIsoform iso;
       
       // Two genes, each with two isoforms, each with two exons
-      GFFParser parser = new GFFParser("test/files/gff1.txt");
-      List<Gene> genes = parser.parse();
+      GFFParser parser = new GFFParser();
+      List<Gene> genes = parser.parse("test/files/gff1.txt");
       assertThat(genes.size(), is(2));
       
       // Gene 1 isoform 1

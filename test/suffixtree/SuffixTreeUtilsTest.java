@@ -23,10 +23,10 @@ public class SuffixTreeUtilsTest {
 
    @BeforeClass
    public static void setup() {
-      GeneIsoform positive1 = new GeneIsoform("", 2, 2, false, "", "");
-      GeneIsoform positive2 = new GeneIsoform("", 3, 3, false, "", "");
-      GeneIsoform negative1 = new GeneIsoform("", 2, 2, true, "", "");
-      GeneIsoform negative2 = new GeneIsoform("", 3, 3, true, "", "");
+      GeneIsoform positive1 = new GeneIsoform("", 2, 2, false, "", "", null);
+      GeneIsoform positive2 = new GeneIsoform("", 3, 3, false, "", "", null);
+      GeneIsoform negative1 = new GeneIsoform("", 2, 2, true, "", "", null);
+      GeneIsoform negative2 = new GeneIsoform("", 3, 3, true, "", "", null);
       Gene gene = Gene.create(positive1);
       gene.addIsoform(positive2);
       gene.addIsoform(negative1);
@@ -82,10 +82,10 @@ public class SuffixTreeUtilsTest {
 
    @Test
    public void testStripStartsOutsideRange() {
-      GeneIsoform positive1 = new GeneIsoform("", 10, 10, false, "", "");
-      GeneIsoform positive2 = new GeneIsoform("", 20, 20, false, "", "");
-      GeneIsoform negative1 = new GeneIsoform("", 30, 30, true, "", "");
-      GeneIsoform negative2 = new GeneIsoform("", 40, 40, true, "", "");
+      GeneIsoform positive1 = new GeneIsoform("", 10, 10, false, "", "", null);
+      GeneIsoform positive2 = new GeneIsoform("", 20, 20, false, "", "", null);
+      GeneIsoform negative1 = new GeneIsoform("", 30, 30, true, "", "", null);
+      GeneIsoform negative2 = new GeneIsoform("", 40, 40, true, "", "", null);
 
       Gene gene = Gene.create(positive1);
       gene.addIsoform(positive2);

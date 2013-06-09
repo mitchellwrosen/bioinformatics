@@ -3,6 +3,8 @@ package model;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,7 +91,7 @@ public class GFFParser {
             return null;
          String geneId = attributes.get("gene_id");
          String transcriptId = attributes.get("transcript_id");
-         return new GeneIsoform(chromosome, start, stop, reverse, geneId, transcriptId);
+         return new GeneIsoform(chromosome, start, stop, reverse, geneId, transcriptId, this);
       }
       
       /**
@@ -98,7 +100,7 @@ public class GFFParser {
       public Exon toExon() {
          if (!(feature.equals("CDS")))
             return null;
-         return new Exon(start, stop);
+         return new Exon(start, stop, this);
       }
 
       @Override
@@ -120,6 +122,31 @@ public class GFFParser {
          sb.append("}\n");
          return sb.toString();
       }
+
+      public String toGff() {
+         StringBuilder sb = new StringBuilder();
+         sb.append(String.format(chromosome));
+         sb.append(String.format("\t%s", source));
+         sb.append(String.format("\t%s", feature));
+         sb.append(String.format("\t%d", start + 1));
+         sb.append(String.format("\t%d", stop));
+         sb.append(String.format("\t%s", score));
+         if(reverse) {
+            sb.append("\t-");
+         } else {
+            sb.append("\t+");
+         }
+         sb.append(String.format("\t%s", frame));
+
+         sb.append("\t");
+         for (Map.Entry<String, String> entry : attributes.entrySet()) {
+            sb.append(String.format("%s \"%s\"; ", entry.getKey(),
+                  entry.getValue()));
+            
+         }
+         sb.append("\n");
+         return sb.toString();
+      }
    }
    
    protected BufferedReader r; // Input stream
@@ -132,7 +159,16 @@ public class GFFParser {
    protected void next() throws IOException {
       feature = Feature.fromLine(r.readLine());
    }
-   
+
+   public List<Gene> parse(InputStream stream) throws IOException, ParseException {
+      r = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+      genes = new ArrayList<Gene>();
+      feature = Feature.fromLine(r.readLine());
+      
+      parseData();
+      return genes;
+   }
+
    public List<Gene> parse(String filename) throws IOException, ParseException {
       r = new BufferedReader(new FileReader(filename));
       genes = new ArrayList<Gene>();

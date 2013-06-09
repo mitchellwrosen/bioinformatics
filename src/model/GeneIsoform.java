@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import model.GFFParser.Feature;
+
 public class GeneIsoform {
    protected Gene gene;
    protected List<Exon> exons;
@@ -15,9 +17,10 @@ public class GeneIsoform {
    protected boolean reverse;
    protected String geneId;
    protected String transcriptId;
+   protected Feature feature;
 
    public GeneIsoform(String chromosome, int start, int stop, boolean reverse, String geneId,
-         String transcriptId) {
+         String transcriptId, Feature feature) {
       this.chromosome = chromosome;
       this.start = start;
       this.stop = stop;
@@ -31,6 +34,7 @@ public class GeneIsoform {
          this.stop += 3;
 
       this.exons = new ArrayList<Exon>();
+      this.feature = feature;
    }
 
    public Gene getGene()           { return gene; }
@@ -89,5 +93,13 @@ public class GeneIsoform {
       for (int i = 0; i < exons.size()-1; ++i)
          size += exons.get(i+1).getStart() - exons.get(i).getStop();
       return size;
+   }
+
+   public String toGff() {
+      StringBuilder sb = new StringBuilder(feature.toGff());
+      for(Exon exon : exons) {
+         sb.append(exon.toGff());
+      }
+      return sb.toString();
    }
 }
